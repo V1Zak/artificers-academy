@@ -1,0 +1,103 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import Google Fonts for MTG aesthetic */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&display=swap');
+
+@layer base {
+  :root {
+    --mana-white: #F8E7B9;
+    --mana-blue: #0E68AB;
+    --mana-black: #150B00;
+    --mana-red: #D3202A;
+    --mana-green: #00733E;
+    --scroll-bg: #F5E6D3;
+    --scroll-border: #8B7355;
+    --scroll-text: #2C1810;
+    --arcane-gold: #C9A227;
+    --arcane-purple: #6B3FA0;
+  }
+
+  body {
+    @apply bg-scroll-bg text-scroll-text;
+    font-family: Georgia, Cambria, serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Cinzel', serif;
+  }
+}
+
+@layer components {
+  /* Scroll/Parchment styled containers */
+  .scroll-container {
+    @apply bg-scroll-bg border-2 border-scroll-border rounded-lg shadow-scroll;
+    background-image: linear-gradient(
+      to bottom,
+      rgba(245, 230, 211, 0.9),
+      rgba(235, 220, 200, 0.95)
+    );
+  }
+
+  /* Code block styling */
+  .code-scroll {
+    @apply scroll-container p-4 font-mono text-sm overflow-x-auto;
+    background-color: #FDF8F0;
+  }
+
+  /* Mana/Progress bar */
+  .mana-bar {
+    @apply h-3 rounded-full overflow-hidden;
+    background: linear-gradient(to right, #1a1a2e, #16213e);
+  }
+
+  .mana-fill {
+    @apply h-full rounded-full transition-all duration-500;
+    background: linear-gradient(to right, var(--mana-blue), var(--arcane-purple));
+    box-shadow: 0 0 10px var(--mana-blue);
+  }
+
+  /* Button styles */
+  .btn-arcane {
+    @apply px-6 py-2 rounded-lg font-semibold transition-all duration-200;
+    @apply bg-arcane-gold text-scroll-text hover:shadow-glow;
+    font-family: 'Cinzel', serif;
+  }
+
+  .btn-mana {
+    @apply px-6 py-2 rounded-lg font-semibold transition-all duration-200;
+    @apply bg-mana-blue text-white hover:bg-opacity-90;
+  }
+
+  /* Alert/Error styles (Counterspell theme) */
+  .counterspell-alert {
+    @apply border-l-4 border-mana-red bg-red-50 p-4 rounded-r-lg;
+  }
+
+  /* Success styles */
+  .resolve-alert {
+    @apply border-l-4 border-mana-green bg-green-50 p-4 rounded-r-lg;
+  }
+}
+
+/* Syntax highlighting for code blocks */
+.code-scroll code {
+  @apply text-scroll-text;
+}
+
+.code-scroll .keyword {
+  @apply text-mana-blue font-semibold;
+}
+
+.code-scroll .string {
+  @apply text-mana-green;
+}
+
+.code-scroll .comment {
+  @apply text-gray-500 italic;
+}
+
+.code-scroll .decorator {
+  @apply text-arcane-purple;
+}
