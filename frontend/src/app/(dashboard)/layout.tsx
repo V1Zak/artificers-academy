@@ -26,6 +26,7 @@ export default async function DashboardLayout({
 
         <nav className="flex-1 space-y-2">
           <NavLink href="/dashboard">Dashboard</NavLink>
+          <NavLink href="/battlefield">The Battlefield</NavLink>
           <NavLink href="/codex">The Codex</NavLink>
           <NavLink href="/inspector">The Inspector</NavLink>
         </nav>
