@@ -15,6 +15,7 @@ class Settings:
         self.supabase_url = os.getenv("SUPABASE_URL", "")
         self.supabase_service_key = os.getenv("SUPABASE_SERVICE_KEY", "")
         self.environment = os.getenv("ENVIRONMENT", "development")
+        self.frontend_url = os.getenv("FRONTEND_URL", "")  # Production frontend URL
 
     @property
     def is_configured(self) -> bool:
