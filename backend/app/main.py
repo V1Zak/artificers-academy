@@ -8,7 +8,9 @@ Planeswalker progress through their journey.
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import validation, progress
+from app.routers import validation, progress, snippets
+from app.services.database import get_database
+from app.config import get_settings
 
 app = FastAPI(
     title="The Artificer's Academy API",
@@ -31,6 +33,7 @@ app.add_middleware(
 # Include routers
 app.include_router(validation.router, prefix="/api", tags=["validation"])
 app.include_router(progress.router, prefix="/api", tags=["progress"])
+app.include_router(snippets.router, prefix="/api", tags=["snippets"])
 
 
 @app.get("/")
@@ -45,4 +48,11 @@ async def root():
 @app.get("/health")
 async def health_check():
     """Health check for deployment monitoring."""
-    return {"status": "healthy"}
+    settings = get_settings()
+    db = get_database()
+
+    return {
+        "status": "healthy",
+        "database": "connected" if db.is_connected else "in-memory",
+        "environment": settings.environment,
+    }
