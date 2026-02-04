@@ -7,6 +7,11 @@ from app.models.schemas import (
     ProgressUpdate,
     ProgressResponse,
     ProgressUpdateResponse,
+    SnippetCreate,
+    SnippetResponse,
+    SnippetListResponse,
+    SnippetCreateResponse,
+    SnippetDeleteResponse,
 )
 
 __all__ = [
@@ -17,4 +22,9 @@ __all__ = [
     "ProgressUpdate",
     "ProgressResponse",
     "ProgressUpdateResponse",
+    "SnippetCreate",
+    "SnippetResponse",
+    "SnippetListResponse",
+    "SnippetCreateResponse",
+    "SnippetDeleteResponse",
 ]
