@@ -1,9 +1,23 @@
 'use client'
 
-import { useCallback, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import Editor, { OnMount, OnChange } from '@monaco-editor/react'
 import type { editor } from 'monaco-editor'
 import { cn } from '@/lib/utils'
+
+// Shared editor options to avoid duplication
+const BASE_EDITOR_OPTIONS: editor.IStandaloneEditorConstructionOptions = {
+  minimap: { enabled: false },
+  fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+  lineNumbers: 'on',
+  lineNumbersMinChars: 3,
+  scrollBeyondLastLine: false,
+  wordWrap: 'on',
+  tabSize: 4,
+  automaticLayout: true,
+  overviewRulerLanes: 0,
+  hideCursorInOverviewRuler: true,
+}
 
 interface MonacoEditorProps {
   value: string
@@ -12,6 +26,8 @@ interface MonacoEditorProps {
   height?: string
   readOnly?: boolean
   className?: string
+  title?: string
+  onValidate?: () => void // Callback for Ctrl+Enter
 }
 
 /**
@@ -27,14 +43,36 @@ export function MonacoEditor({
   height = '400px',
   readOnly = false,
   className,
+  title = 'Your Decklist',
+  onValidate,
 }: MonacoEditorProps) {
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null)
 
+  // Dispose editor on unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (editorRef.current) {
+        editorRef.current.dispose()
+        editorRef.current = null
+      }
+    }
+  }, [])
+
   const handleMount: OnMount = useCallback((editor) => {
     editorRef.current = editor
-    // Focus editor on mount
     editor.focus()
-  }, [])
+
+    // Add Ctrl/Cmd+Enter keyboard shortcut for validation
+    if (onValidate) {
+      editor.addCommand(
+        // Monaco.KeyMod.CtrlCmd | Monaco.KeyCode.Enter
+        2048 | 3, // CtrlCmd = 2048, Enter = 3
+        () => {
+          onValidate()
+        }
+      )
+    }
+  }, [onValidate])
 
   const handleChange: OnChange = useCallback(
     (value) => {
@@ -47,11 +85,18 @@ export function MonacoEditor({
     <div className={cn('scroll-container overflow-hidden', className)}>
       <div className="px-4 py-2 border-b border-scroll-border bg-scroll-bg/50 flex items-center justify-between">
         <span className="text-sm font-semibold text-arcane-purple">
-          Your Decklist
+          {title}
         </span>
-        <span className="text-xs text-scroll-text/50 font-mono">
-          {language}
-        </span>
+        <div className="flex items-center gap-3">
+          {onValidate && (
+            <span className="text-xs text-scroll-text/40">
+              Ctrl+Enter to validate
+            </span>
+          )}
+          <span className="text-xs text-scroll-text/50 font-mono">
+            {language}
+          </span>
+        </div>
       </div>
       <Editor
         height={height}
@@ -61,17 +106,10 @@ export function MonacoEditor({
         onMount={handleMount}
         theme="vs-light"
         options={{
+          ...BASE_EDITOR_OPTIONS,
           readOnly,
-          minimap: { enabled: false },
           fontSize: 14,
-          fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
-          lineNumbers: 'on',
-          lineNumbersMinChars: 3,
-          scrollBeyondLastLine: false,
-          wordWrap: 'on',
-          tabSize: 4,
           insertSpaces: true,
-          automaticLayout: true,
           padding: { top: 16, bottom: 16 },
           scrollbar: {
             vertical: 'auto',
@@ -79,8 +117,6 @@ export function MonacoEditor({
             verticalScrollbarSize: 10,
             horizontalScrollbarSize: 10,
           },
-          overviewRulerLanes: 0,
-          hideCursorInOverviewRuler: true,
           renderLineHighlight: 'line',
           contextmenu: true,
           quickSuggestions: true,
@@ -91,6 +127,13 @@ export function MonacoEditor({
   )
 }
 
+interface MonacoEditorReadOnlyProps {
+  value: string
+  language?: string
+  height?: string
+  className?: string
+}
+
 /**
  * MonacoEditorReadOnly - Read-only version for displaying code examples
  */
@@ -99,33 +142,41 @@ export function MonacoEditorReadOnly({
   language = 'python',
   height = '200px',
   className,
-}: Omit<MonacoEditorProps, 'onChange' | 'readOnly'>) {
+}: MonacoEditorReadOnlyProps) {
+  const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null)
+
+  // Dispose editor on unmount
+  useEffect(() => {
+    return () => {
+      if (editorRef.current) {
+        editorRef.current.dispose()
+        editorRef.current = null
+      }
+    }
+  }, [])
+
+  const handleMount: OnMount = useCallback((editor) => {
+    editorRef.current = editor
+  }, [])
+
   return (
     <div className={cn('scroll-container overflow-hidden', className)}>
       <Editor
         height={height}
         language={language}
         value={value}
+        onMount={handleMount}
         theme="vs-light"
         options={{
+          ...BASE_EDITOR_OPTIONS,
           readOnly: true,
-          minimap: { enabled: false },
           fontSize: 13,
-          fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
-          lineNumbers: 'on',
-          lineNumbersMinChars: 3,
-          scrollBeyondLastLine: false,
-          wordWrap: 'on',
-          tabSize: 4,
-          automaticLayout: true,
           padding: { top: 12, bottom: 12 },
           scrollbar: {
             vertical: 'auto',
             horizontal: 'hidden',
             verticalScrollbarSize: 8,
           },
-          overviewRulerLanes: 0,
-          hideCursorInOverviewRuler: true,
           renderLineHighlight: 'none',
           contextmenu: false,
           domReadOnly: true,

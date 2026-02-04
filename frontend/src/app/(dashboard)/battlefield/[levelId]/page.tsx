@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { getLevel, type Level, type Phase } from '@/lib/api'
@@ -12,20 +12,53 @@ export default function LevelPage() {
   const [level, setLevel] = useState<Level | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const abortControllerRef = useRef<AbortController | null>(null)
 
-  useEffect(() => {
-    async function loadLevel() {
+  const loadLevel = useCallback(
+    async (signal?: AbortSignal) => {
+      setLoading(true)
+      setError(null)
+
       try {
-        const data = await getLevel(levelId)
+        const data = await getLevel(levelId, { signal })
+        if (signal?.aborted) return
         setLevel(data)
       } catch (err) {
-        setError('Failed to load level')
+        if (err instanceof Error && err.name === 'AbortError') return
+        setError('Failed to load level. Is the backend running?')
       } finally {
-        setLoading(false)
+        if (!signal?.aborted) {
+          setLoading(false)
+        }
       }
+    },
+    [levelId]
+  )
+
+  useEffect(() => {
+    // Abort previous request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
     }
-    loadLevel()
-  }, [levelId])
+
+    const controller = new AbortController()
+    abortControllerRef.current = controller
+
+    loadLevel(controller.signal)
+
+    return () => {
+      controller.abort()
+    }
+  }, [loadLevel])
+
+  const handleRetry = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+    }
+    const controller = new AbortController()
+    abortControllerRef.current = controller
+    loadLevel(controller.signal)
+  }, [loadLevel])
 
   if (loading) {
     return (
@@ -42,9 +75,14 @@ export default function LevelPage() {
     return (
       <div className="scroll-container p-8 text-center">
         <p className="text-mana-red mb-4">{error || 'Level not found'}</p>
-        <Link href="/battlefield" className="btn-arcane">
-          Return to Battlefield
-        </Link>
+        <div className="flex gap-4 justify-center">
+          <button onClick={handleRetry} className="btn-arcane">
+            Try Again
+          </button>
+          <Link href="/battlefield" className="btn-arcane">
+            Return to Battlefield
+          </Link>
+        </div>
       </div>
     )
   }
@@ -56,9 +94,7 @@ export default function LevelPage() {
         href="/battlefield"
         className="inline-flex items-center gap-2 text-scroll-text/70 hover:text-scroll-text mb-6"
       >
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-        </svg>
+        <ChevronLeftIcon />
         Back to Battlefield
       </Link>
 
@@ -69,6 +105,15 @@ export default function LevelPage() {
         <p className="text-scroll-text/70">{level.description}</p>
       </div>
 
+      {/* Empty State */}
+      {level.phases.length === 0 && (
+        <div className="scroll-container p-8 text-center">
+          <p className="text-scroll-text/70">
+            No phases available for this level yet. Check back soon!
+          </p>
+        </div>
+      )}
+
       {/* Phases List */}
       <div className="space-y-4">
         {level.phases.map((phase, index) => (
@@ -77,7 +122,6 @@ export default function LevelPage() {
             phase={phase}
             levelId={levelId}
             phaseNumber={index + 1}
-            isFirst={index === 0}
             isCompleted={false} // TODO: Get from user progress
             isUnlocked={index === 0} // TODO: Unlock based on progress
           />
@@ -91,14 +135,12 @@ function PhaseCard({
   phase,
   levelId,
   phaseNumber,
-  isFirst,
   isCompleted,
   isUnlocked,
 }: {
   phase: Phase
   levelId: string
   phaseNumber: number
-  isFirst: boolean
   isCompleted: boolean
   isUnlocked: boolean
 }) {
@@ -118,22 +160,26 @@ function PhaseCard({
           {/* Phase Number */}
           <div
             className={`
-              w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg
-              ${isCompleted
-                ? 'bg-mana-green/20 text-mana-green'
-                : isUnlocked
-                ? 'bg-arcane-purple/20 text-arcane-purple'
-                : 'bg-scroll-text/10 text-scroll-text/40'
+              w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg flex-shrink-0
+              ${
+                isCompleted
+                  ? 'bg-mana-green/20 text-mana-green'
+                  : isUnlocked
+                    ? 'bg-arcane-purple/20 text-arcane-purple'
+                    : 'bg-scroll-text/10 text-scroll-text/40'
               }
             `}
+            aria-label={isCompleted ? 'Completed' : `Phase ${phaseNumber}`}
           >
             {isCompleted ? '✓' : phaseNumber}
           </div>
 
           {/* Phase Info */}
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-lg">{phaseTypeIcon}</span>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1 flex-wrap">
+              <span className="text-lg" role="img" aria-label={phaseTypeLabel}>
+                {phaseTypeIcon}
+              </span>
               <span className="text-xs text-scroll-text/60 uppercase tracking-wide">
                 {phaseTypeLabel}
               </span>
@@ -158,7 +204,7 @@ function PhaseCard({
                 href={`/battlefield/${levelId}/${phase.id}`}
                 className="btn-arcane text-sm"
               >
-                {isFirst ? 'Start' : 'Continue'}
+                {phaseNumber === 1 ? 'Start' : 'Continue'}
               </Link>
             ) : (
               <span className="px-3 py-1 bg-scroll-text/10 text-scroll-text/50 text-sm rounded">
@@ -169,5 +215,24 @@ function PhaseCard({
         </div>
       </div>
     </div>
+  )
+}
+
+function ChevronLeftIcon() {
+  return (
+    <svg
+      className="w-4 h-4"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M15 19l-7-7 7-7"
+      />
+    </svg>
   )
 }

@@ -1,46 +1,95 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import { getCurriculum, type Level } from '@/lib/api'
 import { ManaProgress } from '@/components/theme'
 
-const MANA_COLORS: Record<string, string> = {
-  blue: 'from-mana-blue/20 to-mana-blue/5 border-mana-blue/30',
-  black: 'from-mana-black/20 to-mana-black/5 border-mana-black/30',
-  green: 'from-mana-green/20 to-mana-green/5 border-mana-green/30',
-  gold: 'from-yellow-500/20 to-yellow-500/5 border-yellow-500/30',
-  red: 'from-mana-red/20 to-mana-red/5 border-mana-red/30',
-  white: 'from-mana-white/20 to-mana-white/5 border-mana-white/30',
+// Unified mana configuration
+type ManaColor = 'blue' | 'black' | 'green' | 'gold' | 'red' | 'white'
+
+const MANA_CONFIG: Record<ManaColor, { gradient: string; icon: string }> = {
+  blue: {
+    gradient: 'from-mana-blue/20 to-mana-blue/5 border-mana-blue/30',
+    icon: '💧',
+  },
+  black: {
+    gradient: 'from-mana-black/20 to-mana-black/5 border-mana-black/30',
+    icon: '💀',
+  },
+  green: {
+    gradient: 'from-mana-green/20 to-mana-green/5 border-mana-green/30',
+    icon: '🌿',
+  },
+  gold: {
+    gradient: 'from-yellow-500/20 to-yellow-500/5 border-yellow-500/30',
+    icon: '✨',
+  },
+  red: {
+    gradient: 'from-mana-red/20 to-mana-red/5 border-mana-red/30',
+    icon: '🔥',
+  },
+  white: {
+    gradient: 'from-mana-white/20 to-mana-white/5 border-mana-white/30',
+    icon: '☀️',
+  },
 }
 
-const MANA_ICONS: Record<string, string> = {
-  blue: '💧',
-  black: '💀',
-  green: '🌿',
-  gold: '✨',
-  red: '🔥',
-  white: '☀️',
+const DEFAULT_MANA: ManaColor = 'blue'
+
+// Type guard for valid mana colors
+function isValidManaColor(color: string): color is ManaColor {
+  return color in MANA_CONFIG
 }
 
 export default function BattlefieldPage() {
   const [levels, setLevels] = useState<Level[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const abortControllerRef = useRef<AbortController | null>(null)
 
-  useEffect(() => {
-    async function loadCurriculum() {
-      try {
-        const data = await getCurriculum()
-        setLevels(data.levels)
-      } catch (err) {
-        setError('Failed to load curriculum. Is the backend running?')
-      } finally {
+  const loadCurriculum = useCallback(async (signal?: AbortSignal) => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      const data = await getCurriculum({ signal })
+      if (signal?.aborted) return
+      setLevels(data.levels)
+    } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') return
+      setError('Failed to load curriculum. Is the backend running?')
+    } finally {
+      if (!signal?.aborted) {
         setLoading(false)
       }
     }
-    loadCurriculum()
   }, [])
+
+  useEffect(() => {
+    // Abort previous request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+    }
+
+    const controller = new AbortController()
+    abortControllerRef.current = controller
+
+    loadCurriculum(controller.signal)
+
+    return () => {
+      controller.abort()
+    }
+  }, [loadCurriculum])
+
+  const handleRetry = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+    }
+    const controller = new AbortController()
+    abortControllerRef.current = controller
+    loadCurriculum(controller.signal)
+  }, [loadCurriculum])
 
   if (loading) {
     return (
@@ -57,12 +106,19 @@ export default function BattlefieldPage() {
     return (
       <div className="scroll-container p-8 text-center">
         <p className="text-mana-red mb-4">{error}</p>
-        <button
-          onClick={() => window.location.reload()}
-          className="btn-arcane"
-        >
+        <button onClick={handleRetry} className="btn-arcane">
           Try Again
         </button>
+      </div>
+    )
+  }
+
+  if (levels.length === 0) {
+    return (
+      <div className="scroll-container p-8 text-center">
+        <p className="text-scroll-text/70 mb-4">
+          No levels available yet. Check back soon!
+        </p>
       </div>
     )
   }
@@ -76,11 +132,7 @@ export default function BattlefieldPage() {
 
       <div className="grid gap-6">
         {levels.map((level, index) => (
-          <LevelCard
-            key={level.id}
-            level={level}
-            levelNumber={index + 1}
-          />
+          <LevelCard key={level.id} level={level} levelNumber={index + 1} />
         ))}
       </div>
     </div>
@@ -94,23 +146,26 @@ function LevelCard({
   level: Level
   levelNumber: number
 }) {
-  const colorClass = MANA_COLORS[level.mana_color] || MANA_COLORS.blue
-  const icon = MANA_ICONS[level.mana_color] || '🔮'
-  const isLocked = level.locked
+  // Safely get mana config with fallback
+  const manaColor: ManaColor = isValidManaColor(level.mana_color)
+    ? level.mana_color
+    : DEFAULT_MANA
+  const manaConfig = MANA_CONFIG[manaColor]
+
+  const isLocked = level.locked ?? false
   const completedPhases = 0 // TODO: Get from user progress
   const totalPhases = level.phases.length
 
   return (
     <div
-      className={`
-        scroll-container overflow-hidden
-        ${isLocked ? 'opacity-60' : ''}
-      `}
+      className={`scroll-container overflow-hidden ${isLocked ? 'opacity-60' : ''}`}
     >
-      <div className={`bg-gradient-to-r ${colorClass} p-6`}>
+      <div className={`bg-gradient-to-r ${manaConfig.gradient} p-6`}>
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-4">
-            <span className="text-4xl">{icon}</span>
+            <span className="text-4xl" role="img" aria-label={`${manaColor} mana`}>
+              {manaConfig.icon}
+            </span>
             <div>
               <div className="text-sm text-scroll-text/60 mb-1">
                 Level {levelNumber}
@@ -139,7 +194,7 @@ function LevelCard({
             <ManaProgress
               current={completedPhases}
               total={totalPhases}
-              manaType={level.mana_color as 'blue' | 'green' | 'red' | 'white' | 'black' | 'gold'}
+              manaType={manaColor}
               showCount={false}
             />
           </div>
@@ -166,9 +221,7 @@ function LevelCard({
       {/* Phase Preview */}
       {!isLocked && level.phases.length > 0 && (
         <div className="p-4 border-t border-scroll-border bg-scroll-bg/30">
-          <p className="text-sm font-medium mb-2 text-scroll-text/70">
-            Phases:
-          </p>
+          <p className="text-sm font-medium mb-2 text-scroll-text/70">Phases:</p>
           <div className="flex flex-wrap gap-2">
             {level.phases.map((phase, index) => (
               <span

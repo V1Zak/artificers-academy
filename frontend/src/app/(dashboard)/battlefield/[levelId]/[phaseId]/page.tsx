@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
@@ -9,7 +9,6 @@ import {
   getPhaseContent,
   validateCode,
   type Level,
-  type Phase,
   type PhaseContentResponse,
   type ValidationResponse,
 } from '@/lib/api'
@@ -28,12 +27,19 @@ const MonacoEditor = dynamic(
   }
 )
 
+// Storage key for persisting code
+const getStorageKey = (levelId: string, phaseId: string) =>
+  `artificer-code-${levelId}-${phaseId}`
+
 export default function PhasePage() {
   const params = useParams()
   const router = useRouter()
   const levelId = params.levelId as string
   const phaseId = params.phaseId as string
 
+  // ==========================================
+  // ALL STATE DECLARATIONS AT THE TOP
+  // ==========================================
   const [level, setLevel] = useState<Level | null>(null)
   const [content, setContent] = useState<PhaseContentResponse | null>(null)
   const [loading, setLoading] = useState(true)
@@ -43,57 +49,150 @@ export default function PhasePage() {
   const [code, setCode] = useState('')
   const [validationResult, setValidationResult] = useState<ValidationResponse | null>(null)
   const [validating, setValidating] = useState(false)
+  const [validationError, setValidationError] = useState<string | null>(null)
 
-  // Find current phase and navigation
+  // Refs for cleanup and debouncing
+  const abortControllerRef = useRef<AbortController | null>(null)
+  const validateDebounceRef = useRef<NodeJS.Timeout | null>(null)
+  const codeInitializedRef = useRef(false)
+
+  // ==========================================
+  // DERIVED STATE (computed from state)
+  // ==========================================
   const currentPhaseIndex = level?.phases.findIndex((p) => p.id === phaseId) ?? -1
   const currentPhase = level?.phases[currentPhaseIndex]
   const prevPhase = currentPhaseIndex > 0 ? level?.phases[currentPhaseIndex - 1] : null
   const nextPhase = level?.phases[currentPhaseIndex + 1]
 
+  // ==========================================
+  // EFFECTS
+  // ==========================================
+
+  // Load content with proper cleanup
   useEffect(() => {
+    // Abort previous request if any
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+    }
+
+    const controller = new AbortController()
+    abortControllerRef.current = controller
+
     async function loadContent() {
       setLoading(true)
       setError(null)
+
       try {
         const [levelData, phaseData] = await Promise.all([
-          getLevel(levelId),
-          getPhaseContent(levelId, phaseId),
+          getLevel(levelId, { signal: controller.signal }),
+          getPhaseContent(levelId, phaseId, { signal: controller.signal }),
         ])
+
+        // Don't update state if aborted
+        if (controller.signal.aborted) return
+
         setLevel(levelData)
         setContent(phaseData)
       } catch (err) {
-        setError('Failed to load content')
+        // Ignore abort errors
+        if (err instanceof Error && err.name === 'AbortError') return
+
+        setError('Failed to load content. Is the backend running?')
       } finally {
-        setLoading(false)
+        if (!controller.signal.aborted) {
+          setLoading(false)
+        }
       }
     }
+
     loadContent()
+
+    // Cleanup on unmount or dependency change
+    return () => {
+      controller.abort()
+    }
   }, [levelId, phaseId])
+
+  // Load saved code from localStorage
+  useEffect(() => {
+    if (codeInitializedRef.current) return
+
+    const storageKey = getStorageKey(levelId, phaseId)
+    const savedCode = localStorage.getItem(storageKey)
+
+    if (savedCode) {
+      setCode(savedCode)
+    }
+
+    codeInitializedRef.current = true
+  }, [levelId, phaseId])
+
+  // Save code to localStorage when it changes
+  useEffect(() => {
+    if (!codeInitializedRef.current) return
+    if (!code) return
+
+    const storageKey = getStorageKey(levelId, phaseId)
+    localStorage.setItem(storageKey, code)
+  }, [code, levelId, phaseId])
+
+  // Cleanup debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (validateDebounceRef.current) {
+        clearTimeout(validateDebounceRef.current)
+      }
+    }
+  }, [])
+
+  // ==========================================
+  // CALLBACKS
+  // ==========================================
 
   const handleValidate = useCallback(async () => {
     if (!code.trim()) return
+    if (validating) return // Prevent double submission
 
     setValidating(true)
     setValidationResult(null)
+    setValidationError(null)
 
     try {
       const result = await validateCode(code)
       setValidationResult(result)
     } catch (err) {
-      setError('Failed to validate code')
+      if (err instanceof Error && err.name === 'AbortError') return
+      setValidationError('Failed to validate code. Is the backend running?')
     } finally {
       setValidating(false)
     }
-  }, [code])
+  }, [code, validating])
 
-  const handleCompletePhase = useCallback(() => {
-    // TODO: Save progress to backend
+  // Debounced validation for keyboard shortcut
+  const handleValidateDebounced = useCallback(() => {
+    if (validateDebounceRef.current) {
+      clearTimeout(validateDebounceRef.current)
+    }
+
+    validateDebounceRef.current = setTimeout(() => {
+      handleValidate()
+    }, 300)
+  }, [handleValidate])
+
+  const handleCompletePhase = useCallback(async () => {
+    // TODO: When auth is implemented, save progress:
+    // await updateProgress(userId, levelId, phaseId, true, code)
+
     if (nextPhase) {
       router.push(`/battlefield/${levelId}/${nextPhase.id}`)
     } else {
       router.push(`/battlefield/${levelId}`)
     }
   }, [levelId, nextPhase, router])
+
+  // ==========================================
+  // RENDER
+  // ==========================================
 
   if (loading) {
     return (
@@ -125,9 +224,7 @@ export default function PhasePage() {
           href={`/battlefield/${levelId}`}
           className="inline-flex items-center gap-2 text-scroll-text/70 hover:text-scroll-text"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
+          <ChevronLeftIcon />
           {level.title}
         </Link>
         <span className="text-sm text-scroll-text/60">
@@ -156,6 +253,7 @@ export default function PhasePage() {
             value={code}
             onChange={setCode}
             height="400px"
+            onValidate={handleValidateDebounced}
           />
 
           <div className="mt-4 flex items-center gap-4">
@@ -174,6 +272,11 @@ export default function PhasePage() {
           </div>
 
           {/* Validation Results */}
+          {validationError && (
+            <div className="mt-6 counterspell-alert">
+              <p className="text-sm text-mana-red">{validationError}</p>
+            </div>
+          )}
           {validationResult && (
             <div className="mt-6">
               {validationResult.valid ? (
@@ -197,9 +300,7 @@ export default function PhasePage() {
             href={`/battlefield/${levelId}/${prevPhase.id}`}
             className="inline-flex items-center gap-2 text-scroll-text/70 hover:text-scroll-text"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
+            <ChevronLeftIcon />
             Previous: {prevPhase.title}
           </Link>
         ) : (
@@ -214,9 +315,7 @@ export default function PhasePage() {
           {nextPhase ? (
             <>
               Next: {nextPhase.title}
-              <svg className="w-4 h-4 ml-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
+              <ChevronRightIcon className="ml-2" />
             </>
           ) : (
             'Complete Level'
@@ -227,46 +326,64 @@ export default function PhasePage() {
   )
 }
 
+// ==========================================
+// ICON COMPONENTS
+// ==========================================
+
+function ChevronLeftIcon({ className = '' }: { className?: string }) {
+  return (
+    <svg
+      className={`w-4 h-4 ${className}`}
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M15 19l-7-7 7-7"
+      />
+    </svg>
+  )
+}
+
+function ChevronRightIcon({ className = '' }: { className?: string }) {
+  return (
+    <svg
+      className={`w-4 h-4 inline ${className}`}
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M9 5l7 7-7 7"
+      />
+    </svg>
+  )
+}
+
+// ==========================================
+// MARKDOWN RENDERER
+// ==========================================
+
 /**
- * Simple markdown renderer for tutorial content
+ * Simple markdown renderer for tutorial content.
+ *
+ * Note: This is a basic regex-based parser for MVP. For production,
+ * consider using react-markdown or similar library for:
+ * - Nested structures (lists within lists)
+ * - GFM features (task lists, strikethrough)
+ * - Syntax highlighting in code blocks
+ *
+ * Content is trusted (from our own markdown files), so dangerouslySetInnerHTML
+ * is acceptable here. User-generated content should use a sanitizing library.
  */
 function MarkdownContent({ content }: { content: string }) {
-  // Basic markdown parsing - in production, use a proper markdown library
-  const html = content
-    // Headers
-    .replace(/^### (.*$)/gm, '<h3 class="text-lg font-semibold mt-6 mb-2">$1</h3>')
-    .replace(/^## (.*$)/gm, '<h2 class="text-xl font-semibold mt-8 mb-3">$1</h2>')
-    .replace(/^# (.*$)/gm, '<h2 class="text-2xl font-bold mt-8 mb-4">$1</h2>')
-    // Bold and italic
-    .replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>')
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.*?)\*/g, '<em>$1</em>')
-    // Code blocks
-    .replace(/```(\w+)?\n([\s\S]*?)```/g, (_, lang, code) => {
-      return `<pre class="bg-scroll-bg/50 border border-scroll-border rounded-lg p-4 my-4 overflow-x-auto"><code class="text-sm font-mono">${escapeHtml(code.trim())}</code></pre>`
-    })
-    // Inline code
-    .replace(/`([^`]+)`/g, '<code class="bg-scroll-bg/50 px-1.5 py-0.5 rounded text-sm font-mono text-arcane-purple">$1</code>')
-    // Links
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-mana-blue hover:underline" target="_blank" rel="noopener noreferrer">$1</a>')
-    // Lists
-    .replace(/^\- (.*$)/gm, '<li class="ml-4 list-disc">$1</li>')
-    .replace(/^\d+\. (.*$)/gm, '<li class="ml-4 list-decimal">$1</li>')
-    // Tables (basic support)
-    .replace(/\|(.+)\|/g, (match) => {
-      const cells = match.split('|').filter(Boolean).map(c => c.trim())
-      if (cells.every(c => c.match(/^-+$/))) {
-        return '' // Skip separator rows
-      }
-      const cellHtml = cells.map(c => `<td class="border border-scroll-border/50 px-4 py-2">${c}</td>`).join('')
-      return `<tr>${cellHtml}</tr>`
-    })
-    // Horizontal rules
-    .replace(/^---$/gm, '<hr class="my-8 border-scroll-border" />')
-    // Paragraphs (wrap remaining text)
-    .replace(/^(?!<[h|p|u|o|l|t|c|d|s|b|a|e|i])(.*[^\n])$/gm, '<p class="my-4 leading-relaxed">$1</p>')
-    // Clean up empty paragraphs
-    .replace(/<p class="my-4 leading-relaxed"><\/p>/g, '')
+  const html = useMemo(() => parseMarkdown(content), [content])
 
   return (
     <div
@@ -274,6 +391,113 @@ function MarkdownContent({ content }: { content: string }) {
       dangerouslySetInnerHTML={{ __html: html }}
     />
   )
+}
+
+function parseMarkdown(content: string): string {
+  let html = content
+
+  // Code blocks (must be first to protect code content)
+  html = html.replace(/```(\w+)?\n([\s\S]*?)```/g, (_, lang, code) => {
+    return `<pre class="bg-scroll-bg/50 border border-scroll-border rounded-lg p-4 my-4 overflow-x-auto"><code class="text-sm font-mono">${escapeHtml(code.trim())}</code></pre>`
+  })
+
+  // Inline code (protect before other transformations)
+  const inlineCodePlaceholders: string[] = []
+  html = html.replace(/`([^`]+)`/g, (_, code) => {
+    const placeholder = `__INLINE_CODE_${inlineCodePlaceholders.length}__`
+    inlineCodePlaceholders.push(
+      `<code class="bg-scroll-bg/50 px-1.5 py-0.5 rounded text-sm font-mono text-arcane-purple">${escapeHtml(code)}</code>`
+    )
+    return placeholder
+  })
+
+  // Headers
+  html = html.replace(/^### (.*$)/gm, '<h3 class="text-lg font-semibold mt-6 mb-2">$1</h3>')
+  html = html.replace(/^## (.*$)/gm, '<h2 class="text-xl font-semibold mt-8 mb-3">$1</h2>')
+  html = html.replace(/^# (.*$)/gm, '<h2 class="text-2xl font-bold mt-8 mb-4">$1</h2>')
+
+  // Bold and italic
+  html = html.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>')
+  html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+  html = html.replace(/(?<![*])\*([^*]+)\*(?![*])/g, '<em>$1</em>')
+
+  // Links
+  html = html.replace(
+    /\[([^\]]+)\]\(([^)]+)\)/g,
+    '<a href="$2" class="text-mana-blue hover:underline" target="_blank" rel="noopener noreferrer">$1</a>'
+  )
+
+  // Unordered lists - wrap in <ul>
+  html = html.replace(/((?:^\- .+$\n?)+)/gm, (match) => {
+    const items = match
+      .split('\n')
+      .filter(Boolean)
+      .map((line) => line.replace(/^\- (.*)$/, '<li>$1</li>'))
+      .join('')
+    return `<ul class="list-disc ml-6 my-4">${items}</ul>`
+  })
+
+  // Ordered lists - wrap in <ol>
+  html = html.replace(/((?:^\d+\. .+$\n?)+)/gm, (match) => {
+    const items = match
+      .split('\n')
+      .filter(Boolean)
+      .map((line) => line.replace(/^\d+\. (.*)$/, '<li>$1</li>'))
+      .join('')
+    return `<ol class="list-decimal ml-6 my-4">${items}</ol>`
+  })
+
+  // Tables - wrap properly
+  html = html.replace(/((?:\|.+\|\n?)+)/g, (match) => {
+    const rows = match.trim().split('\n')
+    let tableHtml = '<table class="w-full my-4 border-collapse">'
+    let isHeader = true
+
+    for (const row of rows) {
+      const cells = row.split('|').filter(Boolean).map((c) => c.trim())
+
+      // Skip separator row
+      if (cells.every((c) => /^-+$/.test(c))) {
+        isHeader = false
+        continue
+      }
+
+      const tag = isHeader ? 'th' : 'td'
+      const cellClass = isHeader
+        ? 'border border-scroll-border/50 px-4 py-2 bg-scroll-bg/30 font-semibold text-left'
+        : 'border border-scroll-border/50 px-4 py-2'
+
+      const cellsHtml = cells
+        .map((c) => `<${tag} class="${cellClass}">${c}</${tag}>`)
+        .join('')
+      tableHtml += `<tr>${cellsHtml}</tr>`
+
+      if (isHeader) isHeader = false
+    }
+
+    tableHtml += '</table>'
+    return tableHtml
+  })
+
+  // Horizontal rules
+  html = html.replace(/^---$/gm, '<hr class="my-8 border-scroll-border" />')
+
+  // Paragraphs - wrap standalone text lines
+  html = html.replace(
+    /^(?!<[a-z]|__|$)(.+)$/gm,
+    '<p class="my-4 leading-relaxed">$1</p>'
+  )
+
+  // Restore inline code
+  inlineCodePlaceholders.forEach((code, i) => {
+    html = html.replace(`__INLINE_CODE_${i}__`, code)
+  })
+
+  // Clean up empty paragraphs and extra whitespace
+  html = html.replace(/<p class="my-4 leading-relaxed"><\/p>/g, '')
+  html = html.replace(/\n{3,}/g, '\n\n')
+
+  return html
 }
 
 function escapeHtml(text: string): string {
