@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import { getCurriculum, type Level } from '@/lib/api'
+import { useProgress } from '@/contexts'
 import { ManaProgress } from '@/components/theme'
 
 // Unified mana configuration
@@ -47,6 +48,7 @@ export default function BattlefieldPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
+  const { getCompletedCount, loading: progressLoading } = useProgress()
 
   const loadCurriculum = useCallback(async (signal?: AbortSignal) => {
     setLoading(true)
@@ -91,7 +93,7 @@ export default function BattlefieldPage() {
     loadCurriculum(controller.signal)
   }, [loadCurriculum])
 
-  if (loading) {
+  if (loading || progressLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
@@ -132,7 +134,12 @@ export default function BattlefieldPage() {
 
       <div className="grid gap-6">
         {levels.map((level, index) => (
-          <LevelCard key={level.id} level={level} levelNumber={index + 1} />
+          <LevelCard
+            key={level.id}
+            level={level}
+            levelNumber={index + 1}
+            completedPhases={getCompletedCount(level.id)}
+          />
         ))}
       </div>
     </div>
@@ -142,9 +149,11 @@ export default function BattlefieldPage() {
 function LevelCard({
   level,
   levelNumber,
+  completedPhases,
 }: {
   level: Level
   levelNumber: number
+  completedPhases: number
 }) {
   // Safely get mana config with fallback
   const manaColor: ManaColor = isValidManaColor(level.mana_color)
@@ -153,8 +162,8 @@ function LevelCard({
   const manaConfig = MANA_CONFIG[manaColor]
 
   const isLocked = level.locked ?? false
-  const completedPhases = 0 // TODO: Get from user progress
   const totalPhases = level.phases.length
+  const isComplete = totalPhases > 0 && completedPhases >= totalPhases
 
   return (
     <div
@@ -177,6 +186,11 @@ function LevelCard({
           {isLocked && (
             <span className="px-3 py-1 bg-scroll-text/10 rounded text-sm">
               🔒 Locked
+            </span>
+          )}
+          {isComplete && !isLocked && (
+            <span className="px-3 py-1 bg-mana-green/20 text-mana-green rounded text-sm font-medium">
+              ✓ Complete
             </span>
           )}
         </div>
@@ -206,7 +220,11 @@ function LevelCard({
               href={`/battlefield/${level.id}`}
               className="btn-arcane inline-block"
             >
-              {completedPhases > 0 ? 'Continue Journey' : 'Begin Journey'}
+              {isComplete
+                ? 'Review Level'
+                : completedPhases > 0
+                  ? 'Continue Journey'
+                  : 'Begin Journey'}
             </Link>
           </div>
         )}
