@@ -19,19 +19,49 @@ app = FastAPI(
 )
 
 # Configure CORS for frontend communication
-settings = get_settings()
-allowed_origins = [
-    "http://localhost:3000",  # Next.js dev server
-]
+def get_cors_origins() -> list[str]:
+    """Build list of allowed CORS origins."""
+    settings = get_settings()
+    origins = [
+        "http://localhost:3000",  # Next.js dev server
+    ]
 
-# Add production frontend URL if configured
-if settings.frontend_url:
-    allowed_origins.append(settings.frontend_url)
+    # Add production frontend URL if configured
+    if settings.frontend_url:
+        origins.append(settings.frontend_url)
+
+        # Also allow Vercel preview deployments for the same project
+        # Extract project name from production URL for preview pattern
+        # e.g., https://myapp.vercel.app -> also allow https://myapp-*-username.vercel.app
+        if "vercel.app" in settings.frontend_url:
+            origins.append(settings.frontend_url.replace("https://", "https://*-"))
+
+    return origins
+
+
+def get_cors_regex() -> str | None:
+    """Get CORS origin regex pattern for preview deployments."""
+    settings = get_settings()
+
+    # Only allow Vercel preview URLs if a Vercel production URL is configured
+    # This prevents allowing ANY Vercel app when FRONTEND_URL isn't set
+    if settings.frontend_url and "vercel.app" in settings.frontend_url:
+        # Extract the app name prefix for matching preview deployments
+        # Production: https://myapp.vercel.app
+        # Previews:   https://myapp-git-branch-user.vercel.app
+        app_name = settings.frontend_url.replace("https://", "").replace(".vercel.app", "")
+        return rf"https://{app_name}(-[a-z0-9-]+)?\.vercel\.app"
+
+    return None
+
+
+cors_origins = get_cors_origins()
+cors_regex = get_cors_regex()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,
-    allow_origin_regex=r"https://.*\.vercel\.app",  # Vercel preview deployments
+    allow_origins=cors_origins,
+    allow_origin_regex=cors_regex,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
