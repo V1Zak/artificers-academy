@@ -100,3 +100,78 @@ class ProgressUpdateResponse(BaseModel):
 
     message: str
     """Human-readable message."""
+
+
+# ==========================================
+# Snippet Models (Decklists)
+# ==========================================
+
+class SnippetCreate(BaseModel):
+    """Request to save a new code snippet (Decklist)."""
+
+    level_id: str = Field(..., min_length=1, max_length=50)
+    """The level this snippet is associated with."""
+
+    title: str = Field(..., min_length=1, max_length=200)
+    """Title for the snippet."""
+
+    code: str = Field(..., max_length=100_000)
+    """The code content (max 100KB)."""
+
+    is_valid: bool = False
+    """Whether the code passed validation."""
+
+    validation_result: Optional[dict] = None
+    """Full validation response if available."""
+
+
+class SnippetResponse(BaseModel):
+    """Response containing a saved snippet."""
+
+    id: str
+    """Unique snippet identifier."""
+
+    level_id: str
+    """The level this snippet is associated with."""
+
+    title: str
+    """Title of the snippet."""
+
+    code: str
+    """The code content."""
+
+    is_valid: bool
+    """Whether the code passed validation."""
+
+    validation_result: Optional[dict] = None
+    """Full validation response if available."""
+
+    created_at: Optional[str] = None
+    """When the snippet was created."""
+
+
+class SnippetListResponse(BaseModel):
+    """Response containing a list of snippets."""
+
+    snippets: list[SnippetResponse]
+    """List of saved snippets."""
+
+
+class SnippetCreateResponse(BaseModel):
+    """Response after creating a snippet."""
+
+    id: str
+    """ID of the created snippet."""
+
+    message: str
+    """Human-readable message."""
+
+
+class SnippetDeleteResponse(BaseModel):
+    """Response after deleting a snippet."""
+
+    status: str
+    """Status of the operation."""
+
+    message: str
+    """Human-readable message."""
