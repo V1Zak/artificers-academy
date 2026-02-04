@@ -190,8 +190,11 @@ export function ProgressProvider({ children }: ProgressProviderProps) {
           ]
         })
       } catch (err) {
-        // Refresh from server on error
-        await fetchProgress()
+        // Refresh from server on error - use current abort controller if available
+        const signal = abortControllerRef.current?.signal
+        if (!signal?.aborted) {
+          await fetchProgress(signal)
+        }
         throw err
       }
     },
@@ -242,7 +245,11 @@ export function ProgressProvider({ children }: ProgressProviderProps) {
 
   // Refresh progress
   const refreshProgress = useCallback(async () => {
-    await fetchProgress()
+    // Use existing abort controller's signal if available
+    const signal = abortControllerRef.current?.signal
+    if (!signal?.aborted) {
+      await fetchProgress(signal)
+    }
   }, [fetchProgress])
 
   const value = useMemo(

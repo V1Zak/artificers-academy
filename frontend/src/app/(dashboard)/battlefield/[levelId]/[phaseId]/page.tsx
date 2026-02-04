@@ -122,6 +122,14 @@ export default function PhasePage() {
     }
   }, [levelId, phaseId])
 
+  // Reset code initialization when navigating to different phase
+  useEffect(() => {
+    codeInitializedRef.current = false
+    setCode('') // Clear previous phase's code
+    setValidationResult(null)
+    setValidationError(null)
+  }, [levelId, phaseId])
+
   // Load saved code: prioritize server-saved, fallback to localStorage
   useEffect(() => {
     if (codeInitializedRef.current) return

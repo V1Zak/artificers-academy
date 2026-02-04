@@ -10,11 +10,7 @@ interface UserContextType {
   error: string | null
 }
 
-const UserContext = createContext<UserContextType>({
-  user: null,
-  loading: true,
-  error: null,
-})
+const UserContext = createContext<UserContextType | null>(null)
 
 export function useUser() {
   const context = useContext(UserContext)
