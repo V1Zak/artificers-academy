@@ -217,13 +217,11 @@ class MCPValidator:
         )
 
 
-# Singleton instance
-validator = MCPValidator()
-
-
 def validate_code(code: str) -> ValidationResponse:
     """
     Validate MCP server code.
+
+    Creates a new validator instance per request to ensure thread safety.
 
     Args:
         code: Python source code to validate
@@ -231,4 +229,4 @@ def validate_code(code: str) -> ValidationResponse:
     Returns:
         ValidationResponse with the Inspector's verdict
     """
-    return validator.validate(code)
+    return MCPValidator().validate(code)

@@ -7,15 +7,15 @@ In the language of the Grand Artificer:
 - ValidationResponse: The Inspector's verdict
 """
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 
 
 class ValidationRequest(BaseModel):
     """A Decklist (Python code) submitted for validation."""
 
-    code: str
-    """The Python code to validate."""
+    code: str = Field(..., max_length=100_000, description="The Python code to validate")
+    """The Python code to validate (max 100KB)."""
 
 
 class ValidationError(BaseModel):
@@ -50,8 +50,8 @@ class ValidationResponse(BaseModel):
     """Names of Tutors (@mcp.prompt) discovered."""
 
 
-class ProgressUpdate(BaseModel):
-    """Progress update for a user's journey through a level."""
+class ProgressEntry(BaseModel):
+    """A single progress entry for a level/phase."""
 
     level_id: str
     """The level identifier (e.g., 'level1')."""
@@ -63,7 +63,23 @@ class ProgressUpdate(BaseModel):
     """Whether this phase is completed."""
 
     code_snapshot: Optional[str] = None
-    """Optional code snapshot to save."""
+    """Optional code snapshot saved by the user."""
+
+
+class ProgressUpdate(BaseModel):
+    """Progress update for a user's journey through a level."""
+
+    level_id: str = Field(..., min_length=1, max_length=50)
+    """The level identifier (e.g., 'level1')."""
+
+    phase_id: str = Field(..., min_length=1, max_length=50)
+    """The phase identifier (e.g., 'phase1')."""
+
+    completed: bool = False
+    """Whether this phase is completed."""
+
+    code_snapshot: Optional[str] = Field(None, max_length=100_000)
+    """Optional code snapshot to save (max 100KB)."""
 
 
 class ProgressResponse(BaseModel):
@@ -72,5 +88,15 @@ class ProgressResponse(BaseModel):
     user_id: str
     """User identifier."""
 
-    progress: list[dict]
+    progress: list[ProgressEntry]
     """List of progress entries."""
+
+
+class ProgressUpdateResponse(BaseModel):
+    """Response after updating progress."""
+
+    status: str
+    """Status of the operation."""
+
+    message: str
+    """Human-readable message."""
