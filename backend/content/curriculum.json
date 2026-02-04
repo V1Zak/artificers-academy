@@ -1,0 +1,76 @@
+{
+  "levels": [
+    {
+      "id": "level1",
+      "title": "The Sanctum",
+      "subtitle": "MTG Oracle Server",
+      "description": "Learn the fundamentals of MCP by building a Magic: The Gathering card oracle server.",
+      "mana_color": "blue",
+      "phases": [
+        {
+          "id": "phase1",
+          "title": "Understanding the Multiverse",
+          "description": "Learn about Clients, Hosts, and Servers - the fundamental architecture of MCP.",
+          "type": "lesson",
+          "content_file": "level1/phase1_multiverse.md"
+        },
+        {
+          "id": "phase2",
+          "title": "Preparing Your Mana Base",
+          "description": "Set up your development environment with uv and install dependencies.",
+          "type": "tutorial",
+          "content_file": "level1/phase2_mana_base.md"
+        },
+        {
+          "id": "phase3",
+          "title": "Crafting Your First Sorcery",
+          "description": "Create your first @mcp.tool() that fetches card data from Scryfall.",
+          "type": "tutorial",
+          "content_file": "level1/phase3_first_sorcery.md",
+          "validation_required": true
+        },
+        {
+          "id": "phase4",
+          "title": "Summoning the Inspector",
+          "description": "Use the MCP Inspector to test your server before connecting to a client.",
+          "type": "tutorial",
+          "content_file": "level1/phase4_inspector.md"
+        },
+        {
+          "id": "phase5",
+          "title": "The Grand Summoning",
+          "description": "Connect your server to Claude Desktop and witness the magic.",
+          "type": "tutorial",
+          "content_file": "level1/phase5_grand_summoning.md"
+        }
+      ]
+    },
+    {
+      "id": "level2",
+      "title": "The Archive",
+      "subtitle": "Filesystem Access",
+      "description": "Master local file operations with read/write access.",
+      "mana_color": "black",
+      "phases": [],
+      "locked": true
+    },
+    {
+      "id": "level3",
+      "title": "The Aether",
+      "subtitle": "External APIs",
+      "description": "Connect to external APIs with async operations.",
+      "mana_color": "green",
+      "phases": [],
+      "locked": true
+    },
+    {
+      "id": "level4",
+      "title": "The Blind Eternities",
+      "subtitle": "Deployment",
+      "description": "Deploy your server to production.",
+      "mana_color": "gold",
+      "phases": [],
+      "locked": true
+    }
+  ]
+}

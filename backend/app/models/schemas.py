@@ -175,3 +175,77 @@ class SnippetDeleteResponse(BaseModel):
 
     message: str
     """Human-readable message."""
+
+
+# ==========================================
+# Content/Curriculum Models
+# ==========================================
+
+class Phase(BaseModel):
+    """A single phase within a level."""
+
+    id: str
+    """Phase identifier (e.g., 'phase1')."""
+
+    title: str
+    """Display title for the phase."""
+
+    description: str
+    """Brief description of the phase."""
+
+    type: str
+    """Phase type: 'lesson' or 'tutorial'."""
+
+    content_file: str
+    """Path to the markdown content file."""
+
+    validation_required: bool = False
+    """Whether code validation is required to complete."""
+
+
+class Level(BaseModel):
+    """A level in the curriculum (e.g., The Sanctum)."""
+
+    id: str
+    """Level identifier (e.g., 'level1')."""
+
+    title: str
+    """Display title (e.g., 'The Sanctum')."""
+
+    subtitle: str
+    """Subtitle describing the project type."""
+
+    description: str
+    """Detailed description of what the level teaches."""
+
+    mana_color: str
+    """MTG mana color theme (blue, black, green, gold, etc.)."""
+
+    phases: list[Phase] = []
+    """List of phases in this level."""
+
+    locked: bool = False
+    """Whether the level is locked."""
+
+
+class CurriculumResponse(BaseModel):
+    """Full curriculum structure."""
+
+    levels: list[Level]
+    """All available levels."""
+
+
+class PhaseContentResponse(BaseModel):
+    """Response containing phase markdown content."""
+
+    level_id: str
+    """Level identifier."""
+
+    phase_id: str
+    """Phase identifier."""
+
+    title: str
+    """Phase title."""
+
+    content: str
+    """Markdown content for the phase."""

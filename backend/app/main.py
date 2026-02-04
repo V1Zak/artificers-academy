@@ -8,7 +8,7 @@ Planeswalker progress through their journey.
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import validation, progress, snippets
+from app.routers import validation, progress, snippets, content
 from app.services.database import get_database
 from app.config import get_settings
 
@@ -34,6 +34,7 @@ app.add_middleware(
 app.include_router(validation.router, prefix="/api", tags=["validation"])
 app.include_router(progress.router, prefix="/api", tags=["progress"])
 app.include_router(snippets.router, prefix="/api", tags=["snippets"])
+app.include_router(content.router, prefix="/api", tags=["content"])
 
 
 @app.get("/")
