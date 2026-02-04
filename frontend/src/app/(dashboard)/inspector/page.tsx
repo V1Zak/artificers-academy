@@ -1,9 +1,22 @@
 'use client'
 
 import { useState } from 'react'
-import { CodeScrollEditable } from '@/components/theme/CodeScroll'
+import dynamic from 'next/dynamic'
 import { CounterspellAlert, ResolveAlert } from '@/components/theme/CounterspellAlert'
 import { validateCode, type ValidationResponse } from '@/lib/api'
+
+// Dynamic import for Monaco to avoid SSR issues
+const MonacoEditor = dynamic(
+  () => import('@/components/editor/MonacoEditor').then((mod) => mod.MonacoEditor),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="scroll-container h-[400px] flex items-center justify-center">
+        <p className="text-scroll-text/70">Loading editor...</p>
+      </div>
+    ),
+  }
+)
 
 const EXAMPLE_CODE = `from fastmcp import FastMCP
 
@@ -56,9 +69,10 @@ export default function InspectorPage() {
         {/* Code Input */}
         <div>
           <h2 className="text-xl font-semibold mb-4">Your Decklist</h2>
-          <CodeScrollEditable
+          <MonacoEditor
             value={code}
             onChange={setCode}
+            height="400px"
             className="mb-4"
           />
           <button

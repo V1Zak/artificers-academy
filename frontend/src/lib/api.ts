@@ -104,3 +104,82 @@ export async function updateProgress(
     throw new Error(message)
   }
 }
+
+// ==========================================
+// Curriculum API
+// ==========================================
+
+export interface Phase {
+  id: string
+  title: string
+  description: string
+  type: 'lesson' | 'tutorial'
+  content_file: string
+  validation_required?: boolean
+}
+
+export interface Level {
+  id: string
+  title: string
+  subtitle: string
+  description: string
+  mana_color: string
+  phases: Phase[]
+  locked?: boolean
+}
+
+export interface CurriculumResponse {
+  levels: Level[]
+}
+
+export interface PhaseContentResponse {
+  level_id: string
+  phase_id: string
+  title: string
+  content: string
+}
+
+/**
+ * Get the full curriculum structure
+ */
+export async function getCurriculum(): Promise<CurriculumResponse> {
+  const response = await fetch(`${API_URL}/api/curriculum`)
+
+  if (!response.ok) {
+    const message = await parseErrorResponse(response, 'Failed to fetch curriculum')
+    throw new Error(message)
+  }
+
+  return response.json()
+}
+
+/**
+ * Get a specific level by ID
+ */
+export async function getLevel(levelId: string): Promise<Level> {
+  const response = await fetch(`${API_URL}/api/levels/${levelId}`)
+
+  if (!response.ok) {
+    const message = await parseErrorResponse(response, 'Failed to fetch level')
+    throw new Error(message)
+  }
+
+  return response.json()
+}
+
+/**
+ * Get phase content (markdown)
+ */
+export async function getPhaseContent(
+  levelId: string,
+  phaseId: string
+): Promise<PhaseContentResponse> {
+  const response = await fetch(`${API_URL}/api/levels/${levelId}/phases/${phaseId}`)
+
+  if (!response.ok) {
+    const message = await parseErrorResponse(response, 'Failed to fetch phase content')
+    throw new Error(message)
+  }
+
+  return response.json()
+}
