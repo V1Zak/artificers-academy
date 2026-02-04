@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { getLevel, type Level, type Phase } from '@/lib/api'
+import { useProgress } from '@/contexts'
 
 export default function LevelPage() {
   const params = useParams()
@@ -13,6 +14,8 @@ export default function LevelPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
+
+  const { isPhaseCompleted, isPhaseUnlocked, loading: progressLoading } = useProgress()
 
   const loadLevel = useCallback(
     async (signal?: AbortSignal) => {
@@ -60,7 +63,7 @@ export default function LevelPage() {
     loadLevel(controller.signal)
   }, [loadLevel])
 
-  if (loading) {
+  if (loading || progressLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
@@ -122,8 +125,8 @@ export default function LevelPage() {
             phase={phase}
             levelId={levelId}
             phaseNumber={index + 1}
-            isCompleted={false} // TODO: Get from user progress
-            isUnlocked={index === 0} // TODO: Unlock based on progress
+            isCompleted={isPhaseCompleted(levelId, phase.id)}
+            isUnlocked={isPhaseUnlocked(levelId, phase.id, index)}
           />
         ))}
       </div>

@@ -13,6 +13,7 @@ import {
   type ValidationResponse,
 } from '@/lib/api'
 import { CounterspellAlert, ResolveAlert } from '@/components/theme'
+import { useProgress } from '@/contexts'
 
 // Dynamic import for Monaco to avoid SSR issues
 const MonacoEditor = dynamic(
@@ -55,6 +56,14 @@ export default function PhasePage() {
   const abortControllerRef = useRef<AbortController | null>(null)
   const validateDebounceRef = useRef<NodeJS.Timeout | null>(null)
   const codeInitializedRef = useRef(false)
+
+  // Progress context
+  const {
+    getSavedCode,
+    completePhase,
+    saveCode: saveCodeToServer,
+    loading: progressLoading,
+  } = useProgress()
 
   // ==========================================
   // DERIVED STATE (computed from state)
@@ -113,21 +122,30 @@ export default function PhasePage() {
     }
   }, [levelId, phaseId])
 
-  // Load saved code from localStorage
+  // Load saved code: prioritize server-saved, fallback to localStorage
   useEffect(() => {
     if (codeInitializedRef.current) return
+    if (progressLoading) return // Wait for progress to load
 
+    // First, try to get server-saved code
+    const serverCode = getSavedCode(levelId, phaseId)
+    if (serverCode) {
+      setCode(serverCode)
+      codeInitializedRef.current = true
+      return
+    }
+
+    // Fallback to localStorage
     const storageKey = getStorageKey(levelId, phaseId)
-    const savedCode = localStorage.getItem(storageKey)
-
-    if (savedCode) {
-      setCode(savedCode)
+    const localCode = localStorage.getItem(storageKey)
+    if (localCode) {
+      setCode(localCode)
     }
 
     codeInitializedRef.current = true
-  }, [levelId, phaseId])
+  }, [levelId, phaseId, progressLoading, getSavedCode])
 
-  // Save code to localStorage when it changes
+  // Save code to localStorage when it changes (immediate backup)
   useEffect(() => {
     if (!codeInitializedRef.current) return
     if (!code) return
@@ -135,6 +153,31 @@ export default function PhasePage() {
     const storageKey = getStorageKey(levelId, phaseId)
     localStorage.setItem(storageKey, code)
   }, [code, levelId, phaseId])
+
+  // Debounced save to server (every 5 seconds after last change)
+  const saveDebounceRef = useRef<NodeJS.Timeout | null>(null)
+  useEffect(() => {
+    if (!codeInitializedRef.current) return
+    if (!code) return
+
+    // Clear previous debounce
+    if (saveDebounceRef.current) {
+      clearTimeout(saveDebounceRef.current)
+    }
+
+    // Debounce server save (5 seconds)
+    saveDebounceRef.current = setTimeout(() => {
+      saveCodeToServer(levelId, phaseId, code).catch(() => {
+        // Silently fail - localStorage backup exists
+      })
+    }, 5000)
+
+    return () => {
+      if (saveDebounceRef.current) {
+        clearTimeout(saveDebounceRef.current)
+      }
+    }
+  }, [code, levelId, phaseId, saveCodeToServer])
 
   // Cleanup debounce timer on unmount
   useEffect(() => {
@@ -180,21 +223,26 @@ export default function PhasePage() {
   }, [handleValidate])
 
   const handleCompletePhase = useCallback(async () => {
-    // TODO: When auth is implemented, save progress:
-    // await updateProgress(userId, levelId, phaseId, true, code)
+    try {
+      // Save progress to server with code snapshot
+      await completePhase(levelId, phaseId, code || undefined)
+    } catch (err) {
+      // Log error but don't block navigation - localStorage has a backup
+      console.error('Failed to save progress:', err)
+    }
 
     if (nextPhase) {
       router.push(`/battlefield/${levelId}/${nextPhase.id}`)
     } else {
       router.push(`/battlefield/${levelId}`)
     }
-  }, [levelId, nextPhase, router])
+  }, [levelId, phaseId, code, nextPhase, router, completePhase])
 
   // ==========================================
   // RENDER
   // ==========================================
 
-  if (loading) {
+  if (loading || progressLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
