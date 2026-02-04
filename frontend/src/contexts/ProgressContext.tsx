@@ -218,6 +218,7 @@ export function ProgressProvider({ children }: ProgressProviderProps) {
           )
 
           if (existing) {
+            // Update existing entry, preserving completion status
             return prev.map((p) =>
               p.level_id === levelId && p.phase_id === phaseId
                 ? { ...p, code_snapshot: code }
@@ -225,6 +226,7 @@ export function ProgressProvider({ children }: ProgressProviderProps) {
             )
           }
 
+          // New entry - if phase isn't in progress array, it hasn't been completed yet
           return [
             ...prev,
             {

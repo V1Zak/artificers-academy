@@ -55,6 +55,7 @@ export default function PhasePage() {
   // Refs for cleanup and debouncing
   const abortControllerRef = useRef<AbortController | null>(null)
   const validateDebounceRef = useRef<NodeJS.Timeout | null>(null)
+  const saveDebounceRef = useRef<NodeJS.Timeout | null>(null)
   const codeInitializedRef = useRef(false)
 
   // Progress context
@@ -163,7 +164,6 @@ export default function PhasePage() {
   }, [code, levelId, phaseId])
 
   // Debounced save to server (every 5 seconds after last change)
-  const saveDebounceRef = useRef<NodeJS.Timeout | null>(null)
   useEffect(() => {
     if (!codeInitializedRef.current) return
     if (!code) return

@@ -34,19 +34,26 @@ export function UserProvider({ children, initialUser = null }: UserProviderProps
   useEffect(() => {
     const supabase = supabaseRef.current
 
-    // If we have initial user, we're already loaded
+    // If we have initial user from server, just set up the auth listener
+    // State is already initialized correctly from props
     if (initialUser) {
-      setUser(initialUser)
-      setLoading(false)
-      return
+      // Listen for auth changes (e.g., sign out)
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        (_event, session) => {
+          setUser(session?.user ?? null)
+        }
+      )
+      return () => {
+        subscription.unsubscribe()
+      }
     }
 
-    // Otherwise, fetch user
-    async function getUser() {
+    // No initial user - fetch from Supabase client
+    async function fetchUser() {
       try {
-        const { data: { user }, error } = await supabase.auth.getUser()
+        const { data, error } = await supabase.auth.getUser()
         if (error) throw error
-        setUser(user)
+        setUser(data.user)
       } catch (err) {
         setError('Failed to load user')
       } finally {
@@ -54,7 +61,7 @@ export function UserProvider({ children, initialUser = null }: UserProviderProps
       }
     }
 
-    getUser()
+    fetchUser()
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
