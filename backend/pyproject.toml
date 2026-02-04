@@ -1,0 +1,11 @@
+[project]
+name = "artificers-academy-backend"
+version = "0.1.0"
+description = "Backend API for The Artificer's Academy - MCP learning platform"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.128.0",
+    "python-multipart>=0.0.22",
+    "supabase>=2.27.3",
+    "uvicorn[standard]>=0.40.0",
+]
