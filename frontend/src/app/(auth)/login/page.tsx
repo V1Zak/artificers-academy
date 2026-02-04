@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useMemo } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 
@@ -11,7 +11,8 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
-  const supabase = createClient()
+  const searchParams = useSearchParams()
+  const supabase = useMemo(() => createClient(), [])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -29,7 +30,11 @@ export default function LoginPage() {
       return
     }
 
-    router.push('/dashboard')
+    // Get redirect URL from query params, with validation
+    const next = searchParams.get('next')
+    const safeNext = next && next.startsWith('/') && !next.startsWith('//') ? next : '/dashboard'
+
+    router.push(safeNext)
     router.refresh()
   }
 

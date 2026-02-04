@@ -20,7 +20,7 @@ export default function Home() {
           <Link href="/login" className="btn-arcane">
             Begin Your Journey
           </Link>
-          <Link href="/codex" className="btn-mana">
+          <Link href="/login?next=/codex" className="btn-mana">
             Browse the Codex
           </Link>
         </div>

@@ -31,6 +31,18 @@ export interface ProgressResponse {
 }
 
 /**
+ * Parse error response from API
+ */
+async function parseErrorResponse(response: Response, fallbackMessage: string): Promise<string> {
+  try {
+    const error = await response.json()
+    return error.detail || error.message || fallbackMessage
+  } catch {
+    return fallbackMessage
+  }
+}
+
+/**
  * Validate MCP server code
  */
 export async function validateCode(code: string): Promise<ValidationResponse> {
@@ -43,7 +55,8 @@ export async function validateCode(code: string): Promise<ValidationResponse> {
   })
 
   if (!response.ok) {
-    throw new Error('Failed to validate code')
+    const message = await parseErrorResponse(response, 'Failed to validate code')
+    throw new Error(message)
   }
 
   return response.json()
@@ -56,7 +69,8 @@ export async function getProgress(userId: string): Promise<ProgressResponse> {
   const response = await fetch(`${API_URL}/api/progress/${userId}`)
 
   if (!response.ok) {
-    throw new Error('Failed to fetch progress')
+    const message = await parseErrorResponse(response, 'Failed to fetch progress')
+    throw new Error(message)
   }
 
   return response.json()
@@ -86,6 +100,7 @@ export async function updateProgress(
   })
 
   if (!response.ok) {
-    throw new Error('Failed to update progress')
+    const message = await parseErrorResponse(response, 'Failed to update progress')
+    throw new Error(message)
   }
 }
