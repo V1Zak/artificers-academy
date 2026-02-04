@@ -1,24 +1,46 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
+  return (
+    <Suspense fallback={<LoginFormSkeleton />}>
+      <LoginForm />
+    </Suspense>
+  )
+}
+
+function LoginFormSkeleton() {
+  return (
+    <div className="animate-pulse">
+      <div className="h-8 bg-scroll-border/30 rounded w-3/4 mx-auto mb-2" />
+      <div className="h-4 bg-scroll-border/30 rounded w-1/2 mx-auto mb-6" />
+      <div className="space-y-4">
+        <div className="h-10 bg-scroll-border/30 rounded" />
+        <div className="h-10 bg-scroll-border/30 rounded" />
+        <div className="h-10 bg-scroll-border/30 rounded" />
+      </div>
+    </div>
+  )
+}
+
+function LoginForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
-  const supabase = useMemo(() => createClient(), [])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
     setLoading(true)
 
+    const supabase = createClient()
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
