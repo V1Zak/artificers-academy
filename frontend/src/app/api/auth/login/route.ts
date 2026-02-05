@@ -16,8 +16,10 @@ export async function POST(request: Request) {
 
   const cookieStore = await cookies()
 
-  // Collect cookies that need to be set on the response
-  const cookiesToSet: CookieToSet[] = []
+  // Create the response up front so we can attach auth cookies during sign-in.
+  const response = NextResponse.json({
+    redirectTo: '/dashboard',
+  })
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -28,7 +30,9 @@ export async function POST(request: Request) {
           return cookieStore.getAll()
         },
         setAll(cookiesToSetFromSupabase: CookieToSet[]) {
-          cookiesToSet.push(...cookiesToSetFromSupabase)
+          cookiesToSetFromSupabase.forEach(({ name, value, options }: CookieToSet) =>
+            response.cookies.set(name, value, options)
+          )
         },
       },
     }
@@ -46,31 +50,8 @@ export async function POST(request: Request) {
     )
   }
 
-  // Ensure auth cookies are issued for SSR by setting the session explicitly if needed.
-  if (data.session && cookiesToSet.length === 0) {
-    const { error: sessionError } = await supabase.auth.setSession({
-      access_token: data.session.access_token,
-      refresh_token: data.session.refresh_token,
-    })
-
-    if (sessionError) {
-      return NextResponse.json(
-        { error: sessionError.message },
-        { status: 500 }
-      )
-    }
-  }
-
-  // Create response and set cookies
-  const response = NextResponse.json({
-    user: data.user,
-    redirectTo: '/dashboard',
-  })
-
-  // Set all collected cookies on the response
-  for (const { name, value, options } of cookiesToSet) {
-    response.cookies.set(name, value, options)
-  }
+  // Ensure the response isn't cached and can carry Set-Cookie headers.
+  response.headers.set('Cache-Control', 'no-store')
 
   return response
 }
