@@ -46,6 +46,21 @@ export async function POST(request: Request) {
     )
   }
 
+  // Ensure auth cookies are issued for SSR by setting the session explicitly if needed.
+  if (data.session && cookiesToSet.length === 0) {
+    const { error: sessionError } = await supabase.auth.setSession({
+      access_token: data.session.access_token,
+      refresh_token: data.session.refresh_token,
+    })
+
+    if (sessionError) {
+      return NextResponse.json(
+        { error: sessionError.message },
+        { status: 500 }
+      )
+    }
+  }
+
   // Create response and set cookies
   const response = NextResponse.json({
     user: data.user,
