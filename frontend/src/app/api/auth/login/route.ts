@@ -66,49 +66,22 @@ export async function POST(request: Request) {
       .replace('.supabase.co', '')
     log(`Project ref: ${projectRef}`)
 
-    const cookieName = `sb-${projectRef}-auth-token`
-    log(`Cookie name: ${cookieName}`)
-
-    const cookieValue = JSON.stringify({
-      access_token: data.session?.access_token,
-      refresh_token: data.session?.refresh_token,
-      expires_at: data.session?.expires_at,
-      expires_in: data.session?.expires_in,
-      token_type: data.session?.token_type,
-      user: data.user,
-    })
-    log(`Cookie value length: ${cookieValue.length}`)
-
-    // Build Set-Cookie header manually to ensure it's sent
-    const maxAge = 60 * 60 * 24 * 365
-    const cookieHeader = `${cookieName}=${encodeURIComponent(cookieValue)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${maxAge}`
-    log(`Set-Cookie header length: ${cookieHeader.length}`)
-
-    // Create response with headers set directly
-    const responseBody = JSON.stringify({
+    // Return session data to client - client will store cookie via JavaScript
+    // This bypasses server-side Set-Cookie issues
+    return NextResponse.json({
       success: true,
+      session: {
+        access_token: data.session?.access_token,
+        refresh_token: data.session?.refresh_token,
+        expires_at: data.session?.expires_at,
+        expires_in: data.session?.expires_in,
+        token_type: data.session?.token_type,
+      },
       user: { id: data.user?.id, email: data.user?.email },
+      cookieName: `sb-${projectRef}-auth-token`,
       redirectTo: '/dashboard',
       debug: debugLogs,
-      cookieInfo: {
-        name: cookieName,
-        valueLength: cookieValue.length,
-        headerLength: cookieHeader.length,
-        willBeSet: true,
-      },
     })
-
-    const response = new Response(responseBody, {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-store',
-        'Set-Cookie': cookieHeader,
-      },
-    })
-    log('Response created with Set-Cookie header')
-
-    return response
   } catch (err) {
     log(`Unexpected error: ${err}`)
     return NextResponse.json(
