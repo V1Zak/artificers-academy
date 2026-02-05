@@ -3,6 +3,7 @@
 import { useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
   return (
@@ -67,23 +68,22 @@ function LoginForm() {
         return
       }
 
-      // Store session in cookie via JavaScript since server Set-Cookie is being stripped
-      if (data.session && data.cookieName) {
-        const cookieValue = JSON.stringify({
+      // Use Supabase client to set session - this ensures cookies are in the correct format
+      if (data.session?.access_token && data.session?.refresh_token) {
+        const supabase = createClient()
+        const { error: sessionError } = await supabase.auth.setSession({
           access_token: data.session.access_token,
           refresh_token: data.session.refresh_token,
-          expires_at: data.session.expires_at,
-          expires_in: data.session.expires_in,
-          token_type: data.session.token_type,
-          user: data.user,
         })
 
-        // Set cookie with JavaScript
-        const maxAge = 60 * 60 * 24 * 365 // 1 year
-        document.cookie = `${data.cookieName}=${encodeURIComponent(cookieValue)}; path=/; max-age=${maxAge}; SameSite=Lax; Secure`
+        if (sessionError) {
+          console.log('[LOGIN DEBUG] Failed to set session:', sessionError.message)
+          setError('Failed to establish session')
+          setLoading(false)
+          return
+        }
 
-        console.log('[LOGIN DEBUG] Cookie set via JavaScript:', data.cookieName)
-        console.log('[LOGIN DEBUG] Cookie value length:', cookieValue.length)
+        console.log('[LOGIN DEBUG] Session set via Supabase client')
       }
 
       setShowDebug(true)
