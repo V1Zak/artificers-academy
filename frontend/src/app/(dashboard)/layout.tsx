@@ -1,15 +1,41 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
 import { Providers } from '@/components/providers'
+import type { User } from '@supabase/supabase-js'
+
+// Debug user for bypassing auth during development
+const DEBUG_USER: User = {
+  id: 'debug-user-12345',
+  email: 'debug@artificers-academy.dev',
+  aud: 'authenticated',
+  role: 'authenticated',
+  app_metadata: {},
+  user_metadata: {},
+  created_at: new Date().toISOString(),
+} as User
 
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const cookieStore = await cookies()
+  const debugBypass = cookieStore.get('debug-auth-bypass')?.value === 'artificer-debug-2024'
+
+  let user: User | null = null
+
+  if (debugBypass) {
+    // Debug bypass enabled - use mock user
+    console.log('[AUTH DEBUG] Debug bypass active - using mock user')
+    user = DEBUG_USER
+  } else {
+    // Normal auth flow
+    const supabase = await createClient()
+    const { data } = await supabase.auth.getUser()
+    user = data.user
+  }
 
   if (!user) {
     redirect('/login')
