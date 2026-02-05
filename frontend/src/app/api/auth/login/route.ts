@@ -79,8 +79,13 @@ export async function POST(request: Request) {
     })
     log(`Cookie value length: ${cookieValue.length}`)
 
-    // Create response with debug info
-    const response = NextResponse.json({
+    // Build Set-Cookie header manually to ensure it's sent
+    const maxAge = 60 * 60 * 24 * 365
+    const cookieHeader = `${cookieName}=${encodeURIComponent(cookieValue)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${maxAge}`
+    log(`Set-Cookie header length: ${cookieHeader.length}`)
+
+    // Create response with headers set directly
+    const responseBody = JSON.stringify({
       success: true,
       user: { id: data.user?.id, email: data.user?.email },
       redirectTo: '/dashboard',
@@ -88,22 +93,20 @@ export async function POST(request: Request) {
       cookieInfo: {
         name: cookieName,
         valueLength: cookieValue.length,
+        headerLength: cookieHeader.length,
         willBeSet: true,
       },
     })
 
-    // Set the auth cookie
-    response.cookies.set(cookieName, cookieValue, {
-      path: '/',
-      httpOnly: true,
-      secure: true,
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 365,
+    const response = new Response(responseBody, {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-store',
+        'Set-Cookie': cookieHeader,
+      },
     })
-    log('Cookie set on response')
-
-    response.headers.set('Cache-Control', 'no-store')
-    log('Response ready')
+    log('Response created with Set-Cookie header')
 
     return response
   } catch (err) {
