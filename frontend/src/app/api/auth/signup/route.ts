@@ -1,4 +1,5 @@
-import { createClient } from '@/lib/supabase/server'
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
@@ -18,7 +19,24 @@ export async function POST(request: Request) {
     )
   }
 
-  const supabase = await createClient()
+  const cookieStore = await cookies()
+  const cookiesToSet: { name: string; value: string; options: CookieOptions }[] = []
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll()
+        },
+        setAll(cookies) {
+          cookiesToSet.push(...cookies)
+        },
+      },
+    }
+  )
+
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -34,8 +52,14 @@ export async function POST(request: Request) {
     )
   }
 
-  return NextResponse.json({
+  const response = NextResponse.json({
     user: data.user,
     message: 'Check your email for the confirmation link',
   })
+
+  for (const { name, value, options } of cookiesToSet) {
+    response.cookies.set(name, value, options)
+  }
+
+  return response
 }
