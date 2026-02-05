@@ -51,6 +51,7 @@ export default function PhasePage() {
   const [validationResult, setValidationResult] = useState<ValidationResponse | null>(null)
   const [validating, setValidating] = useState(false)
   const [validationError, setValidationError] = useState<string | null>(null)
+  const [showHints, setShowHints] = useState(false)
 
   // Refs for cleanup and debouncing
   const abortControllerRef = useRef<AbortController | null>(null)
@@ -320,12 +321,26 @@ export default function PhasePage() {
             >
               {validating ? 'Validating...' : 'Validate Code'}
             </button>
+            <button
+              onClick={() => setShowHints(!showHints)}
+              className="px-4 py-2 text-sm border border-arcane-gold/50 text-arcane-gold rounded-lg hover:bg-arcane-gold/10 transition-colors"
+            >
+              {showHints ? 'Hide Hints' : 'Show Hints'}
+            </button>
             {validationResult?.valid && (
               <span className="text-mana-green font-medium">
                 ✓ Code is valid!
               </span>
             )}
           </div>
+
+          {/* Hints Panel */}
+          {showHints && (
+            <div className="mt-4 p-4 bg-arcane-gold/10 border border-arcane-gold/30 rounded-lg">
+              <h3 className="font-semibold text-arcane-gold mb-3">Hints from the Grand Artificer</h3>
+              <PhaseHints levelId={levelId} phaseId={phaseId} />
+            </div>
+          )}
 
           {/* Validation Results */}
           {validationError && (
@@ -563,4 +578,107 @@ function escapeHtml(text: string): string {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;')
+}
+
+// ==========================================
+// HINTS COMPONENT
+// ==========================================
+
+interface HintData {
+  hints: string[]
+  starterCode?: string
+}
+
+const PHASE_HINTS: Record<string, Record<string, HintData>> = {
+  level1: {
+    phase3: {
+      hints: [
+        "Start by importing FastMCP: from fastmcp import FastMCP",
+        "Create your server instance: mcp = FastMCP('mtg-oracle')",
+        "Use the @mcp.tool() decorator to define your search function",
+        "Your tool function needs a detailed docstring - this becomes the 'Oracle Text' that Claude reads",
+        "Use httpx for async HTTP requests to the Scryfall API",
+        "The Scryfall API endpoint is: https://api.scryfall.com/cards/named?fuzzy={card_name}",
+        "Don't forget to handle errors gracefully - what if the card isn't found?",
+      ],
+      starterCode: `from fastmcp import FastMCP
+import httpx
+
+mcp = FastMCP("mtg-oracle")
+
+@mcp.tool()
+async def search_card(card_name: str) -> str:
+    """
+    Search for a Magic: The Gathering card by name.
+
+    This tool queries the Scryfall API to find card information
+    including oracle text, mana cost, and type line.
+
+    Args:
+        card_name: The name of the card to search for (fuzzy matching supported)
+
+    Returns:
+        Card information including name, mana cost, type, and oracle text
+    """
+    # Your implementation here
+    pass
+`,
+    },
+  },
+}
+
+function PhaseHints({ levelId, phaseId }: { levelId: string; phaseId: string }) {
+  const [revealedHints, setRevealedHints] = useState(0)
+  const [showStarter, setShowStarter] = useState(false)
+
+  const hintData = PHASE_HINTS[levelId]?.[phaseId]
+
+  if (!hintData) {
+    return (
+      <p className="text-scroll-text/70 text-sm">
+        No hints available for this phase. You&apos;ve got this, Artificer!
+      </p>
+    )
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Progressive hints */}
+      <div className="space-y-2">
+        {hintData.hints.slice(0, revealedHints).map((hint, i) => (
+          <div key={i} className="flex gap-2 text-sm">
+            <span className="text-arcane-gold font-bold">{i + 1}.</span>
+            <span className="text-scroll-text">{hint}</span>
+          </div>
+        ))}
+      </div>
+
+      {revealedHints < hintData.hints.length && (
+        <button
+          onClick={() => setRevealedHints(revealedHints + 1)}
+          className="text-sm text-arcane-purple hover:underline"
+        >
+          Reveal next hint ({revealedHints + 1} of {hintData.hints.length})
+        </button>
+      )}
+
+      {/* Starter code */}
+      {hintData.starterCode && (
+        <div className="mt-4 pt-4 border-t border-arcane-gold/20">
+          <button
+            onClick={() => setShowStarter(!showStarter)}
+            className="text-sm text-arcane-purple hover:underline"
+          >
+            {showStarter ? 'Hide starter code' : 'Show starter code template'}
+          </button>
+
+          {showStarter && (
+            <pre className="mt-2 p-3 bg-scroll-bg/50 border border-scroll-border rounded text-xs overflow-x-auto">
+              <code>{hintData.starterCode}</code>
+            </pre>
+          )}
+        </div>
+      )}
+    </div>
+  )
 }

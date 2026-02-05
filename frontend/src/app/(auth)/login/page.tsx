@@ -5,6 +5,9 @@ import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 
+// Debug mode controlled by environment variable
+const DEBUG_MODE = process.env.NEXT_PUBLIC_DEBUG_MODE === 'true'
+
 export default function LoginPage() {
   return (
     <Suspense fallback={<LoginFormSkeleton />}>
@@ -158,24 +161,26 @@ function LoginForm() {
         </Link>
       </p>
 
-      {/* Debug Bypass Button */}
-      <div className="mt-8 pt-4 border-t border-scroll-border/30">
-        <p className="text-xs text-scroll-text/50 text-center mb-2">Development Debug</p>
-        <button
-          type="button"
-          onClick={() => {
-            document.cookie = 'debug-auth-bypass=artificer-debug-2024; path=/; max-age=3600'
-            console.log('[DEBUG] Auth bypass cookie set')
-            window.location.href = '/dashboard'
-          }}
-          className="w-full px-4 py-2 text-sm bg-yellow-500/20 text-yellow-700 border border-yellow-500/50 rounded-lg hover:bg-yellow-500/30 transition-colors"
-        >
-          Debug: Bypass Auth
-        </button>
-      </div>
+      {/* Debug Bypass Button - only shown when DEBUG_MODE is enabled */}
+      {DEBUG_MODE && (
+        <div className="mt-8 pt-4 border-t border-scroll-border/30">
+          <p className="text-xs text-scroll-text/50 text-center mb-2">Development Debug</p>
+          <button
+            type="button"
+            onClick={() => {
+              document.cookie = 'debug-auth-bypass=artificer-debug-2024; path=/; max-age=3600'
+              console.log('[DEBUG] Auth bypass cookie set')
+              window.location.href = '/dashboard'
+            }}
+            className="w-full px-4 py-2 text-sm bg-yellow-500/20 text-yellow-700 border border-yellow-500/50 rounded-lg hover:bg-yellow-500/30 transition-colors"
+          >
+            Debug: Bypass Auth
+          </button>
+        </div>
+      )}
 
-      {/* Debug Panel */}
-      {showDebug && debugInfo && (
+      {/* Debug Panel - only shown when DEBUG_MODE is enabled */}
+      {DEBUG_MODE && showDebug && debugInfo && (
         <div className="mt-6 p-4 bg-black/80 text-white text-xs rounded-lg">
           <div className="flex justify-between items-center mb-2">
             <span className="font-bold text-yellow-400">Debug Info</span>
