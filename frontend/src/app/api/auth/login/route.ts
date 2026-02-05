@@ -1,8 +1,5 @@
-import { createServerClient, type CookieOptions } from '@supabase/ssr'
-import { cookies } from 'next/headers'
+import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
-
-type CookieToSet = { name: string; value: string; options: CookieOptions }
 
 export async function POST(request: Request) {
   const { email, password } = await request.json()
@@ -14,26 +11,14 @@ export async function POST(request: Request) {
     )
   }
 
-  const cookieStore = await cookies()
-
-  // Create the response up front so we can attach auth cookies during sign-in.
-  const response = NextResponse.json({
-    redirectTo: '/dashboard',
-  })
-
-  const supabase = createServerClient(
+  // Use standard Supabase client (not SSR) since we'll manually handle cookies
+  const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll()
-        },
-        setAll(cookiesToSetFromSupabase: CookieToSet[]) {
-          cookiesToSetFromSupabase.forEach(({ name, value, options }: CookieToSet) =>
-            response.cookies.set(name, value, options)
-          )
-        },
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
       },
     }
   )
@@ -50,7 +35,37 @@ export async function POST(request: Request) {
     )
   }
 
-  // Ensure the response isn't cached and can carry Set-Cookie headers.
+  // Create response
+  const response = NextResponse.json({
+    user: data.user,
+    redirectTo: '/dashboard',
+  })
+
+  // Manually set the auth cookie with the session
+  // Extract project ref from Supabase URL (e.g., https://xxxxx.supabase.co -> xxxxx)
+  const projectRef = process.env.NEXT_PUBLIC_SUPABASE_URL!
+    .replace('https://', '')
+    .replace('.supabase.co', '')
+
+  const cookieName = `sb-${projectRef}-auth-token`
+  const cookieValue = JSON.stringify({
+    access_token: data.session?.access_token,
+    refresh_token: data.session?.refresh_token,
+    expires_at: data.session?.expires_at,
+    expires_in: data.session?.expires_in,
+    token_type: data.session?.token_type,
+    user: data.user,
+  })
+
+  // Set the auth cookie
+  response.cookies.set(cookieName, cookieValue, {
+    path: '/',
+    httpOnly: true,
+    secure: true,
+    sameSite: 'lax',
+    maxAge: 60 * 60 * 24 * 365, // 1 year
+  })
+
   response.headers.set('Cache-Control', 'no-store')
 
   return response
