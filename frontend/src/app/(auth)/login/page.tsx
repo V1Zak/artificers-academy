@@ -28,9 +28,10 @@ function LoginFormSkeleton() {
 }
 
 interface DebugInfo {
-  debug?: string[]
-  cookieInfo?: { name: string; valueLength: number; willBeSet: boolean }
-  success?: boolean
+  message: string
+  userId?: string
+  email?: string
+  error?: string
 }
 
 function LoginForm() {
@@ -49,43 +50,33 @@ function LoginForm() {
     setLoading(true)
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+      // Use Supabase client directly - this handles cookies automatically
+      const supabase = createClient()
+
+      console.log('[LOGIN DEBUG] Attempting login with Supabase client directly')
+
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       })
 
-      const data = await response.json()
-      setDebugInfo(data)
-
-      console.log('[LOGIN DEBUG] Response status:', response.status)
-      console.log('[LOGIN DEBUG] Response data:', data)
-
-      if (!response.ok) {
-        setError(data.error || 'Login failed')
+      if (authError) {
+        console.log('[LOGIN DEBUG] Auth error:', authError.message)
+        setError(authError.message)
+        setDebugInfo({ message: 'Auth failed', error: authError.message })
         setLoading(false)
         setShowDebug(true)
         return
       }
 
-      // Use Supabase client to set session - this ensures cookies are in the correct format
-      if (data.session?.access_token && data.session?.refresh_token) {
-        const supabase = createClient()
-        const { error: sessionError } = await supabase.auth.setSession({
-          access_token: data.session.access_token,
-          refresh_token: data.session.refresh_token,
-        })
+      console.log('[LOGIN DEBUG] Auth success! User:', data.user?.email)
+      console.log('[LOGIN DEBUG] Session exists:', !!data.session)
 
-        if (sessionError) {
-          console.log('[LOGIN DEBUG] Failed to set session:', sessionError.message)
-          setError('Failed to establish session')
-          setLoading(false)
-          return
-        }
-
-        console.log('[LOGIN DEBUG] Session set via Supabase client')
-      }
-
+      setDebugInfo({
+        message: 'Login successful',
+        userId: data.user?.id,
+        email: data.user?.email || undefined,
+      })
       setShowDebug(true)
 
       // Get redirect URL from query params, with validation
@@ -95,11 +86,13 @@ function LoginForm() {
       // Wait a moment then redirect
       setTimeout(() => {
         window.location.href = safeNext
-      }, 1000)
+      }, 500)
     } catch (err) {
-      console.error('[LOGIN DEBUG] Fetch error:', err)
+      console.error('[LOGIN DEBUG] Unexpected error:', err)
       setError('An unexpected error occurred')
+      setDebugInfo({ message: 'Unexpected error', error: String(err) })
       setLoading(false)
+      setShowDebug(true)
     }
   }
 
@@ -194,21 +187,19 @@ function LoginForm() {
             </button>
           </div>
 
-          <div className={`mb-2 ${debugInfo.success ? 'text-green-400' : 'text-red-400'}`}>
-            Status: {debugInfo.success ? 'SUCCESS' : 'FAILED'}
+          <div className={`mb-2 ${debugInfo.error ? 'text-red-400' : 'text-green-400'}`}>
+            {debugInfo.message}
           </div>
 
-          {debugInfo.cookieInfo && (
-            <div className="mb-2 text-blue-300">
-              Cookie: {debugInfo.cookieInfo.name} ({debugInfo.cookieInfo.valueLength} chars)
-            </div>
+          {debugInfo.userId && (
+            <div className="text-blue-300">User ID: {debugInfo.userId}</div>
           )}
-
-          <div className="border-t border-white/20 pt-2 mt-2 space-y-1">
-            {debugInfo.debug?.map((log, i) => (
-              <div key={i} className="text-gray-300">{log}</div>
-            ))}
-          </div>
+          {debugInfo.email && (
+            <div className="text-blue-300">Email: {debugInfo.email}</div>
+          )}
+          {debugInfo.error && (
+            <div className="text-red-300">Error: {debugInfo.error}</div>
+          )}
         </div>
       )}
     </>
