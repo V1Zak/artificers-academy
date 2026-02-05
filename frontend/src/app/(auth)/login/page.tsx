@@ -3,7 +3,6 @@
 import { useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
   return (
@@ -39,26 +38,32 @@ function LoginForm() {
     setError(null)
     setLoading(true)
 
-    const supabase = createClient()
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+    try {
+      // Use server-side API route for login to ensure cookies are properly set
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
 
-    if (error) {
-      setError(error.message)
+      const data = await response.json()
+
+      if (!response.ok) {
+        setError(data.error || 'Login failed')
+        setLoading(false)
+        return
+      }
+
+      // Get redirect URL from query params, with validation
+      const next = searchParams.get('next')
+      const safeNext = next && next.startsWith('/') && !next.startsWith('//') ? next : '/dashboard'
+
+      // Full page navigation to ensure cookies are sent
+      window.location.href = safeNext
+    } catch {
+      setError('An unexpected error occurred')
       setLoading(false)
-      return
     }
-
-    // Get redirect URL from query params, with validation
-    const next = searchParams.get('next')
-    const safeNext = next && next.startsWith('/') && !next.startsWith('//') ? next : '/dashboard'
-
-    // Wait briefly to ensure cookies are written before navigation
-    // Use full page navigation to ensure cookies are sent with the request
-    await new Promise(resolve => setTimeout(resolve, 100))
-    window.location.href = safeNext
   }
 
   return (
