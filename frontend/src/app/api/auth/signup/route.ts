@@ -2,6 +2,8 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
+type CookieToSet = { name: string; value: string; options: CookieOptions }
+
 export async function POST(request: Request) {
   const { email, password } = await request.json()
 
@@ -20,7 +22,7 @@ export async function POST(request: Request) {
   }
 
   const cookieStore = await cookies()
-  const cookiesToSet: { name: string; value: string; options: CookieOptions }[] = []
+  const cookiesToSet: CookieToSet[] = []
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -30,8 +32,8 @@ export async function POST(request: Request) {
         getAll() {
           return cookieStore.getAll()
         },
-        setAll(cookies) {
-          cookiesToSet.push(...cookies)
+        setAll(cookiesToSetFromSupabase: CookieToSet[]) {
+          cookiesToSet.push(...cookiesToSetFromSupabase)
         },
       },
     }
