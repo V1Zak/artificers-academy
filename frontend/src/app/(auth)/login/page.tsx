@@ -48,23 +48,16 @@ function LoginForm() {
     setLoading(true)
 
     try {
-      // Use server-side API route for login to ensure cookies are properly set
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
-        credentials: 'include', // Ensure cookies are included
       })
 
       const data = await response.json()
       setDebugInfo(data)
 
-      // Log response headers for debugging
       console.log('[LOGIN DEBUG] Response status:', response.status)
-      console.log('[LOGIN DEBUG] Response headers:')
-      response.headers.forEach((value, key) => {
-        console.log(`  ${key}: ${value}`)
-      })
       console.log('[LOGIN DEBUG] Response data:', data)
 
       if (!response.ok) {
@@ -74,17 +67,35 @@ function LoginForm() {
         return
       }
 
-      // Show debug briefly then redirect
+      // Store session in cookie via JavaScript since server Set-Cookie is being stripped
+      if (data.session && data.cookieName) {
+        const cookieValue = JSON.stringify({
+          access_token: data.session.access_token,
+          refresh_token: data.session.refresh_token,
+          expires_at: data.session.expires_at,
+          expires_in: data.session.expires_in,
+          token_type: data.session.token_type,
+          user: data.user,
+        })
+
+        // Set cookie with JavaScript
+        const maxAge = 60 * 60 * 24 * 365 // 1 year
+        document.cookie = `${data.cookieName}=${encodeURIComponent(cookieValue)}; path=/; max-age=${maxAge}; SameSite=Lax; Secure`
+
+        console.log('[LOGIN DEBUG] Cookie set via JavaScript:', data.cookieName)
+        console.log('[LOGIN DEBUG] Cookie value length:', cookieValue.length)
+      }
+
       setShowDebug(true)
 
       // Get redirect URL from query params, with validation
       const next = searchParams.get('next')
       const safeNext = next && next.startsWith('/') && !next.startsWith('//') ? next : '/dashboard'
 
-      // Wait a moment to see debug, then redirect
+      // Wait a moment then redirect
       setTimeout(() => {
         window.location.href = safeNext
-      }, 1500)
+      }, 1000)
     } catch (err) {
       console.error('[LOGIN DEBUG] Fetch error:', err)
       setError('An unexpected error occurred')
