@@ -55,8 +55,9 @@ function LoginForm() {
     const next = searchParams.get('next')
     const safeNext = next && next.startsWith('/') && !next.startsWith('//') ? next : '/dashboard'
 
+    // Wait briefly to ensure cookies are written before navigation
     // Use full page navigation to ensure cookies are sent with the request
-    // Client-side navigation (router.push) can race with cookie setting
+    await new Promise(resolve => setTimeout(resolve, 100))
     window.location.href = safeNext
   }
 
