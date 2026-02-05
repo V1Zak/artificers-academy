@@ -40,6 +40,9 @@ class ValidationResponse(BaseModel):
     errors: list[ValidationError] = []
     """List of Counterspells (errors) found."""
 
+    warnings: list[ValidationError] = []
+    """List of warnings (suggestions, not errors)."""
+
     tools_found: list[str] = []
     """Names of Sorceries (@mcp.tool) discovered."""
 
@@ -48,6 +51,15 @@ class ValidationResponse(BaseModel):
 
     prompts_found: list[str] = []
     """Names of Tutors (@mcp.prompt) discovered."""
+
+    has_async: bool = False
+    """Whether the code uses async patterns properly."""
+
+    has_caching: bool = False
+    """Whether the code implements caching."""
+
+    has_security: bool = False
+    """Whether the code implements security patterns (path validation, etc.)."""
 
 
 class ProgressEntry(BaseModel):
