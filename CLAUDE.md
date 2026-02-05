@@ -65,16 +65,23 @@ git branch -d feature/add-login-page
 
 "The Artificer's Academy" is an educational platform teaching developers how to build **Model Context Protocol (MCP)** servers using Magic: The Gathering metaphors.
 
+### Production URLs
+- **Frontend:** https://artificers-academy.vercel.app
+- **Backend API:** https://artificers-academy-production.up.railway.app
+- **Supabase:** https://ywqcuhwpinyanmrxqkos.supabase.co
+
 ### Tech Stack
 - **Frontend:** Next.js 14 (App Router) + Tailwind CSS + shadcn/ui
-- **Backend:** FastAPI (Python 3.10+) with `uv` package manager
+- **Backend:** FastAPI (Python 3.12+) with `uv` package manager
 - **Database:** Supabase (PostgreSQL + Auth)
+- **Auth:** `@supabase/ssr` (v0.8.0+) - **IMPORTANT: Must be 0.4.1+ for Next.js 14 compatibility**
 - **Deployment:** Vercel (frontend) + Railway (backend)
 
 ### Key Directories
 - `frontend/` - Next.js application
 - `backend/` - FastAPI application
 - `backend/content/` - Curriculum content (markdown)
+- `supabase/` - Database setup instructions
 
 ### Running the Project
 ```bash
@@ -84,6 +91,43 @@ cd frontend && npm run dev
 # Backend
 cd backend && uv run uvicorn app.main:app --reload
 ```
+
+---
+
+## Critical Technical Notes
+
+### Supabase SSR Version
+**ALWAYS ensure `@supabase/ssr` is version 0.8.0 or higher.**
+
+Versions below 0.4.1 have a known bug causing "Auth session missing" errors with Next.js 14+, even when cookies are set correctly. This was the root cause of auth issues that took 10+ PRs to debug.
+
+```bash
+# Check version
+npm list @supabase/ssr
+
+# Update if needed
+npm install @supabase/ssr@latest
+```
+
+### Environment Variables
+Frontend `NEXT_PUBLIC_API_URL` **must include the full protocol** (`https://`). Without it, API calls become relative URLs and fail with 404.
+
+```env
+# Correct
+NEXT_PUBLIC_API_URL=https://artificers-academy-production.up.railway.app
+
+# Wrong - will cause 404 errors
+NEXT_PUBLIC_API_URL=artificers-academy-production.up.railway.app
+```
+
+### Database Constraints
+The `user_progress` table requires a unique constraint for upsert operations:
+```sql
+ALTER TABLE user_progress
+ADD CONSTRAINT user_progress_unique_user_level_phase
+UNIQUE (user_id, level_id, phase_id);
+```
+Without this, saving progress returns a 500 error.
 
 ---
 
@@ -149,3 +193,26 @@ When writing copy for the app or explaining concepts:
 - Be encouraging but precise
 - Use the metaphors defined above
 - Example: "Prepare your mana base" instead of "Install dependencies"
+
+---
+
+## Service Access (for debugging)
+
+### CLI Tokens
+If you need to access services programmatically:
+
+```bash
+# Vercel
+npx vercel --token YOUR_VERCEL_TOKEN projects ls
+
+# Railway
+RAILWAY_TOKEN=YOUR_TOKEN npx @railway/cli status
+
+# Supabase
+SUPABASE_ACCESS_TOKEN=YOUR_TOKEN npx supabase projects list
+```
+
+### Token Sources
+- Vercel: https://vercel.com/account/tokens
+- Railway: https://railway.app/account/tokens
+- Supabase: https://supabase.com/dashboard/account/tokens

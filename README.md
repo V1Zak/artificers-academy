@@ -2,6 +2,11 @@
 
 An interactive educational platform that teaches developers how to build, debug, and deploy **Model Context Protocol (MCP)** servers through the lens of Magic: The Gathering metaphors.
 
+## Live Demo
+
+- **Frontend:** https://artificers-academy.vercel.app
+- **Backend API:** https://artificers-academy-production.up.railway.app
+
 ## Overview
 
 The Artificer's Academy transforms complex MCP concepts into an engaging learning experience by treating:
@@ -16,15 +21,17 @@ The Artificer's Academy transforms complex MCP concepts into an engaging learnin
 - **The Inspector**: Real-time code validation with themed feedback
 - **The Codex**: Comprehensive documentation with the Grand Artificer's Dictionary
 - **Progress Tracking**: Save your journey and code snippets
+- **Authentication**: Secure login with Supabase Auth
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|------------|
-| Frontend | Next.js 14 (App Router), TypeScript, Tailwind CSS |
-| Backend | FastAPI (Python 3.10+), uv package manager |
-| Database | Supabase (PostgreSQL + Auth) |
-| Deployment | Vercel (frontend), Railway (backend) |
+| Layer | Technology | Version |
+|-------|------------|---------|
+| Frontend | Next.js (App Router), TypeScript, Tailwind CSS | 14.x |
+| Backend | FastAPI (Python), uv package manager | 3.12+ |
+| Database | Supabase (PostgreSQL + Auth) | - |
+| Auth | @supabase/ssr | 0.8.0+ |
+| Deployment | Vercel (frontend), Railway (backend) | - |
 
 ## Project Structure
 
@@ -33,8 +40,12 @@ artificers-academy/
 ├── frontend/                 # Next.js application
 │   ├── src/
 │   │   ├── app/             # App Router pages
+│   │   │   ├── (auth)/      # Login/signup pages
+│   │   │   ├── (dashboard)/ # Protected dashboard pages
+│   │   │   └── api/         # API routes
 │   │   ├── components/      # React components
 │   │   └── lib/             # Utilities & API client
+│   │       └── supabase/    # Supabase client configs
 │   └── package.json
 │
 ├── backend/                  # FastAPI application
@@ -42,9 +53,14 @@ artificers-academy/
 │   │   ├── routers/         # API endpoints
 │   │   ├── services/        # Business logic
 │   │   └── models/          # Pydantic schemas
+│   ├── content/             # Curriculum markdown files
 │   └── pyproject.toml
 │
-└── CLAUDE.md                 # AI assistant rules & project context
+├── supabase/                 # Database setup
+│   └── README.md            # Supabase configuration guide
+│
+├── CLAUDE.md                 # AI assistant rules & project context
+└── DEPLOYMENT.md            # Production deployment guide
 ```
 
 ## Getting Started
@@ -52,9 +68,9 @@ artificers-academy/
 ### Prerequisites
 
 - Node.js 18+
-- Python 3.10+
+- Python 3.12+
 - [uv](https://github.com/astral-sh/uv) package manager
-- Supabase account (for auth)
+- Supabase account
 
 ### Backend Setup
 
@@ -64,6 +80,13 @@ cd backend
 
 # Install dependencies with uv
 uv sync
+
+# Create .env file with Supabase credentials
+cat > .env << EOF
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_KEY=your-service-role-key
+ENVIRONMENT=development
+EOF
 
 # Run the development server
 uv run uvicorn app.main:app --reload
@@ -80,18 +103,27 @@ cd frontend
 # Install dependencies
 npm install
 
-# Copy environment template
+# Create environment file
 cp .env.example .env.local
 
-# Add your Supabase credentials to .env.local
-# NEXT_PUBLIC_SUPABASE_URL=your-url
-# NEXT_PUBLIC_SUPABASE_ANON_KEY=your-key
+# Edit .env.local with your credentials:
+# NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+# NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+# NEXT_PUBLIC_API_URL=http://localhost:8000
 
 # Run the development server
 npm run dev
 ```
 
 The app will be available at `http://localhost:3000`
+
+### Database Setup
+
+See [supabase/README.md](supabase/README.md) for detailed database setup instructions.
+
+**Required Tables:**
+- `user_progress` - Tracks user journey through levels
+- `code_snippets` - Stores saved code (Decklists)
 
 ## The Curriculum
 
@@ -137,6 +169,19 @@ Deploy your server to production.
 
 ## API Endpoints
 
+### Health Check
+```
+GET /health
+```
+Returns service status and database connection state.
+
+### Curriculum
+```
+GET /api/curriculum          # Get all levels
+GET /api/levels/{level_id}   # Get specific level
+GET /api/levels/{level_id}/phases/{phase_id}  # Get phase content
+```
+
 ### Validation
 ```
 POST /api/validate
@@ -146,16 +191,13 @@ Content-Type: application/json
   "code": "from fastmcp import FastMCP..."
 }
 ```
-
 Returns validation results with themed error messages.
 
 ### Progress
 ```
-GET  /api/progress/{user_id}
-POST /api/progress/{user_id}
+GET  /api/progress/{user_id}   # Get user progress
+POST /api/progress/{user_id}   # Save progress
 ```
-
-Track and update user progress through levels.
 
 ## Development
 
@@ -183,6 +225,30 @@ cd backend && uv run pytest
 # Frontend
 cd frontend && npm run lint
 ```
+
+## Deployment
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for production deployment instructions.
+
+**Quick Links:**
+- Vercel Dashboard: https://vercel.com/dashboard
+- Railway Dashboard: https://railway.app/dashboard
+- Supabase Dashboard: https://supabase.com/dashboard
+
+## Troubleshooting
+
+### Auth Issues
+- Ensure `@supabase/ssr` is version 0.8.0+ (older versions have cookie handling bugs)
+- Check that Supabase Site URL matches your deployment URL
+- Verify redirect URLs are configured in Supabase Auth settings
+
+### Database Errors
+- Run the migration scripts in `supabase/` directory
+- Ensure `user_progress` table has the unique constraint on `(user_id, level_id, phase_id)`
+
+### CORS Errors
+- Verify `FRONTEND_URL` in Railway matches your Vercel URL exactly
+- Ensure no trailing slash in URLs
 
 ## Contributing
 
