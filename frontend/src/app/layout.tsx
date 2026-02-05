@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import { AuthDebugIndicator } from '@/components/AuthDebugIndicator'
 
 export const metadata: Metadata = {
   title: "The Artificer's Academy",
@@ -17,6 +18,7 @@ export default function RootLayout({
         <div className="min-h-screen flex flex-col">
           {children}
         </div>
+        <AuthDebugIndicator />
       </body>
     </html>
   )

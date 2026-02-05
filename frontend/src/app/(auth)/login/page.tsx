@@ -26,16 +26,25 @@ function LoginFormSkeleton() {
   )
 }
 
+interface DebugInfo {
+  debug?: string[]
+  cookieInfo?: { name: string; valueLength: number; willBeSet: boolean }
+  success?: boolean
+}
+
 function LoginForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [debugInfo, setDebugInfo] = useState<DebugInfo | null>(null)
+  const [showDebug, setShowDebug] = useState(false)
   const searchParams = useSearchParams()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
+    setDebugInfo(null)
     setLoading(true)
 
     try {
@@ -44,23 +53,40 @@ function LoginForm() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
+        credentials: 'include', // Ensure cookies are included
       })
 
       const data = await response.json()
+      setDebugInfo(data)
+
+      // Log response headers for debugging
+      console.log('[LOGIN DEBUG] Response status:', response.status)
+      console.log('[LOGIN DEBUG] Response headers:')
+      response.headers.forEach((value, key) => {
+        console.log(`  ${key}: ${value}`)
+      })
+      console.log('[LOGIN DEBUG] Response data:', data)
 
       if (!response.ok) {
         setError(data.error || 'Login failed')
         setLoading(false)
+        setShowDebug(true)
         return
       }
+
+      // Show debug briefly then redirect
+      setShowDebug(true)
 
       // Get redirect URL from query params, with validation
       const next = searchParams.get('next')
       const safeNext = next && next.startsWith('/') && !next.startsWith('//') ? next : '/dashboard'
 
-      // Full page navigation to ensure cookies are sent
-      window.location.href = safeNext
-    } catch {
+      // Wait a moment to see debug, then redirect
+      setTimeout(() => {
+        window.location.href = safeNext
+      }, 1500)
+    } catch (err) {
+      console.error('[LOGIN DEBUG] Fetch error:', err)
       setError('An unexpected error occurred')
       setLoading(false)
     }
@@ -127,6 +153,37 @@ function LoginForm() {
           Begin your initiation
         </Link>
       </p>
+
+      {/* Debug Panel */}
+      {showDebug && debugInfo && (
+        <div className="mt-6 p-4 bg-black/80 text-white text-xs rounded-lg">
+          <div className="flex justify-between items-center mb-2">
+            <span className="font-bold text-yellow-400">Debug Info</span>
+            <button
+              onClick={() => setShowDebug(false)}
+              className="text-gray-400 hover:text-white"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div className={`mb-2 ${debugInfo.success ? 'text-green-400' : 'text-red-400'}`}>
+            Status: {debugInfo.success ? 'SUCCESS' : 'FAILED'}
+          </div>
+
+          {debugInfo.cookieInfo && (
+            <div className="mb-2 text-blue-300">
+              Cookie: {debugInfo.cookieInfo.name} ({debugInfo.cookieInfo.valueLength} chars)
+            </div>
+          )}
+
+          <div className="border-t border-white/20 pt-2 mt-2 space-y-1">
+            {debugInfo.debug?.map((log, i) => (
+              <div key={i} className="text-gray-300">{log}</div>
+            ))}
+          </div>
+        </div>
+      )}
     </>
   )
 }
