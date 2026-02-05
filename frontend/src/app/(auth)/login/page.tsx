@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, Suspense } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 
@@ -32,7 +32,6 @@ function LoginForm() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-  const router = useRouter()
   const searchParams = useSearchParams()
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -56,8 +55,9 @@ function LoginForm() {
     const next = searchParams.get('next')
     const safeNext = next && next.startsWith('/') && !next.startsWith('//') ? next : '/dashboard'
 
-    router.push(safeNext)
-    router.refresh()
+    // Use full page navigation to ensure cookies are sent with the request
+    // Client-side navigation (router.push) can race with cookie setting
+    window.location.href = safeNext
   }
 
   return (
