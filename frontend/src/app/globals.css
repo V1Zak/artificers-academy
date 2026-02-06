@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 /* Import Google Fonts for MTG aesthetic */
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @layer base {
   :root {
@@ -12,15 +12,29 @@
     --mana-black: #150B00;
     --mana-red: #D3202A;
     --mana-green: #00733E;
+    --arcane-gold: #D4A843;
+    --arcane-purple: #8B5CF6;
+
+    /* Dark Magitech palette */
+    --void: #0B0C15;
+    --void-light: #12131F;
+    --void-lighter: #1A1B2E;
+    --obsidian: rgba(255, 255, 255, 0.05);
+    --obsidian-hover: rgba(255, 255, 255, 0.08);
+    --obsidian-border: rgba(255, 255, 255, 0.1);
+    --luminescent: #D4A843;
+    --silver: #E8E6E3;
+    --silver-muted: rgba(232, 230, 227, 0.7);
+    --silver-faint: rgba(232, 230, 227, 0.4);
+
+    /* Legacy scroll tokens */
     --scroll-bg: #F5E6D3;
     --scroll-border: #8B7355;
     --scroll-text: #2C1810;
-    --arcane-gold: #C9A227;
-    --arcane-purple: #6B3FA0;
   }
 
   body {
-    @apply bg-scroll-bg text-scroll-text;
+    @apply bg-void text-silver;
     font-family: Georgia, Cambria, serif;
   }
 
@@ -30,26 +44,39 @@
 }
 
 @layer components {
-  /* Scroll/Parchment styled containers */
+  /* Glass card - primary container style */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 0.75rem;
+    backdrop-filter: blur(12px);
+  }
+
+  .glass-card:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+
+  /* Glass border utility */
+  .glass-border {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  /* Scroll/Parchment styled containers (legacy - now dark themed) */
   .scroll-container {
-    @apply bg-scroll-bg border-2 border-scroll-border rounded-lg shadow-scroll;
-    background-image: linear-gradient(
-      to bottom,
-      rgba(245, 230, 211, 0.9),
-      rgba(235, 220, 200, 0.95)
-    );
+    @apply glass-card;
   }
 
   /* Code block styling */
   .code-scroll {
-    @apply scroll-container p-4 font-mono text-sm overflow-x-auto;
-    background-color: #FDF8F0;
+    @apply p-4 font-mono text-sm overflow-x-auto;
+    background-color: rgba(0, 0, 0, 0.3);
   }
 
   /* Mana/Progress bar */
   .mana-bar {
     @apply h-3 rounded-full overflow-hidden;
-    background: linear-gradient(to right, #1a1a2e, #16213e);
+    background: rgba(255, 255, 255, 0.06);
   }
 
   .mana-fill {
@@ -61,8 +88,14 @@
   /* Button styles */
   .btn-arcane {
     @apply px-6 py-2 rounded-lg font-semibold transition-all duration-200;
-    @apply bg-arcane-gold text-scroll-text hover:shadow-glow;
+    background: linear-gradient(135deg, var(--arcane-gold), #B8942F);
+    color: var(--void);
     font-family: 'Cinzel', serif;
+  }
+
+  .btn-arcane:hover {
+    box-shadow: 0 0 20px rgba(212, 168, 67, 0.4);
+    transform: translateY(-1px);
   }
 
   .btn-mana {
@@ -70,20 +103,26 @@
     @apply bg-mana-blue text-white hover:bg-opacity-90;
   }
 
+  .btn-mana:hover {
+    box-shadow: 0 0 15px rgba(14, 104, 171, 0.3);
+  }
+
   /* Alert/Error styles (Counterspell theme) */
   .counterspell-alert {
-    @apply border-l-4 border-mana-red bg-red-50 p-4 rounded-r-lg;
+    @apply border-l-4 border-mana-red p-4 rounded-r-lg;
+    background: rgba(211, 32, 42, 0.1);
   }
 
   /* Success styles */
   .resolve-alert {
-    @apply border-l-4 border-mana-green bg-green-50 p-4 rounded-r-lg;
+    @apply border-l-4 border-mana-green p-4 rounded-r-lg;
+    background: rgba(0, 115, 62, 0.1);
   }
 }
 
 /* Syntax highlighting for code blocks */
 .code-scroll code {
-  @apply text-scroll-text;
+  @apply text-silver;
 }
 
 .code-scroll .keyword {
@@ -99,5 +138,71 @@
 }
 
 .code-scroll .decorator {
-  @apply text-arcane-purple;
+  color: var(--arcane-purple);
+}
+
+/* Prose styling for dark theme markdown */
+.prose-dark h1, .prose-dark h2, .prose-dark h3, .prose-dark h4 {
+  @apply text-silver;
+}
+
+.prose-dark p {
+  color: var(--silver-muted);
+}
+
+.prose-dark a {
+  color: var(--arcane-purple);
+}
+
+.prose-dark a:hover {
+  @apply underline;
+}
+
+.prose-dark strong {
+  @apply text-silver;
+}
+
+.prose-dark code {
+  color: var(--arcane-purple);
+  background: rgba(139, 92, 246, 0.1);
+  @apply px-1.5 py-0.5 rounded text-sm font-mono;
+}
+
+.prose-dark pre {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  @apply rounded-lg p-4 my-4 overflow-x-auto;
+}
+
+.prose-dark pre code {
+  background: transparent;
+  @apply p-0;
+}
+
+.prose-dark ul, .prose-dark ol {
+  color: var(--silver-muted);
+}
+
+.prose-dark li::marker {
+  color: var(--arcane-purple);
+}
+
+.prose-dark hr {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.prose-dark table {
+  @apply w-full;
+}
+
+.prose-dark th {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  @apply px-4 py-2 font-semibold text-left text-silver;
+}
+
+.prose-dark td {
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  @apply px-4 py-2;
+  color: var(--silver-muted);
 }
