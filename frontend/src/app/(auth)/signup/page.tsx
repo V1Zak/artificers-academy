@@ -55,7 +55,7 @@ export default function SignupPage() {
     return (
       <div className="text-center">
         <h1 className="text-2xl font-bold mb-4">Check Your Scroll</h1>
-        <p className="text-scroll-text/70 mb-4">
+        <p className="text-silver/60 mb-4">
           We&apos;ve sent a magical seal to your email. Click the link to complete
           your initiation into the Academy.
         </p>
@@ -71,7 +71,7 @@ export default function SignupPage() {
       <h1 className="text-2xl font-bold text-center mb-2">
         Join the Academy
       </h1>
-      <p className="text-center text-scroll-text/70 mb-6">
+      <p className="text-center text-silver/60 mb-6">
         Begin your journey as an Artificer
       </p>
 
@@ -91,7 +91,7 @@ export default function SignupPage() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-2 border border-scroll-border rounded-lg bg-white/50 focus:outline-none focus:ring-2 focus:ring-arcane-gold"
+            className="w-full px-4 py-2 border border-white/[0.08] rounded-lg bg-white/[0.03] focus:outline-none focus:ring-2 focus:ring-arcane-gold"
             placeholder="artificer@academy.com"
             required
           />
@@ -106,7 +106,7 @@ export default function SignupPage() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-2 border border-scroll-border rounded-lg bg-white/50 focus:outline-none focus:ring-2 focus:ring-arcane-gold"
+            className="w-full px-4 py-2 border border-white/[0.08] rounded-lg bg-white/[0.03] focus:outline-none focus:ring-2 focus:ring-arcane-gold"
             placeholder="Create a secret incantation"
             required
           />
@@ -121,7 +121,7 @@ export default function SignupPage() {
             type="password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            className="w-full px-4 py-2 border border-scroll-border rounded-lg bg-white/50 focus:outline-none focus:ring-2 focus:ring-arcane-gold"
+            className="w-full px-4 py-2 border border-white/[0.08] rounded-lg bg-white/[0.03] focus:outline-none focus:ring-2 focus:ring-arcane-gold"
             placeholder="Repeat your incantation"
             required
           />

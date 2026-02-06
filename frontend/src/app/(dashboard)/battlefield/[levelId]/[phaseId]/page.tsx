@@ -22,7 +22,7 @@ const MonacoEditor = dynamic(
     ssr: false,
     loading: () => (
       <div className="scroll-container h-[400px] flex items-center justify-center">
-        <p className="text-scroll-text/70">Loading editor...</p>
+        <p className="text-silver/60">Loading editor...</p>
       </div>
     ),
   }
@@ -256,7 +256,7 @@ export default function PhasePage() {
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <div className="animate-pulse text-4xl mb-4">📜</div>
-          <p className="text-scroll-text/70">Loading phase content...</p>
+          <p className="text-silver/60">Loading phase content...</p>
         </div>
       </div>
     )
@@ -279,12 +279,12 @@ export default function PhasePage() {
       <div className="flex items-center justify-between mb-6">
         <Link
           href={`/battlefield/${levelId}`}
-          className="inline-flex items-center gap-2 text-scroll-text/70 hover:text-scroll-text"
+          className="inline-flex items-center gap-2 text-silver/60 hover:text-silver"
         >
           <ChevronLeftIcon />
           {level.title}
         </Link>
-        <span className="text-sm text-scroll-text/60">
+        <span className="text-sm text-silver/50">
           Phase {currentPhaseIndex + 1} of {level.phases.length}
         </span>
       </div>
@@ -365,11 +365,11 @@ export default function PhasePage() {
       )}
 
       {/* Navigation Footer */}
-      <div className="flex items-center justify-between pt-6 border-t border-scroll-border">
+      <div className="flex items-center justify-between pt-6 border-t border-white/[0.06]">
         {prevPhase ? (
           <Link
             href={`/battlefield/${levelId}/${prevPhase.id}`}
-            className="inline-flex items-center gap-2 text-scroll-text/70 hover:text-scroll-text"
+            className="inline-flex items-center gap-2 text-silver/60 hover:text-silver"
           >
             <ChevronLeftIcon />
             Previous: {prevPhase.title}
@@ -458,7 +458,7 @@ function MarkdownContent({ content }: { content: string }) {
 
   return (
     <div
-      className="prose prose-scroll max-w-none"
+      className="prose-dark max-w-none"
       dangerouslySetInnerHTML={{ __html: html }}
     />
   )
@@ -469,7 +469,7 @@ function parseMarkdown(content: string): string {
 
   // Code blocks (must be first to protect code content)
   html = html.replace(/```(\w+)?\n([\s\S]*?)```/g, (_, lang, code) => {
-    return `<pre class="bg-scroll-bg/50 border border-scroll-border rounded-lg p-4 my-4 overflow-x-auto"><code class="text-sm font-mono">${escapeHtml(code.trim())}</code></pre>`
+    return `<pre class="bg-black/30 border border-white/[0.06] rounded-lg p-4 my-4 overflow-x-auto"><code class="text-sm font-mono">${escapeHtml(code.trim())}</code></pre>`
   })
 
   // Inline code (protect before other transformations)
@@ -477,7 +477,7 @@ function parseMarkdown(content: string): string {
   html = html.replace(/`([^`]+)`/g, (_, code) => {
     const placeholder = `__INLINE_CODE_${inlineCodePlaceholders.length}__`
     inlineCodePlaceholders.push(
-      `<code class="bg-scroll-bg/50 px-1.5 py-0.5 rounded text-sm font-mono text-arcane-purple">${escapeHtml(code)}</code>`
+      `<code class="bg-black/30 px-1.5 py-0.5 rounded text-sm font-mono text-arcane-purple">${escapeHtml(code)}</code>`
     )
     return placeholder
   })
@@ -535,8 +535,8 @@ function parseMarkdown(content: string): string {
 
       const tag = isHeader ? 'th' : 'td'
       const cellClass = isHeader
-        ? 'border border-scroll-border/50 px-4 py-2 bg-scroll-bg/30 font-semibold text-left'
-        : 'border border-scroll-border/50 px-4 py-2'
+        ? 'border border-white/[0.06] px-4 py-2 bg-white/5 font-semibold text-left'
+        : 'border border-white/[0.06] px-4 py-2'
 
       const cellsHtml = cells
         .map((c) => `<${tag} class="${cellClass}">${c}</${tag}>`)
@@ -551,7 +551,7 @@ function parseMarkdown(content: string): string {
   })
 
   // Horizontal rules
-  html = html.replace(/^---$/gm, '<hr class="my-8 border-scroll-border" />')
+  html = html.replace(/^---$/gm, '<hr class="my-8 border-white/[0.06]" />')
 
   // Paragraphs - wrap standalone text lines
   html = html.replace(
@@ -635,7 +635,7 @@ function PhaseHints({ levelId, phaseId }: { levelId: string; phaseId: string }) 
 
   if (!hintData) {
     return (
-      <p className="text-scroll-text/70 text-sm">
+      <p className="text-silver/60 text-sm">
         No hints available for this phase. You&apos;ve got this, Artificer!
       </p>
     )
@@ -648,7 +648,7 @@ function PhaseHints({ levelId, phaseId }: { levelId: string; phaseId: string }) 
         {hintData.hints.slice(0, revealedHints).map((hint, i) => (
           <div key={i} className="flex gap-2 text-sm">
             <span className="text-arcane-gold font-bold">{i + 1}.</span>
-            <span className="text-scroll-text">{hint}</span>
+            <span className="text-silver">{hint}</span>
           </div>
         ))}
       </div>
@@ -673,7 +673,7 @@ function PhaseHints({ levelId, phaseId }: { levelId: string; phaseId: string }) 
           </button>
 
           {showStarter && (
-            <pre className="mt-2 p-3 bg-scroll-bg/50 border border-scroll-border rounded text-xs overflow-x-auto">
+            <pre className="mt-2 p-3 bg-black/30 border border-white/[0.06] rounded text-xs overflow-x-auto">
               <code>{hintData.starterCode}</code>
             </pre>
           )}

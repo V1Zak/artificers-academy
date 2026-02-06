@@ -4,7 +4,7 @@ export default function CodexPage() {
   return (
     <div>
       <h1 className="text-3xl font-bold mb-2">The Codex</h1>
-      <p className="text-scroll-text/70 mb-8">
+      <p className="text-silver/60 mb-8">
         The Grand Artificer&apos;s compendium of knowledge
       </p>
 
@@ -15,7 +15,7 @@ export default function CodexPage() {
         </h2>
         <div className="scroll-container overflow-hidden">
           <table className="w-full">
-            <thead className="bg-scroll-bg/50 border-b border-scroll-border">
+            <thead className="bg-white/[0.03] border-b border-white/[0.06]">
               <tr>
                 <th className="text-left p-4 font-semibold">Technical Term</th>
                 <th className="text-left p-4 font-semibold">Metaphorical Term</th>
@@ -153,10 +153,10 @@ function TermRow({
   description: string
 }) {
   return (
-    <tr className="border-b border-scroll-border/50">
+    <tr className="border-b border-white/[0.06]">
       <td className="p-4 font-mono text-sm">{technical}</td>
       <td className="p-4 text-arcane-purple font-semibold">{metaphor}</td>
-      <td className="p-4 text-scroll-text/70">{description}</td>
+      <td className="p-4 text-silver/60">{description}</td>
     </tr>
   )
 }
@@ -171,7 +171,7 @@ function ConceptCard({
   return (
     <div className="scroll-container p-6">
       <h3 className="text-lg font-semibold mb-2">{title}</h3>
-      <p className="text-scroll-text/70">{description}</p>
+      <p className="text-silver/60">{description}</p>
     </div>
   )
 }

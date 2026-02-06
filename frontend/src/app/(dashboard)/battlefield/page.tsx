@@ -98,7 +98,7 @@ export default function BattlefieldPage() {
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <div className="animate-pulse text-4xl mb-4">🔮</div>
-          <p className="text-scroll-text/70">Consulting the Oracle...</p>
+          <p className="text-silver/60">Consulting the Oracle...</p>
         </div>
       </div>
     )
@@ -118,7 +118,7 @@ export default function BattlefieldPage() {
   if (levels.length === 0) {
     return (
       <div className="scroll-container p-8 text-center">
-        <p className="text-scroll-text/70 mb-4">
+        <p className="text-silver/60 mb-4">
           No levels available yet. Check back soon!
         </p>
       </div>
@@ -128,7 +128,7 @@ export default function BattlefieldPage() {
   return (
     <div>
       <h1 className="text-3xl font-bold mb-2">The Battlefield</h1>
-      <p className="text-scroll-text/70 mb-8">
+      <p className="text-silver/60 mb-8">
         Choose your path and begin your journey to becoming an Artificer
       </p>
 
@@ -176,7 +176,7 @@ function LevelCard({
               {manaConfig.icon}
             </span>
             <div>
-              <div className="text-sm text-scroll-text/60 mb-1">
+              <div className="text-sm text-silver/50 mb-1">
                 Level {levelNumber}
               </div>
               <h2 className="text-2xl font-bold">{level.title}</h2>
@@ -184,7 +184,7 @@ function LevelCard({
             </div>
           </div>
           {isLocked && (
-            <span className="px-3 py-1 bg-scroll-text/10 rounded text-sm">
+            <span className="px-3 py-1 bg-white/5 rounded text-sm">
               🔒 Locked
             </span>
           )}
@@ -195,12 +195,12 @@ function LevelCard({
           )}
         </div>
 
-        <p className="mt-4 text-scroll-text/80">{level.description}</p>
+        <p className="mt-4 text-silver/70">{level.description}</p>
 
         {!isLocked && totalPhases > 0 && (
           <div className="mt-4">
             <div className="flex items-center justify-between text-sm mb-2">
-              <span className="text-scroll-text/70">Progress</span>
+              <span className="text-silver/60">Progress</span>
               <span className="font-medium">
                 {completedPhases} / {totalPhases} phases
               </span>
@@ -230,7 +230,7 @@ function LevelCard({
         )}
 
         {isLocked && (
-          <p className="mt-4 text-sm text-scroll-text/60 italic">
+          <p className="mt-4 text-sm text-silver/50 italic">
             Complete previous levels to unlock this path
           </p>
         )}
@@ -238,13 +238,13 @@ function LevelCard({
 
       {/* Phase Preview */}
       {!isLocked && level.phases.length > 0 && (
-        <div className="p-4 border-t border-scroll-border bg-scroll-bg/30">
-          <p className="text-sm font-medium mb-2 text-scroll-text/70">Phases:</p>
+        <div className="p-4 border-t border-white/[0.06] bg-white/[0.02]">
+          <p className="text-sm font-medium mb-2 text-silver/60">Phases:</p>
           <div className="flex flex-wrap gap-2">
             {level.phases.map((phase, index) => (
               <span
                 key={phase.id}
-                className="px-2 py-1 text-xs bg-scroll-bg rounded border border-scroll-border/50"
+                className="px-2 py-1 text-xs bg-white/[0.03] rounded border border-white/[0.06]/50"
               >
                 {index + 1}. {phase.title}
               </span>

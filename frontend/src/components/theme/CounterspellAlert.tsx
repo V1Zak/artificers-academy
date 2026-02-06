@@ -35,7 +35,7 @@ export function CounterspellAlert({ errors, className }: CounterspellAlertProps)
               <p className="text-sm font-medium text-mana-red/90">
                 {getErrorTitle(error.type)}
               </p>
-              <p className="text-sm text-scroll-text/80 mt-1">
+              <p className="text-sm text-silver/70 mt-1">
                 {error.message}
               </p>
             </div>
@@ -107,7 +107,7 @@ export function ResolveAlert({
 
       {toolsFound.length > 0 && (
         <div className="mb-2">
-          <p className="text-sm font-medium text-scroll-text">
+          <p className="text-sm font-medium text-silver">
             Sorceries Discovered ({toolsFound.length}):
           </p>
           <div className="flex flex-wrap gap-2 mt-1">
@@ -125,7 +125,7 @@ export function ResolveAlert({
 
       {resourcesFound.length > 0 && (
         <div className="mb-2">
-          <p className="text-sm font-medium text-scroll-text">
+          <p className="text-sm font-medium text-silver">
             Permanents Discovered ({resourcesFound.length}):
           </p>
           <div className="flex flex-wrap gap-2 mt-1">
@@ -143,7 +143,7 @@ export function ResolveAlert({
 
       {promptsFound.length > 0 && (
         <div>
-          <p className="text-sm font-medium text-scroll-text">
+          <p className="text-sm font-medium text-silver">
             Tutors Discovered ({promptsFound.length}):
           </p>
           <div className="flex flex-wrap gap-2 mt-1">
