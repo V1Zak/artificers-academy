@@ -62,12 +62,12 @@ export function ManaProgress({
       {(label || showCount) && (
         <div className="flex justify-between items-center mb-2">
           {label && (
-            <span className="text-sm font-medium text-scroll-text">
+            <span className="text-sm font-medium text-silver">
               {label}
             </span>
           )}
           {showCount && (
-            <span className="text-sm text-scroll-text/70">
+            <span className="text-sm text-silver/70">
               {current} / {total}
             </span>
           )}
@@ -112,7 +112,7 @@ export function ManaOrb({ filled, manaType = 'blue', size = 'md' }: ManaOrbProps
     blue: filled ? 'bg-mana-blue' : 'bg-mana-blue/20',
     green: filled ? 'bg-mana-green' : 'bg-mana-green/20',
     red: filled ? 'bg-mana-red' : 'bg-mana-red/20',
-    white: filled ? 'bg-mana-white border border-scroll-border' : 'bg-mana-white/20',
+    white: filled ? 'bg-mana-white border border-white/20' : 'bg-mana-white/20',
     black: filled ? 'bg-mana-black' : 'bg-mana-black/20',
   }
 

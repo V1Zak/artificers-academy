@@ -92,7 +92,7 @@ export default function DashboardPage() {
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <div className="animate-pulse text-4xl mb-4">🔮</div>
-          <p className="text-scroll-text/70">Consulting the Oracle...</p>
+          <p className="text-silver/60">Consulting the Oracle...</p>
         </div>
       </div>
     )
@@ -102,7 +102,7 @@ export default function DashboardPage() {
     return (
       <div>
         <h1 className="text-3xl font-bold mb-2">Welcome, Artificer</h1>
-        <p className="text-scroll-text/70 mb-8">
+        <p className="text-silver/60 mb-8">
           Continue your journey through the Academy
         </p>
         <div className="scroll-container p-8 text-center">
@@ -118,7 +118,7 @@ export default function DashboardPage() {
   return (
     <div>
       <h1 className="text-3xl font-bold mb-2">Welcome, Artificer</h1>
-      <p className="text-scroll-text/70 mb-8">
+      <p className="text-silver/60 mb-8">
         Continue your journey through the Academy
       </p>
 
@@ -187,20 +187,20 @@ function LevelCard({
             Level {level}
           </span>
           <h3 className="text-xl font-bold">{title}</h3>
-          <p className="text-sm text-scroll-text/60">{subtitle}</p>
+          <p className="text-sm text-silver/50">{subtitle}</p>
         </div>
         <StatusBadge status={status} />
       </div>
-      <p className="text-scroll-text/70 mb-4">{description}</p>
+      <p className="text-silver/60 mb-4">{description}</p>
 
       {/* Progress indicator */}
       {totalPhases > 0 && !isLocked && (
         <div className="mb-4">
-          <div className="flex justify-between text-sm text-scroll-text/60 mb-1">
+          <div className="flex justify-between text-sm text-silver/50 mb-1">
             <span>Progress</span>
             <span>{completedPhases} / {totalPhases} phases</span>
           </div>
-          <div className="h-2 bg-scroll-border/30 rounded-full overflow-hidden">
+          <div className="h-2 bg-white/[0.06] rounded-full overflow-hidden">
             <div
               className={`h-full transition-all ${isCompleted ? 'bg-mana-green' : 'bg-arcane-purple'}`}
               style={{ width: `${totalPhases > 0 ? (completedPhases / totalPhases) * 100 : 0}%` }}
@@ -218,7 +218,7 @@ function LevelCard({
         </Link>
       )}
       {isLocked && (
-        <span className="text-sm text-scroll-text/50">
+        <span className="text-sm text-silver/40">
           Complete previous levels to unlock
         </span>
       )}
@@ -242,7 +242,7 @@ function StatusBadge({ status }: { status: 'completed' | 'available' | 'locked' 
     )
   }
   return (
-    <span className="px-2 py-1 bg-gray-200 text-gray-500 text-xs rounded-full">
+    <span className="px-2 py-1 bg-white/5 text-silver/40 text-xs rounded-full">
       Locked
     </span>
   )

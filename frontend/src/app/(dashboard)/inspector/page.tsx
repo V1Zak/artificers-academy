@@ -12,7 +12,7 @@ const MonacoEditor = dynamic(
     ssr: false,
     loading: () => (
       <div className="scroll-container h-[400px] flex items-center justify-center">
-        <p className="text-scroll-text/70">Loading editor...</p>
+        <p className="text-silver/60">Loading editor...</p>
       </div>
     ),
   }
@@ -60,7 +60,7 @@ export default function InspectorPage() {
   return (
     <div>
       <h1 className="text-3xl font-bold mb-2">The Inspector</h1>
-      <p className="text-scroll-text/70 mb-8">
+      <p className="text-silver/60 mb-8">
         Submit your Decklist for validation. The Inspector will analyze your
         spells and identify any issues.
       </p>
@@ -109,7 +109,7 @@ export default function InspectorPage() {
           )}
 
           {!result && !error && (
-            <div className="scroll-container p-6 text-center text-scroll-text/60">
+            <div className="scroll-container p-6 text-center text-silver/50">
               <p>Submit your code to receive the Inspector&apos;s verdict</p>
             </div>
           )}
@@ -154,7 +154,7 @@ function ReferenceCard({
     <div className="scroll-container p-4">
       <h3 className="font-semibold mb-1">{title}</h3>
       <code className="text-sm text-arcane-purple">{decorator}</code>
-      <p className="text-sm text-scroll-text/70 mt-2">{description}</p>
+      <p className="text-sm text-silver/60 mt-2">{description}</p>
     </div>
   )
 }

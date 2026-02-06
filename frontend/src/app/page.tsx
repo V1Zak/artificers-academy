@@ -2,13 +2,13 @@ import Link from 'next/link'
 
 export default function Home() {
   return (
-    <main className="flex-1 flex flex-col items-center justify-center p-8">
+    <main className="flex-1 flex flex-col items-center justify-center p-8 bg-void">
       {/* Hero Section */}
       <div className="text-center max-w-3xl mx-auto">
-        <h1 className="text-5xl font-bold text-scroll-text mb-4">
+        <h1 className="text-5xl font-bold text-silver mb-4">
           The Artificer&apos;s Academy
         </h1>
-        <p className="text-xl text-scroll-text/80 mb-2">
+        <p className="text-xl text-silver/70 mb-2">
           Master the art of crafting MCP servers
         </p>
         <p className="text-lg text-arcane-purple mb-8">
@@ -49,12 +49,12 @@ export default function Home() {
       </div>
 
       {/* Progress Preview */}
-      <div className="scroll-container p-6 mt-12 max-w-md w-full">
-        <h3 className="text-lg font-semibold mb-3">Your Mana Pool</h3>
+      <div className="glass-card p-6 mt-12 max-w-md w-full">
+        <h3 className="text-lg font-semibold mb-3 text-silver">Your Mana Pool</h3>
         <div className="mana-bar">
           <div className="mana-fill" style={{ width: '0%' }} />
         </div>
-        <p className="text-sm text-scroll-text/60 mt-2">
+        <p className="text-sm text-silver/50 mt-2">
           Sign in to track your progress
         </p>
       </div>
@@ -73,19 +73,19 @@ function FeatureCard({
   description: string
   manaColor: 'white' | 'blue' | 'black' | 'red' | 'green'
 }) {
-  const colorClasses = {
+  const borderColors = {
     white: 'border-t-mana-white',
     blue: 'border-t-mana-blue',
-    black: 'border-t-mana-black',
+    black: 'border-t-white/20',
     red: 'border-t-mana-red',
     green: 'border-t-mana-green',
   }
 
   return (
-    <div className={`scroll-container p-6 border-t-4 ${colorClasses[manaColor]}`}>
+    <div className={`glass-card p-6 border-t-2 ${borderColors[manaColor]}`}>
       <p className="text-sm text-arcane-purple font-semibold">{subtitle}</p>
-      <h3 className="text-xl font-bold mb-2">{title}</h3>
-      <p className="text-scroll-text/70">{description}</p>
+      <h3 className="text-xl font-bold mb-2 text-silver">{title}</h3>
+      <p className="text-silver/60">{description}</p>
     </div>
   )
 }

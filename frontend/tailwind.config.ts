@@ -18,7 +18,11 @@ const config: Config = {
           green: '#00733E',
         },
         // Dark Magitech theme
-        void: '#0B0C15',
+        void: {
+          DEFAULT: '#0B0C15',
+          light: '#12131F',
+          lighter: '#1A1B2E',
+        },
         obsidian: 'rgba(255,255,255,0.05)',
         luminescent: '#D4A843',
         silver: '#E8E6E3',

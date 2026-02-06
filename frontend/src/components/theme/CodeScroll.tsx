@@ -24,7 +24,7 @@ export function CodeScroll({
   return (
     <div className={cn('scroll-container overflow-hidden', className)}>
       {title && (
-        <div className="px-4 py-2 border-b border-scroll-border bg-scroll-bg/50">
+        <div className="px-4 py-2 border-b border-white/[0.06] bg-white/[0.03]">
           <span className="text-sm font-semibold text-arcane-purple">
             {title}
           </span>
@@ -57,7 +57,7 @@ export function CodeScrollEditable({
 }: CodeScrollEditableProps) {
   return (
     <div className={cn('scroll-container overflow-hidden', className)}>
-      <div className="px-4 py-2 border-b border-scroll-border bg-scroll-bg/50">
+      <div className="px-4 py-2 border-b border-white/[0.06] bg-white/[0.03]">
         <span className="text-sm font-semibold text-arcane-purple">
           Your Decklist
         </span>
@@ -66,7 +66,7 @@ export function CodeScrollEditable({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full h-64 p-4 font-mono text-sm bg-[#FDF8F0] text-scroll-text resize-none focus:outline-none"
+        className="w-full h-64 p-4 font-mono text-sm bg-black/30 text-silver resize-none focus:outline-none"
         spellCheck={false}
       />
     </div>

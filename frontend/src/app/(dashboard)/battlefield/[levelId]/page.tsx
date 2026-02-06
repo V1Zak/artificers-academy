@@ -68,7 +68,7 @@ export default function LevelPage() {
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <div className="animate-pulse text-4xl mb-4">📜</div>
-          <p className="text-scroll-text/70">Loading level...</p>
+          <p className="text-silver/60">Loading level...</p>
         </div>
       </div>
     )
@@ -95,7 +95,7 @@ export default function LevelPage() {
       {/* Back Navigation */}
       <Link
         href="/battlefield"
-        className="inline-flex items-center gap-2 text-scroll-text/70 hover:text-scroll-text mb-6"
+        className="inline-flex items-center gap-2 text-silver/60 hover:text-silver mb-6"
       >
         <ChevronLeftIcon />
         Back to Battlefield
@@ -105,13 +105,13 @@ export default function LevelPage() {
       <div className="mb-8">
         <p className="text-arcane-purple font-medium mb-1">{level.subtitle}</p>
         <h1 className="text-3xl font-bold mb-2">{level.title}</h1>
-        <p className="text-scroll-text/70">{level.description}</p>
+        <p className="text-silver/60">{level.description}</p>
       </div>
 
       {/* Empty State */}
       {level.phases.length === 0 && (
         <div className="scroll-container p-8 text-center">
-          <p className="text-scroll-text/70">
+          <p className="text-silver/60">
             No phases available for this level yet. Check back soon!
           </p>
         </div>
@@ -169,7 +169,7 @@ function PhaseCard({
                   ? 'bg-mana-green/20 text-mana-green'
                   : isUnlocked
                     ? 'bg-arcane-purple/20 text-arcane-purple'
-                    : 'bg-scroll-text/10 text-scroll-text/40'
+                    : 'bg-white/5 text-silver/30'
               }
             `}
             aria-label={isCompleted ? 'Completed' : `Phase ${phaseNumber}`}
@@ -183,7 +183,7 @@ function PhaseCard({
               <span className="text-lg" role="img" aria-label={phaseTypeLabel}>
                 {phaseTypeIcon}
               </span>
-              <span className="text-xs text-scroll-text/60 uppercase tracking-wide">
+              <span className="text-xs text-silver/50 uppercase tracking-wide">
                 {phaseTypeLabel}
               </span>
               {phase.validation_required && (
@@ -193,7 +193,7 @@ function PhaseCard({
               )}
             </div>
             <h3 className="text-xl font-semibold mb-1">{phase.title}</h3>
-            <p className="text-scroll-text/70">{phase.description}</p>
+            <p className="text-silver/60">{phase.description}</p>
           </div>
 
           {/* Status / Action */}
@@ -210,7 +210,7 @@ function PhaseCard({
                 {phaseNumber === 1 ? 'Start' : 'Continue'}
               </Link>
             ) : (
-              <span className="px-3 py-1 bg-scroll-text/10 text-scroll-text/50 text-sm rounded">
+              <span className="px-3 py-1 bg-white/5 text-silver/40 text-sm rounded">
                 🔒 Locked
               </span>
             )}

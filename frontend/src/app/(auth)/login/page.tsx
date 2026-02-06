@@ -19,12 +19,12 @@ export default function LoginPage() {
 function LoginFormSkeleton() {
   return (
     <div className="animate-pulse">
-      <div className="h-8 bg-scroll-border/30 rounded w-3/4 mx-auto mb-2" />
-      <div className="h-4 bg-scroll-border/30 rounded w-1/2 mx-auto mb-6" />
+      <div className="h-8 bg-white/[0.06] rounded w-3/4 mx-auto mb-2" />
+      <div className="h-4 bg-white/[0.06] rounded w-1/2 mx-auto mb-6" />
       <div className="space-y-4">
-        <div className="h-10 bg-scroll-border/30 rounded" />
-        <div className="h-10 bg-scroll-border/30 rounded" />
-        <div className="h-10 bg-scroll-border/30 rounded" />
+        <div className="h-10 bg-white/[0.06] rounded" />
+        <div className="h-10 bg-white/[0.06] rounded" />
+        <div className="h-10 bg-white/[0.06] rounded" />
       </div>
     </div>
   )
@@ -104,7 +104,7 @@ function LoginForm() {
       <h1 className="text-2xl font-bold text-center mb-2">
         Welcome Back, Planeswalker
       </h1>
-      <p className="text-center text-scroll-text/70 mb-6">
+      <p className="text-center text-silver/60 mb-6">
         Enter the Academy to continue your journey
       </p>
 
@@ -124,7 +124,7 @@ function LoginForm() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-2 border border-scroll-border rounded-lg bg-white/50 focus:outline-none focus:ring-2 focus:ring-arcane-gold"
+            className="w-full px-4 py-2 border border-white/[0.08] rounded-lg bg-white/[0.03] focus:outline-none focus:ring-2 focus:ring-arcane-gold"
             placeholder="artificer@academy.com"
             required
           />
@@ -139,7 +139,7 @@ function LoginForm() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-2 border border-scroll-border rounded-lg bg-white/50 focus:outline-none focus:ring-2 focus:ring-arcane-gold"
+            className="w-full px-4 py-2 border border-white/[0.08] rounded-lg bg-white/[0.03] focus:outline-none focus:ring-2 focus:ring-arcane-gold"
             placeholder="Your secret incantation"
             required
           />
@@ -163,8 +163,8 @@ function LoginForm() {
 
       {/* Debug Bypass Button - only shown when DEBUG_MODE is enabled */}
       {DEBUG_MODE && (
-        <div className="mt-8 pt-4 border-t border-scroll-border/30">
-          <p className="text-xs text-scroll-text/50 text-center mb-2">Development Debug</p>
+        <div className="mt-8 pt-4 border-t border-white/[0.08]/30">
+          <p className="text-xs text-silver/40 text-center mb-2">Development Debug</p>
           <button
             type="button"
             onClick={() => {
