@@ -124,7 +124,7 @@ function LoginForm() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-2 border border-white/[0.08] rounded-lg bg-white/[0.03] focus:outline-none focus:ring-2 focus:ring-arcane-gold"
+            className="w-full px-4 py-2 border border-white/[0.08] rounded-lg bg-white/[0.03] text-silver placeholder:text-silver/30 focus:outline-none focus:ring-2 focus:ring-arcane-gold/50 focus:border-arcane-gold/30 transition-colors"
             placeholder="artificer@academy.com"
             required
           />
@@ -139,7 +139,7 @@ function LoginForm() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-2 border border-white/[0.08] rounded-lg bg-white/[0.03] focus:outline-none focus:ring-2 focus:ring-arcane-gold"
+            className="w-full px-4 py-2 border border-white/[0.08] rounded-lg bg-white/[0.03] text-silver placeholder:text-silver/30 focus:outline-none focus:ring-2 focus:ring-arcane-gold/50 focus:border-arcane-gold/30 transition-colors"
             placeholder="Your secret incantation"
             required
           />
