@@ -1,0 +1,186 @@
+{
+  "levels": [
+    {
+      "id": "level1",
+      "title": "Getting Started",
+      "subtitle": "Your First Tool Server",
+      "description": "Learn the basics of MCP by building a simple server that gives an AI the ability to look up information.",
+      "mana_color": "blue",
+      "phases": [
+        {
+          "id": "phase1",
+          "title": "What is MCP?",
+          "description": "Understand what the Model Context Protocol is and why it matters.",
+          "type": "lesson",
+          "content_file": "simple/level1/phase1_what_is_mcp.md"
+        },
+        {
+          "id": "phase2",
+          "title": "Setting Up Your Tools",
+          "description": "Install the software you need to start building.",
+          "type": "tutorial",
+          "content_file": "simple/level1/phase2_setting_up.md"
+        },
+        {
+          "id": "phase3",
+          "title": "Your First Function",
+          "description": "Write your first tool that an AI can use.",
+          "type": "tutorial",
+          "content_file": "simple/level1/phase3_first_function.md",
+          "validation_required": true
+        },
+        {
+          "id": "phase4",
+          "title": "Testing Your Server",
+          "description": "Use the MCP Inspector to make sure everything works.",
+          "type": "tutorial",
+          "content_file": "simple/level1/phase4_testing.md"
+        },
+        {
+          "id": "phase5",
+          "title": "Connecting to an AI",
+          "description": "Hook your server up to Claude Desktop so the AI can use your tools.",
+          "type": "tutorial",
+          "content_file": "simple/level1/phase5_connecting.md"
+        }
+      ]
+    },
+    {
+      "id": "level2",
+      "title": "Working with Files",
+      "subtitle": "File Access Server",
+      "description": "Build a server that lets an AI read files from your computer safely.",
+      "mana_color": "black",
+      "phases": [
+        {
+          "id": "phase1",
+          "title": "Actions vs Data",
+          "description": "Learn the difference between tools that do things and resources that share data.",
+          "type": "lesson",
+          "content_file": "simple/level2/phase1_actions_vs_data.md"
+        },
+        {
+          "id": "phase2",
+          "title": "Project Setup",
+          "description": "Set up a new project with sample files for the AI to read.",
+          "type": "tutorial",
+          "content_file": "simple/level2/phase2_project_setup.md"
+        },
+        {
+          "id": "phase3",
+          "title": "Listing Files",
+          "description": "Create a resource that shows the AI what files are available.",
+          "type": "tutorial",
+          "content_file": "simple/level2/phase3_listing_files.md",
+          "validation_required": true
+        },
+        {
+          "id": "phase4",
+          "title": "Reading Files Safely",
+          "description": "Let the AI read file contents while keeping your system secure.",
+          "type": "tutorial",
+          "content_file": "simple/level2/phase4_reading_safely.md",
+          "validation_required": true
+        },
+        {
+          "id": "phase5",
+          "title": "Putting It Together",
+          "description": "Test your complete file server and connect it to Claude Desktop.",
+          "type": "tutorial",
+          "content_file": "simple/level2/phase5_putting_together.md"
+        }
+      ]
+    },
+    {
+      "id": "level3",
+      "title": "Connecting to APIs",
+      "subtitle": "API Integration Server",
+      "description": "Build a server that fetches live data from the internet for your AI to use.",
+      "mana_color": "green",
+      "phases": [
+        {
+          "id": "phase1",
+          "title": "Why Connect to APIs?",
+          "description": "Understand why giving an AI access to live data is so powerful.",
+          "type": "lesson",
+          "content_file": "simple/level3/phase1_why_apis.md"
+        },
+        {
+          "id": "phase2",
+          "title": "Getting API Keys",
+          "description": "Sign up for free API accounts and configure your project.",
+          "type": "tutorial",
+          "content_file": "simple/level3/phase2_api_keys.md"
+        },
+        {
+          "id": "phase3",
+          "title": "Fetching Weather Data",
+          "description": "Build a tool that gets current weather for any city.",
+          "type": "tutorial",
+          "content_file": "simple/level3/phase3_weather.md",
+          "validation_required": true
+        },
+        {
+          "id": "phase4",
+          "title": "Adding News and Caching",
+          "description": "Add a news tool and learn how to avoid making too many requests.",
+          "type": "tutorial",
+          "content_file": "simple/level3/phase4_news_caching.md",
+          "validation_required": true
+        },
+        {
+          "id": "phase5",
+          "title": "Testing Everything",
+          "description": "Test all your tools together and connect to Claude Desktop.",
+          "type": "tutorial",
+          "content_file": "simple/level3/phase5_testing_all.md"
+        }
+      ]
+    },
+    {
+      "id": "level4",
+      "title": "Going Live",
+      "subtitle": "Production Deployment",
+      "description": "Put your server on the internet so it can be accessed from anywhere.",
+      "mana_color": "gold",
+      "phases": [
+        {
+          "id": "phase1",
+          "title": "What is Deployment?",
+          "description": "Learn what it means to put your server on the internet.",
+          "type": "lesson",
+          "content_file": "simple/level4/phase1_what_is_deployment.md"
+        },
+        {
+          "id": "phase2",
+          "title": "Packaging with Docker",
+          "description": "Package your server so it runs the same way everywhere.",
+          "type": "tutorial",
+          "content_file": "simple/level4/phase2_docker.md"
+        },
+        {
+          "id": "phase3",
+          "title": "Remote Connections",
+          "description": "Change your server so it can be reached over the internet.",
+          "type": "tutorial",
+          "content_file": "simple/level4/phase3_remote.md",
+          "validation_required": true
+        },
+        {
+          "id": "phase4",
+          "title": "Deploying to the Cloud",
+          "description": "Upload your server to Railway and make it live.",
+          "type": "tutorial",
+          "content_file": "simple/level4/phase4_deploying.md"
+        },
+        {
+          "id": "phase5",
+          "title": "You Did It!",
+          "description": "Celebrate what you have built and explore what comes next.",
+          "type": "lesson",
+          "content_file": "simple/level4/phase5_graduation.md"
+        }
+      ]
+    }
+  ]
+}

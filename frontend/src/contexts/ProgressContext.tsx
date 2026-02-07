@@ -10,6 +10,7 @@ import {
   useMemo,
 } from 'react'
 import { useUser } from './UserContext'
+import { useMode } from './ModeContext'
 import {
   getProgress,
   updateProgress as apiUpdateProgress,
@@ -17,7 +18,7 @@ import {
 } from '@/lib/api'
 
 interface ProgressContextType {
-  /** All progress entries for the user */
+  /** All progress entries for the user in current mode */
   progress: ProgressEntry[]
   /** Loading state */
   loading: boolean
@@ -55,12 +56,13 @@ interface ProgressProviderProps {
 
 export function ProgressProvider({ children }: ProgressProviderProps) {
   const { user } = useUser()
+  const { mode } = useMode()
   const [progress, setProgress] = useState<ProgressEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
 
-  // Fetch progress when user changes
+  // Fetch progress when user or mode changes
   const fetchProgress = useCallback(async (signal?: AbortSignal) => {
     if (!user?.id) {
       setProgress([])
@@ -72,7 +74,7 @@ export function ProgressProvider({ children }: ProgressProviderProps) {
     setError(null)
 
     try {
-      const response = await getProgress(user.id, { signal })
+      const response = await getProgress(user.id, { signal, mode })
       if (signal?.aborted) return
       setProgress(response.progress)
     } catch (err) {
@@ -84,7 +86,7 @@ export function ProgressProvider({ children }: ProgressProviderProps) {
         setLoading(false)
       }
     }
-  }, [user?.id])
+  }, [user?.id, mode])
 
   useEffect(() => {
     // Abort previous request
@@ -122,9 +124,6 @@ export function ProgressProvider({ children }: ProgressProviderProps) {
       if (isPhaseCompleted(levelId, phaseId)) return true
 
       // Otherwise, need to check if previous phase is completed
-      // This requires knowing the previous phase ID, which the caller should handle
-      // For now, we'll return true if any phase in this level is completed
-      // The caller can pass the correct phaseIndex to determine unlock status
       const completedCount = progress.filter(
         (p) => p.level_id === levelId && p.completed
       ).length
@@ -163,7 +162,7 @@ export function ProgressProvider({ children }: ProgressProviderProps) {
       }
 
       try {
-        await apiUpdateProgress(user.id, levelId, phaseId, true, code)
+        await apiUpdateProgress(user.id, levelId, phaseId, true, code, { mode })
 
         // Optimistically update local state
         setProgress((prev) => {
@@ -198,7 +197,7 @@ export function ProgressProvider({ children }: ProgressProviderProps) {
         throw err
       }
     },
-    [user?.id, fetchProgress]
+    [user?.id, mode, fetchProgress]
   )
 
   // Save code without marking complete
@@ -209,7 +208,7 @@ export function ProgressProvider({ children }: ProgressProviderProps) {
       }
 
       try {
-        await apiUpdateProgress(user.id, levelId, phaseId, false, code)
+        await apiUpdateProgress(user.id, levelId, phaseId, false, code, { mode })
 
         // Optimistically update local state
         setProgress((prev) => {
@@ -242,7 +241,7 @@ export function ProgressProvider({ children }: ProgressProviderProps) {
         console.error('Failed to save code:', err)
       }
     },
-    [user?.id]
+    [user?.id, mode]
   )
 
   // Refresh progress

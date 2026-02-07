@@ -16,7 +16,7 @@ export default function SignupPage() {
     setError(null)
 
     if (password !== confirmPassword) {
-      setError('Your incantations do not match!')
+      setError('Passwords do not match')
       return
     }
 
@@ -28,7 +28,6 @@ export default function SignupPage() {
     setLoading(true)
 
     try {
-      // Use server-side API route for signup to ensure proper handling
       const response = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -54,13 +53,12 @@ export default function SignupPage() {
   if (success) {
     return (
       <div className="text-center">
-        <h1 className="text-2xl font-bold mb-4">Check Your Scroll</h1>
-        <p className="text-silver/60 mb-4">
-          We&apos;ve sent a magical seal to your email. Click the link to complete
-          your initiation into the Academy.
+        <h1 className="text-2xl font-bold mb-4">Check Your Email</h1>
+        <p className="mb-4" style={{ color: 'var(--silver-muted)' }}>
+          We&apos;ve sent a confirmation link to your email. Click it to complete your registration.
         </p>
-        <Link href="/login" className="text-arcane-purple hover:underline">
-          Return to the gates
+        <Link href="/login" className="hover:underline" style={{ color: 'var(--arcane-purple)' }}>
+          Back to sign in
         </Link>
       </div>
     )
@@ -69,10 +67,10 @@ export default function SignupPage() {
   return (
     <>
       <h1 className="text-2xl font-bold text-center mb-2">
-        Join the Academy
+        Create Account
       </h1>
-      <p className="text-center text-silver/60 mb-6">
-        Begin your journey as an Artificer
+      <p className="text-center mb-6" style={{ color: 'var(--silver-muted)' }}>
+        Start your learning journey
       </p>
 
       <form onSubmit={handleSignup} className="space-y-4">
@@ -91,8 +89,13 @@ export default function SignupPage() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-2 border border-white/[0.08] rounded-lg bg-white/[0.03] text-silver placeholder:text-silver/30 focus:outline-none focus:ring-2 focus:ring-arcane-gold/50 focus:border-arcane-gold/30 transition-colors"
-            placeholder="artificer@academy.com"
+            className="w-full px-4 py-2 rounded-lg transition-colors focus:outline-none focus:ring-2"
+            style={{
+              border: '1px solid var(--obsidian-border)',
+              backgroundColor: 'var(--obsidian)',
+              color: 'var(--silver)',
+            }}
+            placeholder="you@example.com"
             required
           />
         </div>
@@ -106,8 +109,13 @@ export default function SignupPage() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-2 border border-white/[0.08] rounded-lg bg-white/[0.03] text-silver placeholder:text-silver/30 focus:outline-none focus:ring-2 focus:ring-arcane-gold/50 focus:border-arcane-gold/30 transition-colors"
-            placeholder="Create a secret incantation"
+            className="w-full px-4 py-2 rounded-lg transition-colors focus:outline-none focus:ring-2"
+            style={{
+              border: '1px solid var(--obsidian-border)',
+              backgroundColor: 'var(--obsidian)',
+              color: 'var(--silver)',
+            }}
+            placeholder="Create a password"
             required
           />
         </div>
@@ -121,8 +129,13 @@ export default function SignupPage() {
             type="password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            className="w-full px-4 py-2 border border-white/[0.08] rounded-lg bg-white/[0.03] text-silver placeholder:text-silver/30 focus:outline-none focus:ring-2 focus:ring-arcane-gold/50 focus:border-arcane-gold/30 transition-colors"
-            placeholder="Repeat your incantation"
+            className="w-full px-4 py-2 rounded-lg transition-colors focus:outline-none focus:ring-2"
+            style={{
+              border: '1px solid var(--obsidian-border)',
+              backgroundColor: 'var(--obsidian)',
+              color: 'var(--silver)',
+            }}
+            placeholder="Repeat your password"
             required
           />
         </div>
@@ -132,14 +145,14 @@ export default function SignupPage() {
           disabled={loading}
           className="w-full btn-arcane disabled:opacity-50"
         >
-          {loading ? 'Inscribing...' : 'Begin Initiation'}
+          {loading ? 'Creating account...' : 'Create Account'}
         </button>
       </form>
 
-      <p className="text-center text-sm mt-6">
-        Already an Artificer?{' '}
-        <Link href="/login" className="text-arcane-purple hover:underline">
-          Enter the Academy
+      <p className="text-center text-sm mt-6" style={{ color: 'var(--silver-muted)' }}>
+        Already have an account?{' '}
+        <Link href="/login" className="hover:underline" style={{ color: 'var(--arcane-purple)' }}>
+          Sign in
         </Link>
       </p>
     </>

@@ -2,7 +2,8 @@
 Content router for curriculum and learning materials.
 
 Serves the level/phase structure and markdown content for
-The Artificer's Academy learning platform.
+The Artificer's Academy learning platform. Supports multiple
+learning modes (simple, detailed, mtg).
 """
 
 import json
@@ -12,9 +13,10 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Path as PathParam
+from fastapi import APIRouter, HTTPException, Path as PathParam, Query
 
 from app.models.schemas import (
+    VALID_MODES,
     CurriculumResponse,
     Level,
     Phase,
@@ -26,7 +28,6 @@ logger = logging.getLogger(__name__)
 
 # Path to content directory (relative to backend root)
 CONTENT_DIR = Path(__file__).parent.parent.parent / "content"
-CURRICULUM_FILE = CONTENT_DIR / "curriculum.json"
 
 # Pattern for valid IDs (alphanumeric, underscores, hyphens)
 VALID_ID_PATTERN = re.compile(r"^[a-zA-Z0-9_-]+$")
@@ -39,6 +40,20 @@ def _validate_id(value: str, name: str) -> None:
             status_code=400,
             detail=f"Invalid {name}: must contain only alphanumeric characters, underscores, and hyphens",
         )
+
+
+def _validate_mode(mode: str) -> None:
+    """Validate the learning mode parameter."""
+    if mode not in VALID_MODES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid mode: {mode}. Must be one of {VALID_MODES}",
+        )
+
+
+def _get_curriculum_file(mode: str) -> Path:
+    """Get the curriculum JSON file path for a given mode."""
+    return CONTENT_DIR / f"curriculum-{mode}.json"
 
 
 def _validate_content_path(content_file: str) -> Path:
@@ -64,31 +79,33 @@ def _validate_content_path(content_file: str) -> Path:
     return full_path
 
 
-@lru_cache(maxsize=1)
-def _load_curriculum_cached() -> str:
+@lru_cache(maxsize=3)
+def _load_curriculum_cached(mode: str) -> str:
     """Load curriculum JSON as string (cached for lru_cache compatibility)."""
-    if not CURRICULUM_FILE.exists():
+    curriculum_file = _get_curriculum_file(mode)
+
+    if not curriculum_file.exists():
         raise HTTPException(
             status_code=500,
-            detail="Curriculum configuration not found",
+            detail=f"Curriculum configuration not found for mode: {mode}",
         )
 
     try:
-        return CURRICULUM_FILE.read_text(encoding="utf-8")
+        return curriculum_file.read_text(encoding="utf-8")
     except IOError as e:
-        logger.error(f"Failed to read curriculum.json: {e}")
+        logger.error(f"Failed to read curriculum-{mode}.json: {e}")
         raise HTTPException(
             status_code=500,
             detail="Failed to load curriculum configuration",
         )
 
 
-def _load_curriculum() -> dict:
+def _load_curriculum(mode: str = "mtg") -> dict:
     """Load and parse the curriculum JSON file (with caching)."""
     try:
-        return json.loads(_load_curriculum_cached())
+        return json.loads(_load_curriculum_cached(mode))
     except json.JSONDecodeError as e:
-        logger.error(f"Failed to parse curriculum.json: {e}")
+        logger.error(f"Failed to parse curriculum-{mode}.json: {e}")
         raise HTTPException(
             status_code=500,
             detail="Invalid curriculum configuration",
@@ -113,13 +130,16 @@ def _parse_level(level_data: dict) -> Level:
 
 
 @router.get("/curriculum", response_model=CurriculumResponse)
-async def get_curriculum() -> CurriculumResponse:
+async def get_curriculum(
+    mode: str = Query(default="mtg", description="Learning mode"),
+) -> CurriculumResponse:
     """
     Get the full curriculum structure.
 
     Returns all levels and their phases (without content).
     """
-    data = _load_curriculum()
+    _validate_mode(mode)
+    data = _load_curriculum(mode)
     levels = [_parse_level(level_data) for level_data in data.get("levels", [])]
     return CurriculumResponse(levels=levels)
 
@@ -127,14 +147,16 @@ async def get_curriculum() -> CurriculumResponse:
 @router.get("/levels/{level_id}", response_model=Level)
 async def get_level(
     level_id: str = PathParam(..., min_length=1, max_length=50),
+    mode: str = Query(default="mtg", description="Learning mode"),
 ) -> Level:
     """
     Get a specific level by ID.
 
     Returns the level structure with all phases (without content).
     """
+    _validate_mode(mode)
     _validate_id(level_id, "level_id")
-    data = _load_curriculum()
+    data = _load_curriculum(mode)
 
     for level_data in data.get("levels", []):
         if level_data["id"] == level_id:
@@ -153,16 +175,18 @@ async def get_level(
 async def get_phase_content(
     level_id: str = PathParam(..., min_length=1, max_length=50),
     phase_id: str = PathParam(..., min_length=1, max_length=50),
+    mode: str = Query(default="mtg", description="Learning mode"),
 ) -> PhaseContentResponse:
     """
     Get the content for a specific phase.
 
     Returns the markdown content for the tutorial/lesson.
     """
+    _validate_mode(mode)
     _validate_id(level_id, "level_id")
     _validate_id(phase_id, "phase_id")
 
-    data = _load_curriculum()
+    data = _load_curriculum(mode)
 
     # Find the level
     level_data: Optional[dict] = None

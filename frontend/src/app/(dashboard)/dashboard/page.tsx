@@ -3,7 +3,8 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import { getCurriculum, type Level } from '@/lib/api'
-import { useProgress } from '@/contexts'
+import { useProgress, useMode } from '@/contexts'
+import { getModeConfig } from '@/lib/mode-config'
 import { ManaProgress } from '@/components/theme'
 import { AnimatedCard, PageTransition } from '@/components/motion'
 import { SkeletonCard, SkeletonProgress } from '@/components/ui/Skeleton'
@@ -15,13 +16,15 @@ export default function DashboardPage() {
   const abortControllerRef = useRef<AbortController | null>(null)
 
   const { getCompletedCount, loading: progressLoading } = useProgress()
+  const { mode } = useMode()
+  const config = getModeConfig(mode)
 
   const loadCurriculum = useCallback(async (signal?: AbortSignal) => {
     setLoading(true)
     setError(null)
 
     try {
-      const data = await getCurriculum({ signal })
+      const data = await getCurriculum({ signal, mode })
       if (signal?.aborted) return
       setLevels(data.levels)
     } catch (err) {
@@ -32,7 +35,7 @@ export default function DashboardPage() {
         setLoading(false)
       }
     }
-  }, [])
+  }, [mode])
 
   useEffect(() => {
     if (abortControllerRef.current) {
@@ -61,17 +64,14 @@ export default function DashboardPage() {
     const totalPhases = level.phases.length
     const completedPhases = getCompletedCount(level.id)
 
-    // Level is complete if all phases are done
     if (totalPhases > 0 && completedPhases >= totalPhases) {
       return 'completed'
     }
 
-    // First level is always available
     if (index === 0) {
       return 'available'
     }
 
-    // Level is available if previous level is complete
     const prevLevel = levels[index - 1]
     if (prevLevel) {
       const prevTotalPhases = prevLevel.phases.length
@@ -81,7 +81,6 @@ export default function DashboardPage() {
       }
     }
 
-    // Check if user has started this level (any progress = available)
     if (completedPhases > 0) {
       return 'available'
     }
@@ -92,8 +91,8 @@ export default function DashboardPage() {
   if (loading || progressLoading) {
     return (
       <div>
-        <div className="h-8 w-48 bg-white/[0.06] rounded animate-pulse mb-2" />
-        <div className="h-5 w-72 bg-white/[0.06] rounded animate-pulse mb-8" />
+        <div className="h-8 w-48 rounded animate-pulse mb-2" style={{ backgroundColor: 'var(--obsidian)' }} />
+        <div className="h-5 w-72 rounded animate-pulse mb-8" style={{ backgroundColor: 'var(--obsidian)' }} />
         <SkeletonProgress className="mb-8" />
         <div className="grid md:grid-cols-2 gap-6">
           <SkeletonCard />
@@ -108,9 +107,9 @@ export default function DashboardPage() {
   if (error) {
     return (
       <div>
-        <h1 className="text-3xl font-bold mb-2">Welcome, Artificer</h1>
-        <p className="text-silver/60 mb-8">
-          Continue your journey through the Academy
+        <h1 className="text-3xl font-bold mb-2">{config.headings.dashboardTitle}</h1>
+        <p className="mb-8" style={{ color: 'var(--silver-muted)' }}>
+          {config.headings.dashboardSubtitle}
         </p>
         <div className="scroll-container p-8 text-center">
           <p className="text-mana-red mb-4">{error}</p>
@@ -124,9 +123,9 @@ export default function DashboardPage() {
 
   return (
     <PageTransition>
-      <h1 className="text-3xl font-bold mb-2">Welcome, Artificer</h1>
-      <p className="text-silver/60 mb-8">
-        Continue your journey through the Academy
+      <h1 className="text-3xl font-bold mb-2">{config.headings.dashboardTitle}</h1>
+      <p className="mb-8" style={{ color: 'var(--silver-muted)' }}>
+        {config.headings.dashboardSubtitle}
       </p>
 
       {/* Progress Overview */}
@@ -136,7 +135,7 @@ export default function DashboardPage() {
           <ManaProgress
             current={completedLevelsCount}
             total={levels.length}
-            label="Levels Completed"
+            label={`${config.terms.level}s Completed`}
             manaType="gold"
           />
         </div>
@@ -155,20 +154,15 @@ export default function DashboardPage() {
               href={`/battlefield/${level.id}`}
               completedPhases={getCompletedCount(level.id)}
               totalPhases={level.phases.length}
+              levelLabel={config.terms.level}
+              phaseLabel={config.terms.phase}
+              statusLabels={config.status}
             />
           </AnimatedCard>
         ))}
       </div>
     </PageTransition>
   )
-}
-
-// Mana color borders for each level
-const LEVEL_BORDERS: Record<number, string> = {
-  1: 'border-l-mana-blue',
-  2: 'border-l-mana-black',
-  3: 'border-l-mana-green',
-  4: 'border-l-arcane-gold',
 }
 
 interface LevelCardProps {
@@ -180,6 +174,9 @@ interface LevelCardProps {
   href: string
   completedPhases: number
   totalPhases: number
+  levelLabel: string
+  phaseLabel: string
+  statusLabels: { completed: string; available: string; locked: string }
 }
 
 function LevelCard({
@@ -191,47 +188,50 @@ function LevelCard({
   href,
   completedPhases,
   totalPhases,
+  levelLabel,
+  phaseLabel,
+  statusLabels,
 }: LevelCardProps) {
   const isLocked = status === 'locked'
   const isCompleted = status === 'completed'
-  const borderColor = LEVEL_BORDERS[level] || 'border-l-arcane-purple'
 
   return (
-    <div
-      className={`scroll-container p-6 border-l-4 ${borderColor} relative overflow-hidden ${isLocked ? '' : ''}`}
-    >
+    <div className="scroll-container p-6 relative overflow-hidden">
       {/* Fog overlay for locked levels */}
       {isLocked && (
-        <div className="absolute inset-0 bg-void/60 backdrop-blur-[1px] z-10 flex items-center justify-center">
-          <span className="text-silver/40 text-sm font-medium">
-            🔒 Complete previous levels to unlock
+        <div className="absolute inset-0 z-10 flex items-center justify-center" style={{ backgroundColor: 'rgba(var(--void), 0.6)', backdropFilter: 'blur(1px)' }}>
+          <span className="text-sm font-medium" style={{ color: 'var(--silver-faint)' }}>
+            Complete previous {levelLabel.toLowerCase()}s to unlock
           </span>
         </div>
       )}
 
       <div className="flex items-start justify-between mb-3">
         <div>
-          <span className="text-sm text-arcane-purple font-semibold">
-            Level {level}
+          <span className="text-sm font-semibold" style={{ color: 'var(--arcane-purple)' }}>
+            {levelLabel} {level}
           </span>
           <h3 className="text-xl font-bold">{title}</h3>
-          <p className="text-sm text-silver/50">{subtitle}</p>
+          <p className="text-sm" style={{ color: 'var(--silver-faint)' }}>{subtitle}</p>
         </div>
-        <StatusBadge status={status} />
+        <StatusBadge status={status} labels={statusLabels} />
       </div>
-      <p className="text-silver/60 mb-4">{description}</p>
+      <p className="mb-4" style={{ color: 'var(--silver-muted)' }}>{description}</p>
 
       {/* Progress indicator */}
       {totalPhases > 0 && !isLocked && (
         <div className="mb-4">
-          <div className="flex justify-between text-sm text-silver/50 mb-1">
+          <div className="flex justify-between text-sm mb-1" style={{ color: 'var(--silver-faint)' }}>
             <span>Progress</span>
-            <span>{completedPhases} / {totalPhases} phases</span>
+            <span>{completedPhases} / {totalPhases} {phaseLabel.toLowerCase()}s</span>
           </div>
-          <div className="h-2 bg-white/[0.06] rounded-full overflow-hidden">
+          <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--obsidian)' }}>
             <div
-              className={`h-full transition-all duration-500 ${isCompleted ? 'bg-mana-green' : 'bg-arcane-purple'}`}
-              style={{ width: `${totalPhases > 0 ? (completedPhases / totalPhases) * 100 : 0}%` }}
+              className={`h-full transition-all duration-500 ${isCompleted ? 'bg-mana-green' : ''}`}
+              style={{
+                width: `${totalPhases > 0 ? (completedPhases / totalPhases) * 100 : 0}%`,
+                ...(!isCompleted ? { backgroundColor: 'var(--arcane-purple)' } : {}),
+              }}
             />
           </div>
         </div>
@@ -249,24 +249,24 @@ function LevelCard({
   )
 }
 
-function StatusBadge({ status }: { status: 'completed' | 'available' | 'locked' }) {
+function StatusBadge({ status, labels }: { status: 'completed' | 'available' | 'locked'; labels: { completed: string; available: string; locked: string } }) {
   if (status === 'completed') {
     return (
-      <span className="px-2 py-1 bg-mana-green/20 text-mana-green text-xs rounded-full shadow-[0_0_8px_rgba(34,197,94,0.3)]">
-        ✓ Completed
+      <span className="px-2 py-1 bg-mana-green/20 text-mana-green text-xs rounded-full">
+        {labels.completed}
       </span>
     )
   }
   if (status === 'available') {
     return (
-      <span className="px-2 py-1 bg-arcane-gold/20 text-arcane-gold text-xs rounded-full shadow-[0_0_8px_rgba(212,168,67,0.3)]">
-        Available
+      <span className="px-2 py-1 text-xs rounded-full" style={{ backgroundColor: 'rgba(var(--arcane-gold), 0.2)', color: 'var(--arcane-gold)' }}>
+        {labels.available}
       </span>
     )
   }
   return (
-    <span className="px-2 py-1 bg-white/5 text-silver/40 text-xs rounded-full">
-      Locked
+    <span className="px-2 py-1 text-xs rounded-full" style={{ backgroundColor: 'var(--obsidian)', color: 'var(--silver-faint)' }}>
+      {labels.locked}
     </span>
   )
 }

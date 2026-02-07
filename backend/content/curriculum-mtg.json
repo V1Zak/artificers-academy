@@ -1,0 +1,186 @@
+{
+  "levels": [
+    {
+      "id": "level1",
+      "title": "The Sanctum",
+      "subtitle": "MTG Oracle Server",
+      "description": "Learn the fundamentals of MCP by building a Magic: The Gathering card oracle server.",
+      "mana_color": "blue",
+      "phases": [
+        {
+          "id": "phase1",
+          "title": "Understanding the Multiverse",
+          "description": "Learn about Clients, Hosts, and Servers - the fundamental architecture of MCP.",
+          "type": "lesson",
+          "content_file": "mtg/level1/phase1_multiverse.md"
+        },
+        {
+          "id": "phase2",
+          "title": "Preparing Your Mana Base",
+          "description": "Set up your development environment with uv and install dependencies.",
+          "type": "tutorial",
+          "content_file": "mtg/level1/phase2_mana_base.md"
+        },
+        {
+          "id": "phase3",
+          "title": "Crafting Your First Sorcery",
+          "description": "Create your first @mcp.tool() that fetches card data from Scryfall.",
+          "type": "tutorial",
+          "content_file": "mtg/level1/phase3_first_sorcery.md",
+          "validation_required": true
+        },
+        {
+          "id": "phase4",
+          "title": "Summoning the Inspector",
+          "description": "Use the MCP Inspector to test your server before connecting to a client.",
+          "type": "tutorial",
+          "content_file": "mtg/level1/phase4_inspector.md"
+        },
+        {
+          "id": "phase5",
+          "title": "The Grand Summoning",
+          "description": "Connect your server to Claude Desktop and witness the magic.",
+          "type": "tutorial",
+          "content_file": "mtg/level1/phase5_grand_summoning.md"
+        }
+      ]
+    },
+    {
+      "id": "level2",
+      "title": "The Archive",
+      "subtitle": "Filesystem MCP Server",
+      "description": "Master MCP Resources by building a secure filesystem server for spell scrolls.",
+      "mana_color": "black",
+      "phases": [
+        {
+          "id": "phase1",
+          "title": "The Forbidden Stacks",
+          "description": "Understand Resources vs Tools - the difference between actions and data access.",
+          "type": "lesson",
+          "content_file": "mtg/level2/phase1_forbidden_stacks.md"
+        },
+        {
+          "id": "phase2",
+          "title": "Inscribing the Tome",
+          "description": "Set up your Spell Archive project structure with sample content.",
+          "type": "tutorial",
+          "content_file": "mtg/level2/phase2_inscribing_tome.md"
+        },
+        {
+          "id": "phase3",
+          "title": "The Cataloging Enchantment",
+          "description": "Create Resources with URI templates for directory listing.",
+          "type": "tutorial",
+          "content_file": "mtg/level2/phase3_cataloging_enchantment.md",
+          "validation_required": true
+        },
+        {
+          "id": "phase4",
+          "title": "Reading the Ancient Texts",
+          "description": "Implement secure file reading with path traversal protection.",
+          "type": "tutorial",
+          "content_file": "mtg/level2/phase4_reading_ancient_texts.md",
+          "validation_required": true
+        },
+        {
+          "id": "phase5",
+          "title": "The Archon's Seal",
+          "description": "Test your complete Spell Archive and connect to Claude Desktop.",
+          "type": "tutorial",
+          "content_file": "mtg/level2/phase5_archon_seal.md"
+        }
+      ]
+    },
+    {
+      "id": "level3",
+      "title": "The Aether",
+      "subtitle": "External APIs MCP Server",
+      "description": "Connect to external APIs for weather and news, with async patterns and caching.",
+      "mana_color": "green",
+      "phases": [
+        {
+          "id": "phase1",
+          "title": "Planar Bridges",
+          "description": "Learn why and how to connect MCP servers to external APIs.",
+          "type": "lesson",
+          "content_file": "mtg/level3/phase1_planar_bridges.md"
+        },
+        {
+          "id": "phase2",
+          "title": "Gathering Components",
+          "description": "Set up your Aether Conduit project with API keys and dependencies.",
+          "type": "tutorial",
+          "content_file": "mtg/level3/phase2_gathering_components.md"
+        },
+        {
+          "id": "phase3",
+          "title": "The Weather Divination",
+          "description": "Create an async weather tool using httpx and OpenWeatherMap.",
+          "type": "tutorial",
+          "content_file": "mtg/level3/phase3_weather_divination.md",
+          "validation_required": true
+        },
+        {
+          "id": "phase4",
+          "title": "The Chronicle Scrying",
+          "description": "Add news headlines and implement caching for API efficiency.",
+          "type": "tutorial",
+          "content_file": "mtg/level3/phase4_chronicle_scrying.md",
+          "validation_required": true
+        },
+        {
+          "id": "phase5",
+          "title": "The Convergence",
+          "description": "Test your multi-tool server and connect to Claude Desktop.",
+          "type": "tutorial",
+          "content_file": "mtg/level3/phase5_convergence.md"
+        }
+      ]
+    },
+    {
+      "id": "level4",
+      "title": "The Blind Eternities",
+      "subtitle": "Production Deployment",
+      "description": "Deploy your MCP server to the cloud with Docker and Railway.",
+      "mana_color": "gold",
+      "phases": [
+        {
+          "id": "phase1",
+          "title": "The Spark Ignites",
+          "description": "Understand deployment concepts, transports, and cloud platforms.",
+          "type": "lesson",
+          "content_file": "mtg/level4/phase1_spark_ignites.md"
+        },
+        {
+          "id": "phase2",
+          "title": "Forging the Vessel",
+          "description": "Prepare your server for production with Docker containerization.",
+          "type": "tutorial",
+          "content_file": "mtg/level4/phase2_forging_vessel.md"
+        },
+        {
+          "id": "phase3",
+          "title": "The Planar Portal",
+          "description": "Convert to SSE transport for remote access.",
+          "type": "tutorial",
+          "content_file": "mtg/level4/phase3_planar_portal.md",
+          "validation_required": true
+        },
+        {
+          "id": "phase4",
+          "title": "Traversing the Eternities",
+          "description": "Deploy to Railway and configure your cloud environment.",
+          "type": "tutorial",
+          "content_file": "mtg/level4/phase4_traversing_eternities.md"
+        },
+        {
+          "id": "phase5",
+          "title": "The Ascension",
+          "description": "Complete your journey and earn the title of Grand Artificer.",
+          "type": "lesson",
+          "content_file": "mtg/level4/phase5_ascension.md"
+        }
+      ]
+    }
+  ]
+}

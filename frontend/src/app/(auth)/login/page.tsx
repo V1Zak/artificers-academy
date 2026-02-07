@@ -19,12 +19,12 @@ export default function LoginPage() {
 function LoginFormSkeleton() {
   return (
     <div className="animate-pulse">
-      <div className="h-8 bg-white/[0.06] rounded w-3/4 mx-auto mb-2" />
-      <div className="h-4 bg-white/[0.06] rounded w-1/2 mx-auto mb-6" />
+      <div className="h-8 rounded w-3/4 mx-auto mb-2" style={{ backgroundColor: 'var(--obsidian)' }} />
+      <div className="h-4 rounded w-1/2 mx-auto mb-6" style={{ backgroundColor: 'var(--obsidian)' }} />
       <div className="space-y-4">
-        <div className="h-10 bg-white/[0.06] rounded" />
-        <div className="h-10 bg-white/[0.06] rounded" />
-        <div className="h-10 bg-white/[0.06] rounded" />
+        <div className="h-10 rounded" style={{ backgroundColor: 'var(--obsidian)' }} />
+        <div className="h-10 rounded" style={{ backgroundColor: 'var(--obsidian)' }} />
+        <div className="h-10 rounded" style={{ backgroundColor: 'var(--obsidian)' }} />
       </div>
     </div>
   )
@@ -53,10 +53,7 @@ function LoginForm() {
     setLoading(true)
 
     try {
-      // Use Supabase client directly - this handles cookies automatically
       const supabase = createClient()
-
-      console.log('[LOGIN DEBUG] Attempting login with Supabase client directly')
 
       const { data, error: authError } = await supabase.auth.signInWithPassword({
         email,
@@ -64,16 +61,12 @@ function LoginForm() {
       })
 
       if (authError) {
-        console.log('[LOGIN DEBUG] Auth error:', authError.message)
         setError(authError.message)
         setDebugInfo({ message: 'Auth failed', error: authError.message })
         setLoading(false)
         setShowDebug(true)
         return
       }
-
-      console.log('[LOGIN DEBUG] Auth success! User:', data.user?.email)
-      console.log('[LOGIN DEBUG] Session exists:', !!data.session)
 
       setDebugInfo({
         message: 'Login successful',
@@ -82,16 +75,14 @@ function LoginForm() {
       })
       setShowDebug(true)
 
-      // Get redirect URL from query params, with validation
       const next = searchParams.get('next')
       const safeNext = next && next.startsWith('/') && !next.startsWith('//') ? next : '/dashboard'
 
-      // Wait a moment then redirect
       setTimeout(() => {
         window.location.href = safeNext
       }, 500)
     } catch (err) {
-      console.error('[LOGIN DEBUG] Unexpected error:', err)
+      console.error('[LOGIN] Unexpected error:', err)
       setError('An unexpected error occurred')
       setDebugInfo({ message: 'Unexpected error', error: String(err) })
       setLoading(false)
@@ -102,10 +93,10 @@ function LoginForm() {
   return (
     <>
       <h1 className="text-2xl font-bold text-center mb-2">
-        Welcome Back, Planeswalker
+        Welcome Back
       </h1>
-      <p className="text-center text-silver/60 mb-6">
-        Enter the Academy to continue your journey
+      <p className="text-center mb-6" style={{ color: 'var(--silver-muted)' }}>
+        Sign in to continue your journey
       </p>
 
       <form onSubmit={handleLogin} className="space-y-4">
@@ -124,8 +115,13 @@ function LoginForm() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-2 border border-white/[0.08] rounded-lg bg-white/[0.03] text-silver placeholder:text-silver/30 focus:outline-none focus:ring-2 focus:ring-arcane-gold/50 focus:border-arcane-gold/30 transition-colors"
-            placeholder="artificer@academy.com"
+            className="w-full px-4 py-2 rounded-lg transition-colors focus:outline-none focus:ring-2"
+            style={{
+              border: '1px solid var(--obsidian-border)',
+              backgroundColor: 'var(--obsidian)',
+              color: 'var(--silver)',
+            }}
+            placeholder="you@example.com"
             required
           />
         </div>
@@ -139,8 +135,13 @@ function LoginForm() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-2 border border-white/[0.08] rounded-lg bg-white/[0.03] text-silver placeholder:text-silver/30 focus:outline-none focus:ring-2 focus:ring-arcane-gold/50 focus:border-arcane-gold/30 transition-colors"
-            placeholder="Your secret incantation"
+            className="w-full px-4 py-2 rounded-lg transition-colors focus:outline-none focus:ring-2"
+            style={{
+              border: '1px solid var(--obsidian-border)',
+              backgroundColor: 'var(--obsidian)',
+              color: 'var(--silver)',
+            }}
+            placeholder="Your password"
             required
           />
         </div>
@@ -150,26 +151,25 @@ function LoginForm() {
           disabled={loading}
           className="w-full btn-arcane disabled:opacity-50"
         >
-          {loading ? 'Summoning...' : 'Enter the Academy'}
+          {loading ? 'Signing in...' : 'Sign In'}
         </button>
       </form>
 
-      <p className="text-center text-sm mt-6">
-        New to the Academy?{' '}
-        <Link href="/signup" className="text-arcane-purple hover:underline">
-          Begin your initiation
+      <p className="text-center text-sm mt-6" style={{ color: 'var(--silver-muted)' }}>
+        New here?{' '}
+        <Link href="/signup" className="hover:underline" style={{ color: 'var(--arcane-purple)' }}>
+          Create an account
         </Link>
       </p>
 
       {/* Debug Bypass Button - only shown when DEBUG_MODE is enabled */}
       {DEBUG_MODE && (
-        <div className="mt-8 pt-4 border-t border-white/[0.08]/30">
-          <p className="text-xs text-silver/40 text-center mb-2">Development Debug</p>
+        <div className="mt-8 pt-4" style={{ borderTop: '1px solid var(--obsidian-border)' }}>
+          <p className="text-xs text-center mb-2" style={{ color: 'var(--silver-faint)' }}>Development Debug</p>
           <button
             type="button"
             onClick={() => {
               document.cookie = 'debug-auth-bypass=artificer-debug-2024; path=/; max-age=3600'
-              console.log('[DEBUG] Auth bypass cookie set')
               window.location.href = '/dashboard'
             }}
             className="w-full px-4 py-2 text-sm bg-yellow-500/20 text-yellow-700 border border-yellow-500/50 rounded-lg hover:bg-yellow-500/30 transition-colors"
