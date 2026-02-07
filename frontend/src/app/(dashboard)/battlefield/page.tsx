@@ -243,19 +243,30 @@ function LevelCard({
         )}
       </div>
 
-      {/* Phase Preview */}
+      {/* Phase Preview - Gemstone Orbs */}
       {!isLocked && level.phases.length > 0 && (
         <div className="p-4 border-t border-white/[0.06] bg-white/[0.02]">
-          <p className="text-sm font-medium mb-2 text-silver/60">Phases:</p>
-          <div className="flex flex-wrap gap-2">
-            {level.phases.map((phase, index) => (
-              <span
-                key={phase.id}
-                className="px-2 py-1 text-xs bg-white/[0.03] rounded border border-white/[0.06]"
-              >
-                {index + 1}. {phase.title}
-              </span>
-            ))}
+          <p className="text-sm font-medium mb-3 text-silver/60">Phases:</p>
+          <div className="flex flex-wrap gap-3">
+            {level.phases.map((phase, index) => {
+              const isPhaseComplete = index < completedPhases
+              return (
+                <div key={phase.id} className="flex items-center gap-2 group">
+                  <div
+                    className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                      isPhaseComplete
+                        ? 'bg-mana-green shadow-[0_0_6px_rgba(34,197,94,0.5)]'
+                        : index === completedPhases
+                          ? 'bg-arcane-purple shadow-[0_0_6px_rgba(139,92,246,0.4)] animate-pulse'
+                          : 'bg-white/10'
+                    }`}
+                  />
+                  <span className={`text-xs ${isPhaseComplete ? 'text-silver/70' : index === completedPhases ? 'text-silver' : 'text-silver/40'}`}>
+                    {phase.title}
+                  </span>
+                </div>
+              )
+            })}
           </div>
         </div>
       )}
