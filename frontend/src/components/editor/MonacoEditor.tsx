@@ -122,7 +122,7 @@ export function MonacoEditor({
   )
 
   return (
-    <div className={cn('scroll-container overflow-hidden', className)}>
+    <div className={cn('scroll-container overflow-hidden', className)} aria-label={`Code editor: ${title}`} role="region">
       <div className="px-4 py-2 border-b border-white/[0.06] bg-white/[0.03] flex items-center justify-between">
         <span className="text-sm font-semibold text-arcane-purple">
           {title}
