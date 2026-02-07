@@ -74,14 +74,14 @@ interface CodeScrollEditableProps {
 export function CodeScrollEditable({
   value,
   onChange,
-  placeholder = '# Write your spell here, Artificer...',
+  placeholder = '# Write your code here...',
   className,
 }: CodeScrollEditableProps) {
   return (
     <div className={cn('scroll-container overflow-hidden', className)}>
       <div className="px-4 py-2 border-b border-white/[0.06] bg-white/[0.03]">
         <span className="text-sm font-semibold text-arcane-purple">
-          Your Decklist
+          Your Code
         </span>
       </div>
       <textarea

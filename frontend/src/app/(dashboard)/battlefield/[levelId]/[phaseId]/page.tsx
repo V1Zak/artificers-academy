@@ -307,11 +307,12 @@ export default function PhasePage() {
       {/* Code Editor (for tutorial phases with validation) */}
       {currentPhase?.validation_required && (
         <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4">Your Code</h2>
+          <h2 className="text-xl font-semibold mb-4">{config.editor.title}</h2>
           <MonacoEditor
             value={code}
             onChange={setCode}
             height="400px"
+            title={config.editor.title}
             onValidate={handleValidateDebounced}
           />
 
@@ -450,19 +451,91 @@ interface HintData {
   starterCode?: string
 }
 
-const PHASE_HINTS: Record<string, Record<string, HintData>> = {
-  level1: {
-    phase3: {
-      hints: [
-        "Start by importing FastMCP: from fastmcp import FastMCP",
-        "Create your server instance: mcp = FastMCP('mtg-oracle')",
-        "Use the @mcp.tool() decorator to define your search function",
-        "Your tool function needs a detailed docstring - this becomes the description that the AI reads",
-        "Use httpx for async HTTP requests to the Scryfall API",
-        "The Scryfall API endpoint is: https://api.scryfall.com/cards/named?fuzzy={card_name}",
-        "Don't forget to handle errors gracefully - what if the card isn't found?",
-      ],
-      starterCode: `from fastmcp import FastMCP
+type ModeHints = Record<string, Record<string, Record<string, HintData>>>
+
+const PHASE_HINTS: ModeHints = {
+  simple: {
+    level1: {
+      phase3: {
+        hints: [
+          "Start by importing FastMCP: from fastmcp import FastMCP",
+          "Create your server: mcp = FastMCP('my-server')",
+          "Use @mcp.tool() above your function to make it available to the AI",
+          "Add a description inside your function (a docstring) so the AI knows what it does",
+          "Use httpx to fetch data from the internet",
+          "Don't forget to handle what happens when something goes wrong",
+        ],
+        starterCode: `from fastmcp import FastMCP
+import httpx
+
+mcp = FastMCP("my-server")
+
+@mcp.tool()
+async def get_weather(city: str) -> str:
+    """
+    Get the current weather for a city.
+
+    Args:
+        city: The name of the city to look up
+
+    Returns:
+        A description of the current weather
+    """
+    # Your code here
+    pass
+`,
+      },
+    },
+  },
+  detailed: {
+    level1: {
+      phase3: {
+        hints: [
+          "Import FastMCP: from fastmcp import FastMCP",
+          "Instantiate the server: mcp = FastMCP('mcp-server')",
+          "Decorate your function with @mcp.tool() to register it as a tool endpoint",
+          "The docstring becomes the tool's description in the JSON-RPC schema",
+          "Use httpx for async HTTP client operations",
+          "Implement proper error handling with try/except and meaningful error messages",
+          "Consider edge cases: empty responses, rate limits, malformed data",
+        ],
+        starterCode: `from fastmcp import FastMCP
+import httpx
+
+mcp = FastMCP("mcp-server")
+
+@mcp.tool()
+async def fetch_data(query: str) -> str:
+    """
+    Fetch data from an external API endpoint.
+
+    Performs an HTTP GET request and returns parsed results.
+
+    Args:
+        query: The search query parameter
+
+    Returns:
+        Formatted string with the API response data
+    """
+    # Implementation here
+    pass
+`,
+      },
+    },
+  },
+  mtg: {
+    level1: {
+      phase3: {
+        hints: [
+          "Start by importing FastMCP: from fastmcp import FastMCP",
+          "Create your server instance: mcp = FastMCP('mtg-oracle')",
+          "Use the @mcp.tool() decorator to define your search function",
+          "Your tool function needs a detailed docstring - this becomes the Oracle Text that the Planeswalker reads",
+          "Use httpx for async HTTP requests to the Scryfall API",
+          "The Scryfall API endpoint is: https://api.scryfall.com/cards/named?fuzzy={card_name}",
+          "Don't forget to handle errors gracefully - what if the card isn't found?",
+        ],
+        starterCode: `from fastmcp import FastMCP
 import httpx
 
 mcp = FastMCP("mtg-oracle")
@@ -484,6 +557,7 @@ async def search_card(card_name: str) -> str:
     # Your implementation here
     pass
 `,
+      },
     },
   },
 }
@@ -491,8 +565,9 @@ async def search_card(card_name: str) -> str:
 function PhaseHints({ levelId, phaseId }: { levelId: string; phaseId: string }) {
   const [revealedHints, setRevealedHints] = useState(0)
   const [showStarter, setShowStarter] = useState(false)
+  const { mode } = useMode()
 
-  const hintData = PHASE_HINTS[levelId]?.[phaseId]
+  const hintData = PHASE_HINTS[mode]?.[levelId]?.[phaseId]
 
   if (!hintData) {
     return (

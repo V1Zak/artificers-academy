@@ -90,7 +90,7 @@ export function MonacoEditor({
   height = '400px',
   readOnly = false,
   className,
-  title = 'Your Decklist',
+  title = 'Your Code',
   onValidate,
 }: MonacoEditorProps) {
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null)

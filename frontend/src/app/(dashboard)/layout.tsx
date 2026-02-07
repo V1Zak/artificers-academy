@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
 import { Providers } from '@/components/providers'
 import { MobileSidebar } from '@/components/layout/MobileSidebar'
+import { DesktopNav, DesktopModeBadge } from '@/components/layout/DesktopNav'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import type { User } from '@supabase/supabase-js'
 
@@ -72,8 +73,6 @@ export default async function DashboardLayout({
 }
 
 function DesktopSidebar({ email }: { email: string }) {
-  // Server component - nav labels use MTG defaults
-  // Client components (MobileSidebar) handle dynamic mode-based labels
   return (
     <aside className="hidden md:flex w-64 flex-col border-r" style={{ borderColor: 'var(--obsidian-border)', backgroundColor: 'var(--void-light)' }}>
       <div className="p-4 mb-4">
@@ -82,12 +81,11 @@ function DesktopSidebar({ email }: { email: string }) {
         </Link>
       </div>
 
-      <nav aria-label="Main navigation" className="flex-1 px-2 space-y-1">
-        <NavLink href="/dashboard">Dashboard</NavLink>
-        <NavLink href="/battlefield">Lessons</NavLink>
-        <NavLink href="/codex">Reference</NavLink>
-        <NavLink href="/inspector">Validator</NavLink>
-      </nav>
+      {/* Mode badge - client component */}
+      <DesktopModeBadge />
+
+      {/* Mode-aware nav labels - client component */}
+      <DesktopNav />
 
       {/* Mode switch link */}
       <div className="px-4 py-2">
@@ -113,17 +111,5 @@ function DesktopSidebar({ email }: { email: string }) {
         </form>
       </div>
     </aside>
-  )
-}
-
-function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
-  return (
-    <Link
-      href={href}
-      className="block px-4 py-2.5 rounded-lg transition-all duration-200"
-      style={{ color: 'var(--silver-muted)' }}
-    >
-      {children}
-    </Link>
   )
 }

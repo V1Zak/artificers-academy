@@ -41,6 +41,13 @@ interface ModeConfig {
     success: string
     failure: (count: number) => string
     emptyState: string
+    resultsHeading: string
+  }
+  // Codex section headings
+  codex: {
+    dictionaryHeading: string
+    quickStartHeading: string
+    conceptsHeading: string
   }
   // Codex dictionary
   dictionary: Array<{
@@ -64,6 +71,25 @@ interface ModeConfig {
     decorator: string
     description: string
   }>
+  // Validation alert strings (used by CounterspellAlert / ResolveAlert)
+  validation: {
+    errorCountHeader: (count: number) => string
+    errorTitles: Record<string, string>
+    defaultErrorTitle: string
+    successHeader: string
+    toolsLabel: string
+    resourcesLabel: string
+    promptsLabel: string
+  }
+  // Progress bar completion text
+  progress: {
+    completionText: string
+  }
+  // Editor labels
+  editor: {
+    title: string
+    placeholder: string
+  }
   // Mana icons for levels (overrides for non-MTG modes)
   levelIcons: Record<string, string>
 }
@@ -104,6 +130,12 @@ export const MODE_CONFIG: Record<LearningMode, ModeConfig> = {
       success: 'Your code looks good!',
       failure: (count: number) => `Found ${count} issue${count === 1 ? '' : 's'}`,
       emptyState: 'Paste your code and click "Check My Code" to get feedback',
+      resultsHeading: 'Feedback',
+    },
+    codex: {
+      dictionaryHeading: 'Key Terms',
+      quickStartHeading: 'Quick Start Guide',
+      conceptsHeading: 'Core Concepts',
     },
     dictionary: [
       { technical: 'AI Assistant (e.g., Claude)', metaphor: 'AI Assistant', description: 'The AI that uses your tools', icon: '🤖' },
@@ -128,6 +160,31 @@ export const MODE_CONFIG: Record<LearningMode, ModeConfig> = {
       { title: 'Data Sources', decorator: '@mcp.resource(uri)', description: 'Information accessible via a web-style address' },
       { title: 'Templates', decorator: '@mcp.prompt()', description: 'Pre-written instructions for the AI' },
     ],
+    validation: {
+      errorCountHeader: (count: number) => `${count} Issue${count === 1 ? '' : 's'} Found`,
+      errorTitles: {
+        syntax_error: 'Syntax Problem',
+        missing_import: 'Missing Package',
+        missing_instance: 'Missing Setup',
+        empty_deck: 'Empty File',
+        missing_docstring: 'Missing Description',
+        short_docstring: 'Description Too Short',
+        invalid_resource_uri: 'Bad Address',
+        missing_resource_uri: 'Missing Address',
+      },
+      defaultErrorTitle: 'Problem Found',
+      successHeader: 'Your Code Looks Good!',
+      toolsLabel: 'Functions Found',
+      resourcesLabel: 'Data Sources Found',
+      promptsLabel: 'Templates Found',
+    },
+    progress: {
+      completionText: 'All done!',
+    },
+    editor: {
+      title: 'Your Code',
+      placeholder: '# Write your code here...',
+    },
     levelIcons: {
       blue: '📘',
       black: '📂',
@@ -161,9 +218,9 @@ export const MODE_CONFIG: Record<LearningMode, ModeConfig> = {
     },
     welcome: 'Dashboard',
     status: {
-      completed: 'Completed',
-      available: 'Available',
-      locked: 'Locked',
+      completed: 'Complete',
+      available: 'Unlocked',
+      locked: 'Restricted',
     },
     inspector: {
       submitButton: 'Run Validation',
@@ -171,15 +228,21 @@ export const MODE_CONFIG: Record<LearningMode, ModeConfig> = {
       success: 'Validation passed - all checks green',
       failure: (count: number) => `${count} validation error${count === 1 ? '' : 's'} detected`,
       emptyState: 'Submit your MCP server code for static analysis and validation',
+      resultsHeading: 'Analysis Results',
+    },
+    codex: {
+      dictionaryHeading: 'Terminology Reference',
+      quickStartHeading: 'Quick Start Guide',
+      conceptsHeading: 'Core Concepts',
     },
     dictionary: [
       { technical: 'LLM (e.g., Claude)', metaphor: 'LLM Client', description: 'The language model consuming tool endpoints', icon: '🧠' },
       { technical: 'MCP Server', metaphor: 'Tool Provider', description: 'JSON-RPC server exposing tools and resources', icon: '🖥️' },
       { technical: 'MCP Client', metaphor: 'Host Application', description: 'Application implementing the MCP client protocol', icon: '📡' },
-      { technical: 'Tool', metaphor: 'Tool Function', description: 'Callable endpoint with typed parameters', icon: '🔧' },
+      { technical: 'Tool', metaphor: 'Tool Function', description: 'Callable endpoint with typed parameters', icon: '🛠️' },
       { technical: 'Resource', metaphor: 'Resource Endpoint', description: 'Read-only data addressable by URI template', icon: '📊' },
       { technical: 'Prompt', metaphor: 'Prompt Template', description: 'Reusable context injection template', icon: '📋' },
-      { technical: 'uv', metaphor: 'Dependency Manager', description: 'Fast Python package and project manager', icon: '⚡' },
+      { technical: 'uv', metaphor: 'Dependency Manager', description: 'Fast Python package and project manager', icon: '🔋' },
       { technical: 'Error', metaphor: 'Runtime Error', description: 'Exception in tool execution or protocol violation', icon: '🔴' },
     ],
     quickStart: {
@@ -195,6 +258,31 @@ export const MODE_CONFIG: Record<LearningMode, ModeConfig> = {
       { title: 'Resource Endpoints', decorator: '@mcp.resource(uri)', description: 'Read-only data accessible via URI templates' },
       { title: 'Prompt Templates', decorator: '@mcp.prompt()', description: 'Reusable context injection templates' },
     ],
+    validation: {
+      errorCountHeader: (count: number) => `${count} Validation Error${count === 1 ? '' : 's'}`,
+      errorTitles: {
+        syntax_error: 'Syntax Error',
+        missing_import: 'Missing Import',
+        missing_instance: 'Missing Server Instance',
+        empty_deck: 'Empty Source File',
+        missing_docstring: 'Missing Docstring',
+        short_docstring: 'Insufficient Docstring',
+        invalid_resource_uri: 'Invalid URI Pattern',
+        missing_resource_uri: 'Missing Resource URI',
+      },
+      defaultErrorTitle: 'Validation Error',
+      successHeader: 'All Checks Passed',
+      toolsLabel: 'Tools Detected',
+      resourcesLabel: 'Resources Detected',
+      promptsLabel: 'Prompts Detected',
+    },
+    progress: {
+      completionText: 'Module complete',
+    },
+    editor: {
+      title: 'Source Code',
+      placeholder: '# Enter your MCP server implementation...',
+    },
     levelIcons: {
       blue: '💻',
       black: '📁',
@@ -238,6 +326,12 @@ export const MODE_CONFIG: Record<LearningMode, ModeConfig> = {
       success: 'Spell resolves successfully!',
       failure: (count: number) => `${count} counterspell${count === 1 ? '' : 's'} detected`,
       emptyState: "Submit your code to receive the Inspector's verdict",
+      resultsHeading: "Inspector's Verdict",
+    },
+    codex: {
+      dictionaryHeading: "The Grand Artificer's Dictionary",
+      quickStartHeading: 'Quick Start Incantation',
+      conceptsHeading: 'Core Concepts',
     },
     dictionary: [
       { technical: 'LLM (Claude)', metaphor: 'Planeswalker', description: 'The intelligent entity that invokes your tools', icon: '🧙' },
@@ -262,6 +356,31 @@ export const MODE_CONFIG: Record<LearningMode, ModeConfig> = {
       { title: 'Permanents', decorator: '@mcp.resource(uri)', description: 'Read-only data accessible via URI' },
       { title: 'Tutors', decorator: '@mcp.prompt()', description: 'Pre-configured context templates' },
     ],
+    validation: {
+      errorCountHeader: (count: number) => `${count} Counterspell${count === 1 ? '' : 's'} Detected`,
+      errorTitles: {
+        syntax_error: 'Forbidden Runes',
+        missing_import: 'Missing Mana Source',
+        missing_instance: 'Unbound Library',
+        empty_deck: 'Empty Decklist',
+        missing_docstring: 'Missing Oracle Text',
+        short_docstring: 'Insufficient Oracle Text',
+        invalid_resource_uri: 'Invalid Permanent Binding',
+        missing_resource_uri: 'Unbound Permanent',
+      },
+      defaultErrorTitle: 'Spell Fizzled',
+      successHeader: 'Spell Resolves Successfully!',
+      toolsLabel: 'Sorceries Discovered',
+      resourcesLabel: 'Permanents Discovered',
+      promptsLabel: 'Tutors Discovered',
+    },
+    progress: {
+      completionText: 'Mana pool full!',
+    },
+    editor: {
+      title: 'Your Decklist',
+      placeholder: '# Write your spell here, Artificer...',
+    },
     levelIcons: {
       blue: '💧',
       black: '💀',

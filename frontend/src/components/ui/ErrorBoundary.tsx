@@ -40,7 +40,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         <div className="glass-card p-8 text-center max-w-md mx-auto mt-12">
           <div className="text-4xl mb-4">💥</div>
           <h2 className="text-xl font-bold text-silver mb-2">
-            A Counterspell Was Cast
+            Something Went Wrong
           </h2>
           <p className="text-silver/60 mb-4">
             Something went wrong rendering this section.
