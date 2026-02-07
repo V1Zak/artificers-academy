@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { getCurriculum, type Level } from '@/lib/api'
 import { useProgress } from '@/contexts'
 import { ManaProgress } from '@/components/theme'
+import { AnimatedCard, PageTransition } from '@/components/motion'
 
 export default function DashboardPage() {
   const [levels, setLevels] = useState<Level[]>([])
@@ -116,40 +117,43 @@ export default function DashboardPage() {
   }
 
   return (
-    <div>
+    <PageTransition>
       <h1 className="text-3xl font-bold mb-2">Welcome, Artificer</h1>
       <p className="text-silver/60 mb-8">
         Continue your journey through the Academy
       </p>
 
       {/* Progress Overview */}
-      <div className="scroll-container p-6 mb-8">
-        <h2 className="text-xl font-semibold mb-4">Your Journey</h2>
-        <ManaProgress
-          current={completedLevelsCount}
-          total={levels.length}
-          label="Levels Completed"
-          manaType="gold"
-        />
-      </div>
+      <AnimatedCard>
+        <div className="scroll-container p-6 mb-8">
+          <h2 className="text-xl font-semibold mb-4">Your Journey</h2>
+          <ManaProgress
+            current={completedLevelsCount}
+            total={levels.length}
+            label="Levels Completed"
+            manaType="gold"
+          />
+        </div>
+      </AnimatedCard>
 
       {/* Level Cards */}
       <div className="grid md:grid-cols-2 gap-6">
         {levels.map((level, index) => (
-          <LevelCard
-            key={level.id}
-            level={index + 1}
-            title={level.title}
-            subtitle={level.subtitle}
-            description={level.description}
-            status={getLevelStatus(level, index)}
-            href={`/battlefield/${level.id}`}
-            completedPhases={getCompletedCount(level.id)}
-            totalPhases={level.phases.length}
-          />
+          <AnimatedCard key={level.id} index={index + 1}>
+            <LevelCard
+              level={index + 1}
+              title={level.title}
+              subtitle={level.subtitle}
+              description={level.description}
+              status={getLevelStatus(level, index)}
+              href={`/battlefield/${level.id}`}
+              completedPhases={getCompletedCount(level.id)}
+              totalPhases={level.phases.length}
+            />
+          </AnimatedCard>
         ))}
       </div>
-    </div>
+    </PageTransition>
   )
 }
 

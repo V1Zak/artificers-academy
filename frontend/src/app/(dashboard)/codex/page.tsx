@@ -1,8 +1,11 @@
+'use client'
+
 import { CodeScroll } from '@/components/theme'
+import { AnimatedCard, PageTransition } from '@/components/motion'
 
 export default function CodexPage() {
   return (
-    <div>
+    <PageTransition>
       <h1 className="text-3xl font-bold mb-2">The Codex</h1>
       <p className="text-silver/60 mb-8">
         The Grand Artificer&apos;s compendium of knowledge
@@ -121,25 +124,19 @@ npx @modelcontextprotocol/inspector uv run server.py`}
       <section>
         <h2 className="text-2xl font-semibold mb-4">Core Concepts</h2>
         <div className="grid md:grid-cols-2 gap-6">
-          <ConceptCard
-            title="Oracle Text (Docstrings)"
-            description="Every Sorcery must have Oracle Text - a detailed docstring that tells the Planeswalker how to use it. Without Oracle Text, your spell is incomplete."
-          />
-          <ConceptCard
-            title="Async Incantations"
-            description="When performing I/O operations (API calls, file reads), use async/await to prevent blocking the Stack. This keeps your server responsive."
-          />
-          <ConceptCard
-            title="The Inspector"
-            description="Before connecting to a Player (client), always test your Decklist with the Inspector. It reveals issues before they become problems."
-          />
-          <ConceptCard
-            title="Transport Layers"
-            description="Kitchen Table (stdio) for local development, Tournament Hall (SSE) for production deployments."
-          />
+          {[
+            { title: "Oracle Text (Docstrings)", description: "Every Sorcery must have Oracle Text - a detailed docstring that tells the Planeswalker how to use it. Without Oracle Text, your spell is incomplete." },
+            { title: "Async Incantations", description: "When performing I/O operations (API calls, file reads), use async/await to prevent blocking the Stack. This keeps your server responsive." },
+            { title: "The Inspector", description: "Before connecting to a Player (client), always test your Decklist with the Inspector. It reveals issues before they become problems." },
+            { title: "Transport Layers", description: "Kitchen Table (stdio) for local development, Tournament Hall (SSE) for production deployments." },
+          ].map((card, index) => (
+            <AnimatedCard key={card.title} index={index}>
+              <ConceptCard title={card.title} description={card.description} />
+            </AnimatedCard>
+          ))}
         </div>
       </section>
-    </div>
+    </PageTransition>
   )
 }
 
