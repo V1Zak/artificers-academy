@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { getCurriculum, type Level } from '@/lib/api'
 import { useProgress } from '@/contexts'
 import { ManaProgress } from '@/components/theme'
+import { AnimatedCard, PageTransition } from '@/components/motion'
 
 // Unified mana configuration
 type ManaColor = 'blue' | 'black' | 'green' | 'gold' | 'red' | 'white'
@@ -126,7 +127,7 @@ export default function BattlefieldPage() {
   }
 
   return (
-    <div>
+    <PageTransition>
       <h1 className="text-3xl font-bold mb-2">The Battlefield</h1>
       <p className="text-silver/60 mb-8">
         Choose your path and begin your journey to becoming an Artificer
@@ -134,15 +135,16 @@ export default function BattlefieldPage() {
 
       <div className="grid gap-6">
         {levels.map((level, index) => (
-          <LevelCard
-            key={level.id}
-            level={level}
-            levelNumber={index + 1}
-            completedPhases={getCompletedCount(level.id)}
-          />
+          <AnimatedCard key={level.id} index={index}>
+            <LevelCard
+              level={level}
+              levelNumber={index + 1}
+              completedPhases={getCompletedCount(level.id)}
+            />
+          </AnimatedCard>
         ))}
       </div>
-    </div>
+    </PageTransition>
   )
 }
 
