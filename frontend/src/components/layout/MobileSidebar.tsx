@@ -68,12 +68,13 @@ export function MobileSidebar({ email }: MobileSidebarProps) {
           </button>
         </div>
 
-        <nav className="flex-1 px-2 space-y-1">
+        <nav aria-label="Main navigation" className="flex-1 px-2 space-y-1">
           {navItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
               onClick={() => setOpen(false)}
+              aria-current={pathname === item.href || pathname.startsWith(item.href + '/') ? 'page' : undefined}
               className={`block px-4 py-2.5 rounded-lg transition-all duration-200 min-h-[44px] flex items-center ${
                 pathname === item.href || pathname.startsWith(item.href + '/')
                   ? 'text-silver bg-white/[0.08]'

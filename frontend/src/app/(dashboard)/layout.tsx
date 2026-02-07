@@ -46,6 +46,14 @@ export default async function DashboardLayout({
   return (
     <Providers user={user}>
       <div className="min-h-screen flex bg-void">
+        {/* Skip to content link */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:top-4 focus:left-4 focus:px-4 focus:py-2 focus:bg-arcane-gold focus:text-void focus:rounded-lg focus:font-semibold"
+        >
+          Skip to main content
+        </a>
+
         {/* Mobile sidebar */}
         <MobileSidebar email={user.email || ''} />
 
@@ -57,7 +65,7 @@ export default async function DashboardLayout({
             </Link>
           </div>
 
-          <nav className="flex-1 px-2 space-y-1">
+          <nav aria-label="Main navigation" className="flex-1 px-2 space-y-1">
             <NavLink href="/dashboard">Dashboard</NavLink>
             <NavLink href="/battlefield">The Battlefield</NavLink>
             <NavLink href="/codex">The Codex</NavLink>
@@ -78,7 +86,7 @@ export default async function DashboardLayout({
         </aside>
 
         {/* Main content - extra top padding on mobile for hamburger button */}
-        <main className="flex-1 p-4 pt-16 md:p-8 overflow-y-auto bg-void">
+        <main id="main-content" className="flex-1 p-4 pt-16 md:p-8 overflow-y-auto bg-void">
           <ErrorBoundary>
             {children}
           </ErrorBoundary>

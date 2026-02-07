@@ -73,7 +73,14 @@ export function ManaProgress({
           )}
         </div>
       )}
-      <div className="mana-bar">
+      <div
+        className="mana-bar"
+        role="progressbar"
+        aria-valuenow={current}
+        aria-valuemin={0}
+        aria-valuemax={total}
+        aria-label={label || `Progress: ${current} of ${total}`}
+      >
         <div
           className={cn(
             'h-full rounded-full transition-all duration-500 bg-gradient-to-r',
