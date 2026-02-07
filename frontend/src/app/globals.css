@@ -206,3 +206,23 @@
   @apply px-4 py-2;
   color: var(--silver-muted);
 }
+
+/* Animated nebula gradient for auth pages */
+.nebula-bg {
+  background: radial-gradient(ellipse at 20% 50%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(14, 104, 171, 0.1) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(212, 168, 67, 0.08) 0%, transparent 50%);
+  animation: nebula-shift 20s ease-in-out infinite;
+}
+
+@keyframes nebula-shift {
+  0%, 100% {
+    background-position: 0% 0%, 100% 0%, 50% 100%;
+  }
+  33% {
+    background-position: 100% 50%, 0% 100%, 80% 20%;
+  }
+  66% {
+    background-position: 50% 100%, 80% 50%, 20% 60%;
+  }
+}
