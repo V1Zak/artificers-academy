@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { getLevel, type Level, type Phase } from '@/lib/api'
 import { useProgress } from '@/contexts'
+import { SkeletonPhaseCard } from '@/components/ui/Skeleton'
 
 export default function LevelPage() {
   const params = useParams()
@@ -65,10 +66,17 @@ export default function LevelPage() {
 
   if (loading || progressLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <div className="animate-pulse text-4xl mb-4">📜</div>
-          <p className="text-silver/60">Loading level...</p>
+      <div>
+        <div className="h-4 w-32 bg-white/[0.06] rounded animate-pulse mb-6" />
+        <div className="mb-8 space-y-2">
+          <div className="h-4 w-24 bg-white/[0.06] rounded animate-pulse" />
+          <div className="h-8 w-64 bg-white/[0.06] rounded animate-pulse" />
+          <div className="h-5 w-96 bg-white/[0.06] rounded animate-pulse" />
+        </div>
+        <div className="space-y-4">
+          <SkeletonPhaseCard />
+          <SkeletonPhaseCard />
+          <SkeletonPhaseCard />
         </div>
       </div>
     )

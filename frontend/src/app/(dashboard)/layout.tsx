@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
 import { Providers } from '@/components/providers'
 import { MobileSidebar } from '@/components/layout/MobileSidebar'
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import type { User } from '@supabase/supabase-js'
 
 // Debug user for bypassing auth during development
@@ -78,7 +79,9 @@ export default async function DashboardLayout({
 
         {/* Main content - extra top padding on mobile for hamburger button */}
         <main className="flex-1 p-4 pt-16 md:p-8 overflow-y-auto bg-void">
-          {children}
+          <ErrorBoundary>
+            {children}
+          </ErrorBoundary>
         </main>
       </div>
     </Providers>
