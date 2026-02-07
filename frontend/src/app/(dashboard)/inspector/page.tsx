@@ -4,6 +4,7 @@ import { useState } from 'react'
 import dynamic from 'next/dynamic'
 import { CounterspellAlert, ResolveAlert } from '@/components/theme/CounterspellAlert'
 import { validateCode, type ValidationResponse } from '@/lib/api'
+import { useToast } from '@/contexts/ToastContext'
 
 // Dynamic import for Monaco to avoid SSR issues
 const MonacoEditor = dynamic(
@@ -41,6 +42,7 @@ export default function InspectorPage() {
   const [result, setResult] = useState<ValidationResponse | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const { toast } = useToast()
 
   const handleValidate = async () => {
     setLoading(true)
@@ -50,8 +52,14 @@ export default function InspectorPage() {
     try {
       const response = await validateCode(code)
       setResult(response)
+      if (response.valid) {
+        toast('Spell resolves successfully!', 'success')
+      } else {
+        toast(`${response.errors.length} counterspell(s) detected`, 'error')
+      }
     } catch (err) {
       setError('Failed to connect to the Inspector. Is the backend running?')
+      toast('Failed to connect to the Inspector', 'error')
     } finally {
       setLoading(false)
     }
