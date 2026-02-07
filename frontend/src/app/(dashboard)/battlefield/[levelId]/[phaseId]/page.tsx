@@ -13,7 +13,8 @@ import {
   type ValidationResponse,
 } from '@/lib/api'
 import { CounterspellAlert, ResolveAlert, MarkdownRenderer } from '@/components/theme'
-import { useProgress } from '@/contexts'
+import { useProgress, useMode } from '@/contexts'
+import { getModeConfig } from '@/lib/mode-config'
 import { SkeletonText } from '@/components/ui/Skeleton'
 
 // Dynamic import for Monaco to avoid SSR issues
@@ -23,21 +24,24 @@ const MonacoEditor = dynamic(
     ssr: false,
     loading: () => (
       <div className="scroll-container h-[400px] flex items-center justify-center">
-        <p className="text-silver/60">Loading editor...</p>
+        <p style={{ color: 'var(--silver-muted)' }}>Loading editor...</p>
       </div>
     ),
   }
 )
 
-// Storage key for persisting code
-const getStorageKey = (levelId: string, phaseId: string) =>
-  `artificer-code-${levelId}-${phaseId}`
+// Storage key for persisting code (mode-aware)
+const getStorageKey = (mode: string, levelId: string, phaseId: string) =>
+  `artificer-code-${mode}-${levelId}-${phaseId}`
 
 export default function PhasePage() {
   const params = useParams()
   const router = useRouter()
   const levelId = params.levelId as string
   const phaseId = params.phaseId as string
+
+  const { mode } = useMode()
+  const config = getModeConfig(mode)
 
   // ==========================================
   // ALL STATE DECLARATIONS AT THE TOP
@@ -82,7 +86,6 @@ export default function PhasePage() {
 
   // Load content with proper cleanup
   useEffect(() => {
-    // Abort previous request if any
     if (abortControllerRef.current) {
       abortControllerRef.current.abort()
     }
@@ -96,17 +99,15 @@ export default function PhasePage() {
 
       try {
         const [levelData, phaseData] = await Promise.all([
-          getLevel(levelId, { signal: controller.signal }),
-          getPhaseContent(levelId, phaseId, { signal: controller.signal }),
+          getLevel(levelId, { signal: controller.signal, mode }),
+          getPhaseContent(levelId, phaseId, { signal: controller.signal, mode }),
         ])
 
-        // Don't update state if aborted
         if (controller.signal.aborted) return
 
         setLevel(levelData)
         setContent(phaseData)
       } catch (err) {
-        // Ignore abort errors
         if (err instanceof Error && err.name === 'AbortError') return
 
         setError('Failed to load content. Is the backend running?')
@@ -119,16 +120,15 @@ export default function PhasePage() {
 
     loadContent()
 
-    // Cleanup on unmount or dependency change
     return () => {
       controller.abort()
     }
-  }, [levelId, phaseId])
+  }, [levelId, phaseId, mode])
 
   // Reset code initialization when navigating to different phase
   useEffect(() => {
     codeInitializedRef.current = false
-    setCode('') // Clear previous phase's code
+    setCode('')
     setValidationResult(null)
     setValidationError(null)
   }, [levelId, phaseId])
@@ -136,9 +136,8 @@ export default function PhasePage() {
   // Load saved code: prioritize server-saved, fallback to localStorage
   useEffect(() => {
     if (codeInitializedRef.current) return
-    if (progressLoading) return // Wait for progress to load
+    if (progressLoading) return
 
-    // First, try to get server-saved code
     const serverCode = getSavedCode(levelId, phaseId)
     if (serverCode) {
       setCode(serverCode)
@@ -146,36 +145,33 @@ export default function PhasePage() {
       return
     }
 
-    // Fallback to localStorage
-    const storageKey = getStorageKey(levelId, phaseId)
+    const storageKey = getStorageKey(mode, levelId, phaseId)
     const localCode = localStorage.getItem(storageKey)
     if (localCode) {
       setCode(localCode)
     }
 
     codeInitializedRef.current = true
-  }, [levelId, phaseId, progressLoading, getSavedCode])
+  }, [levelId, phaseId, progressLoading, getSavedCode, mode])
 
   // Save code to localStorage when it changes (immediate backup)
   useEffect(() => {
     if (!codeInitializedRef.current) return
     if (!code) return
 
-    const storageKey = getStorageKey(levelId, phaseId)
+    const storageKey = getStorageKey(mode, levelId, phaseId)
     localStorage.setItem(storageKey, code)
-  }, [code, levelId, phaseId])
+  }, [code, levelId, phaseId, mode])
 
   // Debounced save to server (every 5 seconds after last change)
   useEffect(() => {
     if (!codeInitializedRef.current) return
     if (!code) return
 
-    // Clear previous debounce
     if (saveDebounceRef.current) {
       clearTimeout(saveDebounceRef.current)
     }
 
-    // Debounce server save (5 seconds)
     saveDebounceRef.current = setTimeout(() => {
       saveCodeToServer(levelId, phaseId, code).catch(() => {
         // Silently fail - localStorage backup exists
@@ -204,7 +200,7 @@ export default function PhasePage() {
 
   const handleValidate = useCallback(async () => {
     if (!code.trim()) return
-    if (validating) return // Prevent double submission
+    if (validating) return
 
     setValidating(true)
     setValidationResult(null)
@@ -221,7 +217,6 @@ export default function PhasePage() {
     }
   }, [code, validating])
 
-  // Debounced validation for keyboard shortcut
   const handleValidateDebounced = useCallback(() => {
     if (validateDebounceRef.current) {
       clearTimeout(validateDebounceRef.current)
@@ -234,10 +229,8 @@ export default function PhasePage() {
 
   const handleCompletePhase = useCallback(async () => {
     try {
-      // Save progress to server with code snapshot
       await completePhase(levelId, phaseId, code || undefined)
     } catch (err) {
-      // Log error but don't block navigation - localStorage has a backup
       console.error('Failed to save progress:', err)
     }
 
@@ -256,12 +249,12 @@ export default function PhasePage() {
     return (
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center justify-between mb-6">
-          <div className="h-4 w-32 bg-white/[0.06] rounded animate-pulse" />
-          <div className="h-4 w-20 bg-white/[0.06] rounded animate-pulse" />
+          <div className="h-4 w-32 rounded animate-pulse" style={{ backgroundColor: 'var(--obsidian)' }} />
+          <div className="h-4 w-20 rounded animate-pulse" style={{ backgroundColor: 'var(--obsidian)' }} />
         </div>
         <div className="mb-8 space-y-2">
-          <div className="h-4 w-20 bg-white/[0.06] rounded animate-pulse" />
-          <div className="h-8 w-80 bg-white/[0.06] rounded animate-pulse" />
+          <div className="h-4 w-20 rounded animate-pulse" style={{ backgroundColor: 'var(--obsidian)' }} />
+          <div className="h-8 w-80 rounded animate-pulse" style={{ backgroundColor: 'var(--obsidian)' }} />
         </div>
         <div className="glass-card p-8 mb-8">
           <SkeletonText lines={8} />
@@ -275,7 +268,7 @@ export default function PhasePage() {
       <div className="scroll-container p-8 text-center">
         <p className="text-mana-red mb-4">{error || 'Content not found'}</p>
         <Link href={`/battlefield/${levelId}`} className="btn-arcane">
-          Return to Level
+          Return to {config.terms.level}
         </Link>
       </div>
     )
@@ -287,20 +280,21 @@ export default function PhasePage() {
       <div className="flex items-center justify-between mb-6">
         <Link
           href={`/battlefield/${levelId}`}
-          className="inline-flex items-center gap-2 text-silver/60 hover:text-silver"
+          className="inline-flex items-center gap-2"
+          style={{ color: 'var(--silver-faint)' }}
         >
           <ChevronLeftIcon />
           {level.title}
         </Link>
-        <span className="text-sm text-silver/50">
-          Phase {currentPhaseIndex + 1} of {level.phases.length}
+        <span className="text-sm" style={{ color: 'var(--silver-faint)' }}>
+          {config.terms.phase} {currentPhaseIndex + 1} of {level.phases.length}
         </span>
       </div>
 
       {/* Phase Header */}
       <div className="mb-8">
-        <p className="text-arcane-purple font-medium mb-1">
-          {currentPhase?.type === 'lesson' ? '📖 Lesson' : '⚗️ Tutorial'}
+        <p className="font-medium mb-1" style={{ color: 'var(--arcane-purple)' }}>
+          {currentPhase?.type === 'lesson' ? config.terms.lesson : config.terms.tutorial}
         </p>
         <h1 className="text-3xl font-bold">{content.title}</h1>
       </div>
@@ -327,25 +321,26 @@ export default function PhasePage() {
               disabled={validating || !code.trim()}
               className="btn-arcane disabled:opacity-50 min-h-[44px]"
             >
-              {validating ? 'Validating...' : 'Validate Code'}
+              {validating ? config.inspector.submitting : config.inspector.submitButton}
             </button>
             <button
               onClick={() => setShowHints(!showHints)}
-              className="px-4 py-2 text-sm border border-arcane-gold/50 text-arcane-gold rounded-lg hover:bg-arcane-gold/10 transition-colors min-h-[44px]"
+              className="px-4 py-2 text-sm border rounded-lg transition-colors min-h-[44px]"
+              style={{ borderColor: 'var(--arcane-gold)', color: 'var(--arcane-gold)' }}
             >
               {showHints ? 'Hide Hints' : 'Show Hints'}
             </button>
             {validationResult?.valid && (
               <span className="text-mana-green font-medium">
-                ✓ Code is valid!
+                ✓ {config.inspector.success}
               </span>
             )}
           </div>
 
           {/* Hints Panel */}
           {showHints && (
-            <div className="mt-4 p-4 bg-arcane-gold/10 border border-arcane-gold/30 rounded-lg">
-              <h3 className="font-semibold text-arcane-gold mb-3">Hints from the Grand Artificer</h3>
+            <div className="mt-4 p-4 rounded-lg" style={{ backgroundColor: 'rgba(var(--arcane-gold-rgb, 212,168,67), 0.1)', border: '1px solid rgba(var(--arcane-gold-rgb, 212,168,67), 0.3)' }}>
+              <h3 className="font-semibold mb-3" style={{ color: 'var(--arcane-gold)' }}>Hints</h3>
               <PhaseHints levelId={levelId} phaseId={phaseId} />
             </div>
           )}
@@ -373,11 +368,12 @@ export default function PhasePage() {
       )}
 
       {/* Navigation Footer */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-6 border-t border-white/[0.06]">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-6 border-t" style={{ borderColor: 'var(--obsidian-border)' }}>
         {prevPhase ? (
           <Link
             href={`/battlefield/${levelId}/${prevPhase.id}`}
-            className="inline-flex items-center gap-2 text-silver/60 hover:text-silver min-h-[44px]"
+            className="inline-flex items-center gap-2 min-h-[44px]"
+            style={{ color: 'var(--silver-faint)' }}
           >
             <ChevronLeftIcon />
             <span className="hidden sm:inline">Previous: </span>{prevPhase.title}
@@ -397,7 +393,7 @@ export default function PhasePage() {
               <ChevronRightIcon className="ml-2" />
             </>
           ) : (
-            'Complete Level'
+            `Complete ${config.terms.level}`
           )}
         </button>
       </div>
@@ -461,7 +457,7 @@ const PHASE_HINTS: Record<string, Record<string, HintData>> = {
         "Start by importing FastMCP: from fastmcp import FastMCP",
         "Create your server instance: mcp = FastMCP('mtg-oracle')",
         "Use the @mcp.tool() decorator to define your search function",
-        "Your tool function needs a detailed docstring - this becomes the 'Oracle Text' that Claude reads",
+        "Your tool function needs a detailed docstring - this becomes the description that the AI reads",
         "Use httpx for async HTTP requests to the Scryfall API",
         "The Scryfall API endpoint is: https://api.scryfall.com/cards/named?fuzzy={card_name}",
         "Don't forget to handle errors gracefully - what if the card isn't found?",
@@ -500,8 +496,8 @@ function PhaseHints({ levelId, phaseId }: { levelId: string; phaseId: string }) 
 
   if (!hintData) {
     return (
-      <p className="text-silver/60 text-sm">
-        No hints available for this phase. You&apos;ve got this, Artificer!
+      <p className="text-sm" style={{ color: 'var(--silver-muted)' }}>
+        No hints available for this phase. You&apos;ve got this!
       </p>
     )
   }
@@ -512,8 +508,8 @@ function PhaseHints({ levelId, phaseId }: { levelId: string; phaseId: string }) 
       <div className="space-y-2">
         {hintData.hints.slice(0, revealedHints).map((hint, i) => (
           <div key={i} className="flex gap-2 text-sm">
-            <span className="text-arcane-gold font-bold">{i + 1}.</span>
-            <span className="text-silver">{hint}</span>
+            <span className="font-bold" style={{ color: 'var(--arcane-gold)' }}>{i + 1}.</span>
+            <span>{hint}</span>
           </div>
         ))}
       </div>
@@ -521,7 +517,8 @@ function PhaseHints({ levelId, phaseId }: { levelId: string; phaseId: string }) 
       {revealedHints < hintData.hints.length && (
         <button
           onClick={() => setRevealedHints(revealedHints + 1)}
-          className="text-sm text-arcane-purple hover:underline"
+          className="text-sm hover:underline"
+          style={{ color: 'var(--arcane-purple)' }}
         >
           Reveal next hint ({revealedHints + 1} of {hintData.hints.length})
         </button>
@@ -529,16 +526,17 @@ function PhaseHints({ levelId, phaseId }: { levelId: string; phaseId: string }) 
 
       {/* Starter code */}
       {hintData.starterCode && (
-        <div className="mt-4 pt-4 border-t border-arcane-gold/20">
+        <div className="mt-4 pt-4" style={{ borderTop: '1px solid rgba(var(--arcane-gold-rgb, 212,168,67), 0.2)' }}>
           <button
             onClick={() => setShowStarter(!showStarter)}
-            className="text-sm text-arcane-purple hover:underline"
+            className="text-sm hover:underline"
+            style={{ color: 'var(--arcane-purple)' }}
           >
             {showStarter ? 'Hide starter code' : 'Show starter code template'}
           </button>
 
           {showStarter && (
-            <pre className="mt-2 p-3 bg-black/30 border border-white/[0.06] rounded text-xs overflow-x-auto">
+            <pre className="mt-2 p-3 rounded text-xs overflow-x-auto" style={{ backgroundColor: 'var(--obsidian)', border: '1px solid var(--obsidian-border)' }}>
               <code>{hintData.starterCode}</code>
             </pre>
           )}

@@ -7,8 +7,10 @@ In the language of the Grand Artificer:
 - ValidationResponse: The Inspector's verdict
 """
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional
+
+VALID_MODES = {"simple", "detailed", "mtg"}
 
 
 class ValidationRequest(BaseModel):
@@ -77,6 +79,9 @@ class ProgressEntry(BaseModel):
     code_snapshot: Optional[str] = None
     """Optional code snapshot saved by the user."""
 
+    mode: str = "mtg"
+    """Learning mode (simple, detailed, mtg)."""
+
 
 class ProgressUpdate(BaseModel):
     """Progress update for a user's journey through a level."""
@@ -92,6 +97,15 @@ class ProgressUpdate(BaseModel):
 
     code_snapshot: Optional[str] = Field(None, max_length=100_000)
     """Optional code snapshot to save (max 100KB)."""
+
+    mode: str = Field(default="mtg", description="Learning mode")
+
+    @field_validator("mode")
+    @classmethod
+    def validate_mode(cls, v: str) -> str:
+        if v not in VALID_MODES:
+            raise ValueError(f"Invalid mode: {v}. Must be one of {VALID_MODES}")
+        return v
 
 
 class ProgressResponse(BaseModel):
@@ -261,3 +275,30 @@ class PhaseContentResponse(BaseModel):
 
     content: str
     """Markdown content for the phase."""
+
+
+# ==========================================
+# User Preference Models
+# ==========================================
+
+class UserPreference(BaseModel):
+    """User's learning mode preference."""
+
+    user_id: str
+    """User identifier."""
+
+    active_mode: str = "mtg"
+    """Active learning mode."""
+
+
+class UserPreferenceUpdate(BaseModel):
+    """Request to update user's learning mode preference."""
+
+    active_mode: str = Field(..., description="Learning mode to set")
+
+    @field_validator("active_mode")
+    @classmethod
+    def validate_mode(cls, v: str) -> str:
+        if v not in VALID_MODES:
+            raise ValueError(f"Invalid mode: {v}. Must be one of {VALID_MODES}")
+        return v

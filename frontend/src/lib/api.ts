@@ -5,10 +5,13 @@
  * - Request timeout (30s default)
  * - AbortController support for cleanup
  * - Proper error handling
+ * - Learning mode support
  */
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 const DEFAULT_TIMEOUT = 30000 // 30 seconds
+
+export type LearningMode = 'simple' | 'detailed' | 'mtg'
 
 export interface ValidationError {
   type: string
@@ -29,11 +32,17 @@ export interface ProgressEntry {
   phase_id: string
   completed: boolean
   code_snapshot: string | null
+  mode?: string
 }
 
 export interface ProgressResponse {
   user_id: string
   progress: ProgressEntry[]
+}
+
+export interface UserPreference {
+  user_id: string
+  active_mode: LearningMode
 }
 
 /**
@@ -133,15 +142,17 @@ export async function validateCode(
 }
 
 /**
- * Get user progress
+ * Get user progress filtered by learning mode
  */
 export async function getProgress(
   userId: string,
-  options?: { signal?: AbortSignal }
+  options?: { signal?: AbortSignal; mode?: LearningMode }
 ): Promise<ProgressResponse> {
-  const response = await fetchWithTimeout(`${API_URL}/api/progress/${encodeURIComponent(userId)}`, {
-    signal: options?.signal,
-  })
+  const mode = options?.mode || 'mtg'
+  const response = await fetchWithTimeout(
+    `${API_URL}/api/progress/${encodeURIComponent(userId)}?mode=${encodeURIComponent(mode)}`,
+    { signal: options?.signal }
+  )
 
   if (!response.ok) {
     const message = await parseErrorResponse(response, 'Failed to fetch progress')
@@ -160,8 +171,9 @@ export async function updateProgress(
   phaseId: string,
   completed: boolean,
   codeSnapshot?: string,
-  options?: { signal?: AbortSignal }
+  options?: { signal?: AbortSignal; mode?: LearningMode }
 ): Promise<void> {
+  const mode = options?.mode || 'mtg'
   const response = await fetchWithTimeout(`${API_URL}/api/progress/${encodeURIComponent(userId)}`, {
     method: 'POST',
     headers: {
@@ -172,6 +184,7 @@ export async function updateProgress(
       phase_id: phaseId,
       completed,
       code_snapshot: codeSnapshot,
+      mode,
     }),
     signal: options?.signal,
   })
@@ -180,6 +193,54 @@ export async function updateProgress(
     const message = await parseErrorResponse(response, 'Failed to update progress')
     throw new ApiError(message, response.status)
   }
+}
+
+/**
+ * Get user's learning mode preference
+ */
+export async function getUserPreference(
+  userId: string,
+  options?: { signal?: AbortSignal }
+): Promise<UserPreference> {
+  const response = await fetchWithTimeout(
+    `${API_URL}/api/preferences/${encodeURIComponent(userId)}`,
+    { signal: options?.signal }
+  )
+
+  if (!response.ok) {
+    const message = await parseErrorResponse(response, 'Failed to fetch preference')
+    throw new ApiError(message, response.status)
+  }
+
+  return response.json()
+}
+
+/**
+ * Set user's learning mode preference
+ */
+export async function setUserPreference(
+  userId: string,
+  mode: LearningMode,
+  options?: { signal?: AbortSignal }
+): Promise<UserPreference> {
+  const response = await fetchWithTimeout(
+    `${API_URL}/api/preferences/${encodeURIComponent(userId)}`,
+    {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ active_mode: mode }),
+      signal: options?.signal,
+    }
+  )
+
+  if (!response.ok) {
+    const message = await parseErrorResponse(response, 'Failed to update preference')
+    throw new ApiError(message, response.status)
+  }
+
+  return response.json()
 }
 
 // ==========================================
@@ -217,14 +278,16 @@ export interface PhaseContentResponse {
 }
 
 /**
- * Get the full curriculum structure
+ * Get the full curriculum structure for a learning mode
  */
 export async function getCurriculum(
-  options?: { signal?: AbortSignal }
+  options?: { signal?: AbortSignal; mode?: LearningMode }
 ): Promise<CurriculumResponse> {
-  const response = await fetchWithTimeout(`${API_URL}/api/curriculum`, {
-    signal: options?.signal,
-  })
+  const mode = options?.mode || 'mtg'
+  const response = await fetchWithTimeout(
+    `${API_URL}/api/curriculum?mode=${encodeURIComponent(mode)}`,
+    { signal: options?.signal }
+  )
 
   if (!response.ok) {
     const message = await parseErrorResponse(response, 'Failed to fetch curriculum')
@@ -239,10 +302,11 @@ export async function getCurriculum(
  */
 export async function getLevel(
   levelId: string,
-  options?: { signal?: AbortSignal }
+  options?: { signal?: AbortSignal; mode?: LearningMode }
 ): Promise<Level> {
+  const mode = options?.mode || 'mtg'
   const response = await fetchWithTimeout(
-    `${API_URL}/api/levels/${encodeURIComponent(levelId)}`,
+    `${API_URL}/api/levels/${encodeURIComponent(levelId)}?mode=${encodeURIComponent(mode)}`,
     { signal: options?.signal }
   )
 
@@ -260,10 +324,11 @@ export async function getLevel(
 export async function getPhaseContent(
   levelId: string,
   phaseId: string,
-  options?: { signal?: AbortSignal }
+  options?: { signal?: AbortSignal; mode?: LearningMode }
 ): Promise<PhaseContentResponse> {
+  const mode = options?.mode || 'mtg'
   const response = await fetchWithTimeout(
-    `${API_URL}/api/levels/${encodeURIComponent(levelId)}/phases/${encodeURIComponent(phaseId)}`,
+    `${API_URL}/api/levels/${encodeURIComponent(levelId)}/phases/${encodeURIComponent(phaseId)}?mode=${encodeURIComponent(mode)}`,
     { signal: options?.signal }
   )
 

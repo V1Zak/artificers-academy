@@ -38,6 +38,7 @@ class DatabaseService:
         self._client: Optional[Client] = None
         self._memory_store: dict[str, list[ProgressEntry]] = {}
         self._memory_snippets: dict[str, list[dict]] = {}
+        self._memory_preferences: dict[str, str] = {}
         self._init_client()
 
     def _init_client(self):
@@ -63,15 +64,17 @@ class DatabaseService:
     # Progress Methods
     # ==========================================
 
-    def get_progress(self, user_id: str) -> list[ProgressEntry]:
-        """Get all progress entries for a user."""
+    def get_progress(self, user_id: str, mode: str = "mtg") -> list[ProgressEntry]:
+        """Get all progress entries for a user filtered by mode."""
         if not self.is_connected:
-            return list(self._memory_store.get(user_id, []))
+            entries = self._memory_store.get(user_id, [])
+            return [e for e in entries if e.mode == mode]
 
         try:
             response = self._client.table("user_progress") \
                 .select("*") \
                 .eq("user_id", user_id) \
+                .eq("mode", mode) \
                 .execute()
 
             return [
@@ -80,6 +83,7 @@ class DatabaseService:
                     phase_id=row["phase_id"],
                     completed=row["completed"],
                     code_snapshot=row.get("code_snapshot"),
+                    mode=row.get("mode", "mtg"),
                 )
                 for row in response.data
             ]
@@ -94,8 +98,9 @@ class DatabaseService:
         phase_id: str,
         completed: bool,
         code_snapshot: Optional[str] = None,
+        mode: str = "mtg",
     ) -> None:
-        """Insert or update progress for a user/level/phase."""
+        """Insert or update progress for a user/level/phase/mode."""
         if not self.is_connected:
             # In-memory fallback
             if user_id not in self._memory_store:
@@ -104,7 +109,7 @@ class DatabaseService:
             # Find existing entry
             existing = None
             for entry in self._memory_store[user_id]:
-                if entry.level_id == level_id and entry.phase_id == phase_id:
+                if entry.level_id == level_id and entry.phase_id == phase_id and entry.mode == mode:
                     existing = entry
                     break
 
@@ -118,6 +123,7 @@ class DatabaseService:
                     phase_id=phase_id,
                     completed=completed,
                     code_snapshot=code_snapshot,
+                    mode=mode,
                 ))
             return
 
@@ -128,6 +134,7 @@ class DatabaseService:
                 "level_id": level_id,
                 "phase_id": phase_id,
                 "completed": completed,
+                "mode": mode,
             }
 
             if code_snapshot:
@@ -137,7 +144,7 @@ class DatabaseService:
                 data["completed_at"] = datetime.now(timezone.utc).isoformat()
 
             self._client.table("user_progress") \
-                .upsert(data, on_conflict="user_id,level_id,phase_id") \
+                .upsert(data, on_conflict="user_id,mode,level_id,phase_id") \
                 .execute()
         except Exception as e:
             logger.error(f"Failed to upsert progress for user {user_id}: {e}")
@@ -235,6 +242,46 @@ class DatabaseService:
         except Exception as e:
             logger.error(f"Failed to delete snippet {snippet_id}: {e}")
             raise DatabaseError(f"Failed to delete snippet: {e}")
+
+
+    # ==========================================
+    # User Preferences Methods
+    # ==========================================
+
+    def get_user_preference(self, user_id: str) -> str:
+        """Get a user's active learning mode. Returns 'mtg' if not set."""
+        if not self.is_connected:
+            return self._memory_preferences.get(user_id, "mtg")
+
+        try:
+            response = self._client.table("user_preferences") \
+                .select("active_mode") \
+                .eq("user_id", user_id) \
+                .execute()
+
+            if response.data:
+                return response.data[0]["active_mode"]
+            return "mtg"
+        except Exception as e:
+            logger.error(f"Failed to get preference for user {user_id}: {e}")
+            return "mtg"
+
+    def set_user_preference(self, user_id: str, mode: str) -> None:
+        """Set a user's active learning mode."""
+        if not self.is_connected:
+            self._memory_preferences[user_id] = mode
+            return
+
+        try:
+            self._client.table("user_preferences") \
+                .upsert(
+                    {"user_id": user_id, "active_mode": mode},
+                    on_conflict="user_id",
+                ) \
+                .execute()
+        except Exception as e:
+            logger.error(f"Failed to set preference for user {user_id}: {e}")
+            raise DatabaseError(f"Failed to save preference: {e}")
 
 
 # Thread-safe singleton

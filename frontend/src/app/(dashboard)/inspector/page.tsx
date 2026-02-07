@@ -5,6 +5,8 @@ import dynamic from 'next/dynamic'
 import { CounterspellAlert, ResolveAlert } from '@/components/theme/CounterspellAlert'
 import { validateCode, type ValidationResponse } from '@/lib/api'
 import { useToast } from '@/contexts/ToastContext'
+import { useMode } from '@/contexts'
+import { getModeConfig } from '@/lib/mode-config'
 
 // Dynamic import for Monaco to avoid SSR issues
 const MonacoEditor = dynamic(
@@ -13,7 +15,7 @@ const MonacoEditor = dynamic(
     ssr: false,
     loading: () => (
       <div className="scroll-container h-[400px] flex items-center justify-center">
-        <p className="text-silver/60">Loading editor...</p>
+        <p style={{ color: 'var(--silver-muted)' }}>Loading editor...</p>
       </div>
     ),
   }
@@ -43,6 +45,8 @@ export default function InspectorPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const { toast } = useToast()
+  const { mode } = useMode()
+  const config = getModeConfig(mode)
 
   const handleValidate = async () => {
     setLoading(true)
@@ -53,13 +57,13 @@ export default function InspectorPage() {
       const response = await validateCode(code)
       setResult(response)
       if (response.valid) {
-        toast('Spell resolves successfully!', 'success')
+        toast(config.inspector.success, 'success')
       } else {
-        toast(`${response.errors.length} counterspell(s) detected`, 'error')
+        toast(config.inspector.failure(response.errors.length), 'error')
       }
     } catch (err) {
-      setError('Failed to connect to the Inspector. Is the backend running?')
-      toast('Failed to connect to the Inspector', 'error')
+      setError('Failed to connect to the validator. Is the backend running?')
+      toast('Failed to connect to the validator', 'error')
     } finally {
       setLoading(false)
     }
@@ -67,16 +71,17 @@ export default function InspectorPage() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-2">The Inspector</h1>
-      <p className="text-silver/60 mb-8">
-        Submit your Decklist for validation. The Inspector will analyze your
-        spells and identify any issues.
+      <h1 className="text-3xl font-bold mb-2">{config.headings.inspectorTitle}</h1>
+      <p className="mb-8" style={{ color: 'var(--silver-muted)' }}>
+        {config.headings.inspectorSubtitle}
       </p>
 
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Code Input */}
         <div>
-          <h2 className="text-xl font-semibold mb-4">Your Decklist</h2>
+          <h2 className="text-xl font-semibold mb-4">
+            {mode === 'mtg' ? 'Your Decklist' : 'Your Code'}
+          </h2>
           <MonacoEditor
             value={code}
             onChange={setCode}
@@ -89,13 +94,15 @@ export default function InspectorPage() {
             className="btn-arcane disabled:opacity-50 flex items-center gap-2"
           >
             {loading && <LoadingSpinner />}
-            {loading ? 'Inspecting...' : 'Submit for Inspection'}
+            {loading ? config.inspector.submitting : config.inspector.submitButton}
           </button>
         </div>
 
         {/* Results */}
         <div>
-          <h2 className="text-xl font-semibold mb-4">Inspector&apos;s Verdict</h2>
+          <h2 className="text-xl font-semibold mb-4">
+            {mode === 'mtg' ? "Inspector's Verdict" : 'Results'}
+          </h2>
 
           {error && (
             <div className="counterspell-alert">
@@ -118,8 +125,8 @@ export default function InspectorPage() {
           )}
 
           {!result && !error && (
-            <div className="scroll-container p-6 text-center text-silver/50">
-              <p>Submit your code to receive the Inspector&apos;s verdict</p>
+            <div className="scroll-container p-6 text-center" style={{ color: 'var(--silver-faint)' }}>
+              <p>{config.inspector.emptyState}</p>
             </div>
           )}
         </div>
@@ -129,21 +136,14 @@ export default function InspectorPage() {
       <div className="mt-12">
         <h2 className="text-xl font-semibold mb-4">Quick Reference</h2>
         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
-          <ReferenceCard
-            title="Sorceries"
-            decorator="@mcp.tool()"
-            description="Executable functions the Planeswalker can invoke"
-          />
-          <ReferenceCard
-            title="Permanents"
-            decorator="@mcp.resource(uri)"
-            description="Read-only data accessible via URI"
-          />
-          <ReferenceCard
-            title="Tutors"
-            decorator="@mcp.prompt()"
-            description="Pre-configured context templates"
-          />
+          {config.referenceCards.map((card) => (
+            <ReferenceCard
+              key={card.decorator}
+              title={card.title}
+              decorator={card.decorator}
+              description={card.description}
+            />
+          ))}
         </div>
       </div>
     </div>
@@ -161,9 +161,9 @@ function ReferenceCard({
 }) {
   return (
     <div className="glass-card p-4">
-      <h3 className="font-semibold mb-1 text-silver">{title}</h3>
-      <code className="text-sm text-arcane-purple font-mono">{decorator}</code>
-      <p className="text-sm text-silver/60 mt-2">{description}</p>
+      <h3 className="font-semibold mb-1">{title}</h3>
+      <code className="text-sm font-mono" style={{ color: 'var(--arcane-purple)' }}>{decorator}</code>
+      <p className="text-sm mt-2" style={{ color: 'var(--silver-muted)' }}>{description}</p>
     </div>
   )
 }

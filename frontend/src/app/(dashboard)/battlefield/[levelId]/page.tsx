@@ -4,7 +4,8 @@ import { useEffect, useState, useRef, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { getLevel, type Level, type Phase } from '@/lib/api'
-import { useProgress } from '@/contexts'
+import { useProgress, useMode } from '@/contexts'
+import { getModeConfig } from '@/lib/mode-config'
 import { SkeletonPhaseCard } from '@/components/ui/Skeleton'
 
 export default function LevelPage() {
@@ -17,6 +18,8 @@ export default function LevelPage() {
   const abortControllerRef = useRef<AbortController | null>(null)
 
   const { isPhaseCompleted, isPhaseUnlocked, loading: progressLoading } = useProgress()
+  const { mode } = useMode()
+  const config = getModeConfig(mode)
 
   const loadLevel = useCallback(
     async (signal?: AbortSignal) => {
@@ -24,7 +27,7 @@ export default function LevelPage() {
       setError(null)
 
       try {
-        const data = await getLevel(levelId, { signal })
+        const data = await getLevel(levelId, { signal, mode })
         if (signal?.aborted) return
         setLevel(data)
       } catch (err) {
@@ -36,11 +39,10 @@ export default function LevelPage() {
         }
       }
     },
-    [levelId]
+    [levelId, mode]
   )
 
   useEffect(() => {
-    // Abort previous request
     if (abortControllerRef.current) {
       abortControllerRef.current.abort()
     }
@@ -67,11 +69,11 @@ export default function LevelPage() {
   if (loading || progressLoading) {
     return (
       <div>
-        <div className="h-4 w-32 bg-white/[0.06] rounded animate-pulse mb-6" />
+        <div className="h-4 w-32 rounded animate-pulse mb-6" style={{ backgroundColor: 'var(--obsidian)' }} />
         <div className="mb-8 space-y-2">
-          <div className="h-4 w-24 bg-white/[0.06] rounded animate-pulse" />
-          <div className="h-8 w-64 bg-white/[0.06] rounded animate-pulse" />
-          <div className="h-5 w-96 bg-white/[0.06] rounded animate-pulse" />
+          <div className="h-4 w-24 rounded animate-pulse" style={{ backgroundColor: 'var(--obsidian)' }} />
+          <div className="h-8 w-64 rounded animate-pulse" style={{ backgroundColor: 'var(--obsidian)' }} />
+          <div className="h-5 w-96 rounded animate-pulse" style={{ backgroundColor: 'var(--obsidian)' }} />
         </div>
         <div className="space-y-4">
           <SkeletonPhaseCard />
@@ -91,7 +93,7 @@ export default function LevelPage() {
             Try Again
           </button>
           <Link href="/battlefield" className="btn-arcane">
-            Return to Battlefield
+            Return to {config.nav.battlefield}
           </Link>
         </div>
       </div>
@@ -103,24 +105,25 @@ export default function LevelPage() {
       {/* Back Navigation */}
       <Link
         href="/battlefield"
-        className="inline-flex items-center gap-2 text-silver/60 hover:text-silver mb-6"
+        className="inline-flex items-center gap-2 mb-6"
+        style={{ color: 'var(--silver-faint)' }}
       >
         <ChevronLeftIcon />
-        Back to Battlefield
+        Back to {config.nav.battlefield}
       </Link>
 
       {/* Level Header */}
       <div className="mb-8">
-        <p className="text-arcane-purple font-medium mb-1">{level.subtitle}</p>
+        <p className="font-medium mb-1" style={{ color: 'var(--arcane-purple)' }}>{level.subtitle}</p>
         <h1 className="text-3xl font-bold mb-2">{level.title}</h1>
-        <p className="text-silver/60">{level.description}</p>
+        <p style={{ color: 'var(--silver-muted)' }}>{level.description}</p>
       </div>
 
       {/* Empty State */}
       {level.phases.length === 0 && (
         <div className="scroll-container p-8 text-center">
-          <p className="text-silver/60">
-            No phases available for this level yet. Check back soon!
+          <p style={{ color: 'var(--silver-muted)' }}>
+            No {config.terms.phase.toLowerCase()}s available for this {config.terms.level.toLowerCase()} yet. Check back soon!
           </p>
         </div>
       )}
@@ -135,6 +138,7 @@ export default function LevelPage() {
             phaseNumber={index + 1}
             isCompleted={isPhaseCompleted(levelId, phase.id)}
             isUnlocked={isPhaseUnlocked(levelId, phase.id, index)}
+            config={config}
           />
         ))}
       </div>
@@ -148,15 +152,16 @@ function PhaseCard({
   phaseNumber,
   isCompleted,
   isUnlocked,
+  config,
 }: {
   phase: Phase
   levelId: string
   phaseNumber: number
   isCompleted: boolean
   isUnlocked: boolean
+  config: ReturnType<typeof getModeConfig>
 }) {
-  const phaseTypeIcon = phase.type === 'lesson' ? '📖' : '⚗️'
-  const phaseTypeLabel = phase.type === 'lesson' ? 'Lesson' : 'Tutorial'
+  const phaseTypeLabel = phase.type === 'lesson' ? config.terms.lesson : config.terms.tutorial
 
   return (
     <div
@@ -176,11 +181,16 @@ function PhaseCard({
                 isCompleted
                   ? 'bg-mana-green/20 text-mana-green'
                   : isUnlocked
-                    ? 'bg-arcane-purple/20 text-arcane-purple'
-                    : 'bg-white/5 text-silver/30'
+                    ? ''
+                    : ''
               }
             `}
-            aria-label={isCompleted ? 'Completed' : `Phase ${phaseNumber}`}
+            style={{
+              ...(!isCompleted && isUnlocked
+                ? { backgroundColor: 'rgba(var(--arcane-purple-rgb, 139,92,246), 0.2)', color: 'var(--arcane-purple)' }
+                : !isCompleted ? { backgroundColor: 'var(--obsidian)', color: 'var(--silver-faint)' } : {}),
+            }}
+            aria-label={isCompleted ? config.status.completed : `${config.terms.phase} ${phaseNumber}`}
           >
             {isCompleted ? '✓' : phaseNumber}
           </div>
@@ -188,10 +198,7 @@ function PhaseCard({
           {/* Phase Info */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1 flex-wrap">
-              <span className="text-lg" role="img" aria-label={phaseTypeLabel}>
-                {phaseTypeIcon}
-              </span>
-              <span className="text-xs text-silver/50 uppercase tracking-wide">
+              <span className="text-xs uppercase tracking-wide" style={{ color: 'var(--silver-faint)' }}>
                 {phaseTypeLabel}
               </span>
               {phase.validation_required && (
@@ -201,13 +208,13 @@ function PhaseCard({
               )}
             </div>
             <h3 className="text-lg sm:text-xl font-semibold mb-1">{phase.title}</h3>
-            <p className="text-silver/60 text-sm sm:text-base">{phase.description}</p>
+            <p className="text-sm sm:text-base" style={{ color: 'var(--silver-muted)' }}>{phase.description}</p>
 
-            {/* Status / Action - inline on desktop, below on mobile */}
+            {/* Status / Action - inline on mobile */}
             <div className="mt-3 sm:hidden">
               {isCompleted ? (
                 <span className="px-3 py-1 bg-mana-green/10 text-mana-green text-sm rounded inline-block">
-                  Completed
+                  {config.status.completed}
                 </span>
               ) : isUnlocked ? (
                 <Link
@@ -217,8 +224,8 @@ function PhaseCard({
                   {phaseNumber === 1 ? 'Start' : 'Continue'}
                 </Link>
               ) : (
-                <span className="px-3 py-1 bg-white/5 text-silver/40 text-sm rounded inline-block">
-                  🔒 Locked
+                <span className="px-3 py-1 text-sm rounded inline-block" style={{ backgroundColor: 'var(--obsidian)', color: 'var(--silver-faint)' }}>
+                  {config.status.locked}
                 </span>
               )}
             </div>
@@ -228,7 +235,7 @@ function PhaseCard({
           <div className="flex-shrink-0 hidden sm:block">
             {isCompleted ? (
               <span className="px-3 py-1 bg-mana-green/10 text-mana-green text-sm rounded">
-                Completed
+                {config.status.completed}
               </span>
             ) : isUnlocked ? (
               <Link
@@ -238,8 +245,8 @@ function PhaseCard({
                 {phaseNumber === 1 ? 'Start' : 'Continue'}
               </Link>
             ) : (
-              <span className="px-3 py-1 bg-white/5 text-silver/40 text-sm rounded">
-                🔒 Locked
+              <span className="px-3 py-1 text-sm rounded" style={{ backgroundColor: 'var(--obsidian)', color: 'var(--silver-faint)' }}>
+                {config.status.locked}
               </span>
             )}
           </div>

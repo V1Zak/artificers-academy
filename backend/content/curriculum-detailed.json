@@ -1,0 +1,186 @@
+{
+  "levels": [
+    {
+      "id": "level1",
+      "title": "Module 1: Fundamentals",
+      "subtitle": "MCP Server Implementation",
+      "description": "Implement a fully functional MCP server from scratch, covering the JSON-RPC 2.0 protocol, client-host-server architecture, and tool registration via FastMCP.",
+      "mana_color": "blue",
+      "phases": [
+        {
+          "id": "phase1",
+          "title": "MCP Architecture Overview",
+          "description": "Examine the MCP client-host-server architecture, JSON-RPC 2.0 message format, and the role of each component in the protocol stack.",
+          "type": "lesson",
+          "content_file": "detailed/level1/phase1_architecture.md"
+        },
+        {
+          "id": "phase2",
+          "title": "Environment Setup",
+          "description": "Configure a Python development environment using uv, install FastMCP with CLI extras, and initialize the project structure.",
+          "type": "tutorial",
+          "content_file": "detailed/level1/phase2_environment.md"
+        },
+        {
+          "id": "phase3",
+          "title": "Tool Implementation",
+          "description": "Implement your first MCP tool using the @mcp.tool() decorator, define typed parameters, and handle JSON-RPC request/response cycles.",
+          "type": "tutorial",
+          "content_file": "detailed/level1/phase3_tool_implementation.md",
+          "validation_required": true
+        },
+        {
+          "id": "phase4",
+          "title": "Inspector & Debugging",
+          "description": "Use the MCP Inspector to send test requests, inspect JSON-RPC messages, and debug tool execution before client integration.",
+          "type": "tutorial",
+          "content_file": "detailed/level1/phase4_inspector.md"
+        },
+        {
+          "id": "phase5",
+          "title": "Client Integration",
+          "description": "Configure Claude Desktop as an MCP client, register your server via claude_desktop_config.json, and verify end-to-end tool invocation.",
+          "type": "tutorial",
+          "content_file": "detailed/level1/phase5_client_integration.md"
+        }
+      ]
+    },
+    {
+      "id": "level2",
+      "title": "Module 2: Resources",
+      "subtitle": "Resource Provider Pattern",
+      "description": "Build a filesystem-backed MCP resource provider with URI template routing, secure path resolution, and read-only data access patterns.",
+      "mana_color": "black",
+      "phases": [
+        {
+          "id": "phase1",
+          "title": "Resources vs Tools",
+          "description": "Distinguish between MCP's two primary primitives: tools (model-controlled actions) and resources (application-controlled data providers).",
+          "type": "lesson",
+          "content_file": "detailed/level2/phase1_resources_vs_tools.md"
+        },
+        {
+          "id": "phase2",
+          "title": "Project Scaffolding",
+          "description": "Initialize a new MCP server project with proper directory layout, sample data files, and dependency configuration.",
+          "type": "tutorial",
+          "content_file": "detailed/level2/phase2_scaffolding.md"
+        },
+        {
+          "id": "phase3",
+          "title": "Resource URI Templates",
+          "description": "Implement @mcp.resource() handlers with RFC 6570 URI templates to expose directory listings and file metadata.",
+          "type": "tutorial",
+          "content_file": "detailed/level2/phase3_uri_templates.md",
+          "validation_required": true
+        },
+        {
+          "id": "phase4",
+          "title": "Secure File I/O",
+          "description": "Implement file reading with pathlib-based path resolution, directory traversal prevention, and proper error handling.",
+          "type": "tutorial",
+          "content_file": "detailed/level2/phase4_secure_file_io.md",
+          "validation_required": true
+        },
+        {
+          "id": "phase5",
+          "title": "Integration Testing",
+          "description": "Validate the complete resource provider by testing URI resolution, edge cases, and client-side resource discovery.",
+          "type": "tutorial",
+          "content_file": "detailed/level2/phase5_integration_testing.md"
+        }
+      ]
+    },
+    {
+      "id": "level3",
+      "title": "Module 3: External APIs",
+      "subtitle": "Async API Integration",
+      "description": "Integrate external HTTP APIs into an MCP server using async/await patterns, httpx, and TTL-based response caching.",
+      "mana_color": "green",
+      "phases": [
+        {
+          "id": "phase1",
+          "title": "External API Patterns",
+          "description": "Survey common patterns for integrating third-party APIs into MCP servers, including authentication, rate limiting, and error propagation.",
+          "type": "lesson",
+          "content_file": "detailed/level3/phase1_api_patterns.md"
+        },
+        {
+          "id": "phase2",
+          "title": "Dependency Configuration",
+          "description": "Configure httpx and API key management using environment variables and .env files with python-dotenv.",
+          "type": "tutorial",
+          "content_file": "detailed/level3/phase2_dependencies.md"
+        },
+        {
+          "id": "phase3",
+          "title": "Async HTTP with httpx",
+          "description": "Implement async MCP tools that perform HTTP requests using httpx.AsyncClient with proper connection lifecycle management.",
+          "type": "tutorial",
+          "content_file": "detailed/level3/phase3_async_http.md",
+          "validation_required": true
+        },
+        {
+          "id": "phase4",
+          "title": "Response Caching",
+          "description": "Add TTL-based in-memory caching to reduce API calls, with cache invalidation strategies and storage considerations.",
+          "type": "tutorial",
+          "content_file": "detailed/level3/phase4_caching.md",
+          "validation_required": true
+        },
+        {
+          "id": "phase5",
+          "title": "End-to-End Validation",
+          "description": "Validate the multi-tool MCP server with Inspector testing, error simulation, and Claude Desktop integration.",
+          "type": "tutorial",
+          "content_file": "detailed/level3/phase5_validation.md"
+        }
+      ]
+    },
+    {
+      "id": "level4",
+      "title": "Module 4: Deployment",
+      "subtitle": "Production Infrastructure",
+      "description": "Deploy an MCP server to production using Docker containerization, SSE transport, and Railway cloud hosting with environment configuration.",
+      "mana_color": "gold",
+      "phases": [
+        {
+          "id": "phase1",
+          "title": "Transport Protocols",
+          "description": "Compare MCP transport layers: stdio for local IPC and SSE (Server-Sent Events) for remote HTTP-based communication.",
+          "type": "lesson",
+          "content_file": "detailed/level4/phase1_transports.md"
+        },
+        {
+          "id": "phase2",
+          "title": "Docker Containerization",
+          "description": "Create a production Dockerfile with multi-stage builds, non-root execution, and optimized Python dependency installation.",
+          "type": "tutorial",
+          "content_file": "detailed/level4/phase2_docker.md"
+        },
+        {
+          "id": "phase3",
+          "title": "SSE Transport Layer",
+          "description": "Convert the server from stdio to SSE transport, configure HTTP endpoints, and handle CORS for cross-origin clients.",
+          "type": "tutorial",
+          "content_file": "detailed/level4/phase3_sse_transport.md",
+          "validation_required": true
+        },
+        {
+          "id": "phase4",
+          "title": "Cloud Deployment (Railway)",
+          "description": "Deploy the containerized MCP server to Railway, configure environment variables, and set up persistent URLs.",
+          "type": "tutorial",
+          "content_file": "detailed/level4/phase4_railway.md"
+        },
+        {
+          "id": "phase5",
+          "title": "Production Readiness",
+          "description": "Review production concerns including health checks, logging, monitoring, authentication, and scaling strategies for MCP servers.",
+          "type": "lesson",
+          "content_file": "detailed/level4/phase5_production.md"
+        }
+      ]
+    }
+  ]
+}
