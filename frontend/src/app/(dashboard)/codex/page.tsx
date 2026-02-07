@@ -3,6 +3,17 @@
 import { CodeScroll } from '@/components/theme'
 import { AnimatedCard, PageTransition } from '@/components/motion'
 
+const DICTIONARY_ENTRIES = [
+  { technical: 'LLM (Claude)', metaphor: 'Planeswalker', description: 'The intelligent entity that invokes your tools', icon: '🧙' },
+  { technical: 'MCP Server', metaphor: 'Deck / Library', description: 'Your collection of tools and resources', icon: '📚' },
+  { technical: 'MCP Client', metaphor: 'Player', description: 'The interface (Claude Desktop, etc.)', icon: '🎮' },
+  { technical: 'Tool', metaphor: 'Sorcery / Instant', description: 'Executable functions', icon: '⚡' },
+  { technical: 'Resource', metaphor: 'Permanent', description: 'Read-only data addressable by URI', icon: '🏔️' },
+  { technical: 'Prompt', metaphor: 'Tutor', description: 'Pre-configured context templates', icon: '📜' },
+  { technical: 'uv', metaphor: 'Mana Source', description: 'The package manager that powers your spells', icon: '💎' },
+  { technical: 'Error', metaphor: 'Counterspell', description: 'When a spell fails or is invalid', icon: '🚫' },
+]
+
 export default function CodexPage() {
   return (
     <PageTransition>
@@ -11,63 +22,18 @@ export default function CodexPage() {
         The Grand Artificer&apos;s compendium of knowledge
       </p>
 
-      {/* Terminology */}
+      {/* Terminology - Lore Card Grid */}
       <section className="mb-12">
         <h2 className="text-2xl font-semibold mb-4">
           The Grand Artificer&apos;s Dictionary
         </h2>
-        <div className="scroll-container overflow-x-auto">
-          <table className="w-full min-w-[500px]">
-            <thead className="bg-white/[0.03] border-b border-white/[0.06]">
-              <tr>
-                <th className="text-left p-3 md:p-4 font-semibold">Technical Term</th>
-                <th className="text-left p-3 md:p-4 font-semibold">Metaphorical Term</th>
-                <th className="text-left p-3 md:p-4 font-semibold hidden sm:table-cell">Description</th>
-              </tr>
-            </thead>
-            <tbody>
-              <TermRow
-                technical="LLM (Claude)"
-                metaphor="Planeswalker"
-                description="The intelligent entity that invokes your tools"
-              />
-              <TermRow
-                technical="MCP Server"
-                metaphor="Deck / Library"
-                description="Your collection of tools and resources"
-              />
-              <TermRow
-                technical="MCP Client"
-                metaphor="Player"
-                description="The interface (Claude Desktop, etc.)"
-              />
-              <TermRow
-                technical="Tool"
-                metaphor="Sorcery / Instant"
-                description="Executable functions"
-              />
-              <TermRow
-                technical="Resource"
-                metaphor="Permanent"
-                description="Read-only data addressable by URI"
-              />
-              <TermRow
-                technical="Prompt"
-                metaphor="Tutor"
-                description="Pre-configured context templates"
-              />
-              <TermRow
-                technical="uv"
-                metaphor="Mana Source"
-                description="The package manager that powers your spells"
-              />
-              <TermRow
-                technical="Error"
-                metaphor="Counterspell"
-                description="When a spell fails or is invalid"
-              />
-            </tbody>
-          </table>
+        <p className="text-silver/50 text-sm mb-6">Hover or tap a card to reveal its meaning</p>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {DICTIONARY_ENTRIES.map((entry, index) => (
+            <AnimatedCard key={entry.technical} index={index}>
+              <LoreCard {...entry} />
+            </AnimatedCard>
+          ))}
         </div>
       </section>
 
@@ -140,21 +106,33 @@ npx @modelcontextprotocol/inspector uv run server.py`}
   )
 }
 
-function TermRow({
+function LoreCard({
   technical,
   metaphor,
   description,
+  icon,
 }: {
   technical: string
   metaphor: string
   description: string
+  icon: string
 }) {
   return (
-    <tr className="border-b border-white/[0.06]">
-      <td className="p-3 md:p-4 font-mono text-sm">{technical}</td>
-      <td className="p-3 md:p-4 text-arcane-purple font-semibold">{metaphor}</td>
-      <td className="p-3 md:p-4 text-silver/60 hidden sm:table-cell">{description}</td>
-    </tr>
+    <div className="group [perspective:600px]">
+      <div className="relative h-40 transition-transform duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
+        {/* Front */}
+        <div className="absolute inset-0 glass-card p-4 flex flex-col items-center justify-center text-center [backface-visibility:hidden]">
+          <span className="text-3xl mb-2">{icon}</span>
+          <h3 className="font-semibold text-arcane-purple text-sm">{metaphor}</h3>
+          <p className="text-xs text-silver/40 mt-1 font-mono">{technical}</p>
+        </div>
+        {/* Back */}
+        <div className="absolute inset-0 glass-card p-4 flex flex-col items-center justify-center text-center [backface-visibility:hidden] [transform:rotateY(180deg)] bg-arcane-purple/10 border-arcane-purple/20">
+          <h3 className="font-semibold text-arcane-purple text-sm mb-2">{metaphor}</h3>
+          <p className="text-xs text-silver/70 leading-relaxed">{description}</p>
+        </div>
+      </div>
+    </div>
   )
 }
 
