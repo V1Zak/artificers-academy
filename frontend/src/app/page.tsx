@@ -2,25 +2,25 @@ import Link from 'next/link'
 
 export default function Home() {
   return (
-    <main className="flex-1 flex flex-col items-center justify-center p-8 bg-void">
+    <main className="flex-1 flex flex-col items-center justify-center p-4 sm:p-8 bg-void">
       {/* Hero Section */}
       <div className="text-center max-w-3xl mx-auto">
-        <h1 className="text-5xl font-bold text-silver mb-4">
+        <h1 className="text-3xl sm:text-5xl font-bold text-silver mb-4">
           The Artificer&apos;s Academy
         </h1>
-        <p className="text-xl text-silver/70 mb-2">
+        <p className="text-lg sm:text-xl text-silver/70 mb-2">
           Master the art of crafting MCP servers
         </p>
-        <p className="text-lg text-arcane-purple mb-8">
+        <p className="text-base sm:text-lg text-arcane-purple mb-8">
           Where Planeswalkers learn to build their Decklists
         </p>
 
         {/* Call to Action */}
-        <div className="flex gap-4 justify-center mb-12">
-          <Link href="/login" className="btn-arcane">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-12">
+          <Link href="/login" className="btn-arcane min-h-[44px] flex items-center justify-center">
             Begin Your Journey
           </Link>
-          <Link href="/login?next=/codex" className="btn-mana">
+          <Link href="/login?next=/codex" className="btn-mana min-h-[44px] flex items-center justify-center">
             Browse the Codex
           </Link>
         </div>

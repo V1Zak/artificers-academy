@@ -16,13 +16,13 @@ export default function CodexPage() {
         <h2 className="text-2xl font-semibold mb-4">
           The Grand Artificer&apos;s Dictionary
         </h2>
-        <div className="scroll-container overflow-hidden">
-          <table className="w-full">
+        <div className="scroll-container overflow-x-auto">
+          <table className="w-full min-w-[500px]">
             <thead className="bg-white/[0.03] border-b border-white/[0.06]">
               <tr>
-                <th className="text-left p-4 font-semibold">Technical Term</th>
-                <th className="text-left p-4 font-semibold">Metaphorical Term</th>
-                <th className="text-left p-4 font-semibold">Description</th>
+                <th className="text-left p-3 md:p-4 font-semibold">Technical Term</th>
+                <th className="text-left p-3 md:p-4 font-semibold">Metaphorical Term</th>
+                <th className="text-left p-3 md:p-4 font-semibold hidden sm:table-cell">Description</th>
               </tr>
             </thead>
             <tbody>
@@ -151,9 +151,9 @@ function TermRow({
 }) {
   return (
     <tr className="border-b border-white/[0.06]">
-      <td className="p-4 font-mono text-sm">{technical}</td>
-      <td className="p-4 text-arcane-purple font-semibold">{metaphor}</td>
-      <td className="p-4 text-silver/60">{description}</td>
+      <td className="p-3 md:p-4 font-mono text-sm">{technical}</td>
+      <td className="p-3 md:p-4 text-arcane-purple font-semibold">{metaphor}</td>
+      <td className="p-3 md:p-4 text-silver/60 hidden sm:table-cell">{description}</td>
     </tr>
   )
 }

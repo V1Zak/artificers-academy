@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
 import { Providers } from '@/components/providers'
+import { MobileSidebar } from '@/components/layout/MobileSidebar'
 import type { User } from '@supabase/supabase-js'
 
 // Debug user for bypassing auth during development
@@ -44,8 +45,11 @@ export default async function DashboardLayout({
   return (
     <Providers user={user}>
       <div className="min-h-screen flex bg-void">
-        {/* Sidebar */}
-        <aside className="w-64 flex flex-col border-r border-white/[0.06] bg-void-light backdrop-blur-xl">
+        {/* Mobile sidebar */}
+        <MobileSidebar email={user.email || ''} />
+
+        {/* Desktop sidebar - hidden on mobile */}
+        <aside className="hidden md:flex w-64 flex-col border-r border-white/[0.06] bg-void-light backdrop-blur-xl">
           <div className="p-4 mb-4">
             <Link href="/dashboard" className="text-xl font-bold text-luminescent hover:text-luminescent/90 transition-colors">
               The Academy
@@ -72,8 +76,8 @@ export default async function DashboardLayout({
           </div>
         </aside>
 
-        {/* Main content */}
-        <main className="flex-1 p-8 overflow-y-auto bg-void">
+        {/* Main content - extra top padding on mobile for hamburger button */}
+        <main className="flex-1 p-4 pt-16 md:p-8 overflow-y-auto bg-void">
           {children}
         </main>
       </div>

@@ -158,8 +158,8 @@ function PhaseCard({
         ${isCompleted ? 'border-mana-green/30' : ''}
       `}
     >
-      <div className="p-6">
-        <div className="flex items-start gap-4">
+      <div className="p-4 sm:p-6">
+        <div className="flex items-start gap-3 sm:gap-4">
           {/* Phase Number */}
           <div
             className={`
@@ -192,12 +192,32 @@ function PhaseCard({
                 </span>
               )}
             </div>
-            <h3 className="text-xl font-semibold mb-1">{phase.title}</h3>
-            <p className="text-silver/60">{phase.description}</p>
+            <h3 className="text-lg sm:text-xl font-semibold mb-1">{phase.title}</h3>
+            <p className="text-silver/60 text-sm sm:text-base">{phase.description}</p>
+
+            {/* Status / Action - inline on desktop, below on mobile */}
+            <div className="mt-3 sm:hidden">
+              {isCompleted ? (
+                <span className="px-3 py-1 bg-mana-green/10 text-mana-green text-sm rounded inline-block">
+                  Completed
+                </span>
+              ) : isUnlocked ? (
+                <Link
+                  href={`/battlefield/${levelId}/${phase.id}`}
+                  className="btn-arcane text-sm inline-block min-h-[44px] leading-[44px]"
+                >
+                  {phaseNumber === 1 ? 'Start' : 'Continue'}
+                </Link>
+              ) : (
+                <span className="px-3 py-1 bg-white/5 text-silver/40 text-sm rounded inline-block">
+                  🔒 Locked
+                </span>
+              )}
+            </div>
           </div>
 
-          {/* Status / Action */}
-          <div className="flex-shrink-0">
+          {/* Status / Action - desktop only */}
+          <div className="flex-shrink-0 hidden sm:block">
             {isCompleted ? (
               <span className="px-3 py-1 bg-mana-green/10 text-mana-green text-sm rounded">
                 Completed
