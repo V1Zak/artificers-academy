@@ -131,7 +131,7 @@ export default function DashboardPage() {
       {/* Progress Overview */}
       <AnimatedCard>
         <div className="scroll-container p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-4">Your Journey</h2>
+          <h2 className="text-xl font-semibold mb-4">{config.dashboardProgressHeading}</h2>
           <ManaProgress
             current={completedLevelsCount}
             total={levels.length}

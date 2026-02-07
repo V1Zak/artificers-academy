@@ -58,3 +58,14 @@ export function DesktopModeBadge() {
     </div>
   )
 }
+
+export function DesktopBranding() {
+  const { mode } = useMode()
+  const config = getModeConfig(mode)
+
+  return (
+    <Link href="/dashboard" className="text-xl font-bold transition-colors" style={{ color: 'var(--luminescent)' }}>
+      {config.appTitle}
+    </Link>
+  )
+}

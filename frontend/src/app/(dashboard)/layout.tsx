@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
 import { Providers } from '@/components/providers'
 import { MobileSidebar } from '@/components/layout/MobileSidebar'
-import { DesktopNav, DesktopModeBadge } from '@/components/layout/DesktopNav'
+import { DesktopNav, DesktopModeBadge, DesktopBranding } from '@/components/layout/DesktopNav'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import type { User } from '@supabase/supabase-js'
 
@@ -76,9 +76,7 @@ function DesktopSidebar({ email }: { email: string }) {
   return (
     <aside className="hidden md:flex w-64 flex-col border-r" style={{ borderColor: 'var(--obsidian-border)', backgroundColor: 'var(--void-light)' }}>
       <div className="p-4 mb-4">
-        <Link href="/dashboard" className="text-xl font-bold transition-colors" style={{ color: 'var(--luminescent)' }}>
-          The Academy
-        </Link>
+        <DesktopBranding />
       </div>
 
       {/* Mode badge - client component */}

@@ -62,7 +62,7 @@ export function MobileSidebar({ email }: MobileSidebarProps) {
             style={{ color: 'var(--luminescent)' }}
             onClick={() => setOpen(false)}
           >
-            The Academy
+            {config.appTitle}
           </Link>
           <button
             onClick={() => setOpen(false)}

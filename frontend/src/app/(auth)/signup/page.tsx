@@ -2,6 +2,16 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { getModeConfig } from '@/lib/mode-config'
+import type { LearningMode } from '@/lib/api'
+
+function getStoredMode(): LearningMode {
+  if (typeof window !== 'undefined') {
+    const stored = localStorage.getItem('learning-mode')
+    if (stored === 'simple' || stored === 'detailed' || stored === 'mtg') return stored
+  }
+  return 'mtg'
+}
 
 export default function SignupPage() {
   const [email, setEmail] = useState('')
@@ -10,6 +20,7 @@ export default function SignupPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
+  const config = getModeConfig(getStoredMode())
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -67,10 +78,10 @@ export default function SignupPage() {
   return (
     <>
       <h1 className="text-2xl font-bold text-center mb-2">
-        Create Account
+        {config.auth.signupHeading}
       </h1>
       <p className="text-center mb-6" style={{ color: 'var(--silver-muted)' }}>
-        Start your learning journey
+        {config.auth.signupSubtext}
       </p>
 
       <form onSubmit={handleSignup} className="space-y-4">

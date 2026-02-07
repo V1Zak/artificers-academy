@@ -11,19 +11,10 @@ import { SkeletonCard } from '@/components/ui/Skeleton'
 
 type ManaColor = 'blue' | 'black' | 'green' | 'gold' | 'red' | 'white'
 
-const MANA_CONFIG: Record<ManaColor, { gradient: string }> = {
-  blue: { gradient: 'from-mana-blue/20 to-mana-blue/5 border-mana-blue/30' },
-  black: { gradient: 'from-mana-black/20 to-mana-black/5 border-mana-black/30' },
-  green: { gradient: 'from-mana-green/20 to-mana-green/5 border-mana-green/30' },
-  gold: { gradient: 'from-yellow-500/20 to-yellow-500/5 border-yellow-500/30' },
-  red: { gradient: 'from-mana-red/20 to-mana-red/5 border-mana-red/30' },
-  white: { gradient: 'from-mana-white/20 to-mana-white/5 border-mana-white/30' },
-}
-
 const DEFAULT_MANA: ManaColor = 'blue'
 
-function isValidManaColor(color: string): color is ManaColor {
-  return color in MANA_CONFIG
+function isValidManaColor(color: string, config: ReturnType<typeof getModeConfig>): color is ManaColor {
+  return color in config.levelColors
 }
 
 export default function BattlefieldPage() {
@@ -128,6 +119,7 @@ export default function BattlefieldPage() {
               levelNumber={index + 1}
               completedPhases={getCompletedCount(level.id)}
               config={config}
+              mode={mode}
             />
           </AnimatedCard>
         ))}
@@ -141,16 +133,18 @@ function LevelCard({
   levelNumber,
   completedPhases,
   config,
+  mode,
 }: {
   level: Level
   levelNumber: number
   completedPhases: number
   config: ReturnType<typeof getModeConfig>
+  mode: string
 }) {
-  const manaColor: ManaColor = isValidManaColor(level.mana_color)
+  const manaColor: ManaColor = isValidManaColor(level.mana_color, config)
     ? level.mana_color
     : DEFAULT_MANA
-  const manaConfig = MANA_CONFIG[manaColor]
+  const manaConfig = config.levelColors[manaColor] || config.levelColors.blue
   const levelIcon = config.levelIcons[manaColor] || config.levelIcons.blue
 
   const isLocked = level.locked ?? false
@@ -240,14 +234,18 @@ function LevelCard({
                   <div
                     className={`w-3 h-3 rounded-full transition-all duration-300 ${
                       isPhaseComplete
-                        ? 'bg-mana-green shadow-[0_0_6px_rgba(34,197,94,0.5)]'
+                        ? mode === 'mtg'
+                          ? 'bg-mana-green shadow-[0_0_6px_rgba(34,197,94,0.5)]'
+                          : 'bg-green-500'
                         : index === completedPhases
                           ? 'animate-pulse'
                           : ''
                     }`}
                     style={{
                       ...(!isPhaseComplete && index === completedPhases
-                        ? { backgroundColor: 'var(--arcane-purple)', boxShadow: '0 0 6px rgba(139,92,246,0.4)' }
+                        ? mode === 'mtg'
+                          ? { backgroundColor: 'var(--arcane-purple)', boxShadow: '0 0 6px rgba(139,92,246,0.4)' }
+                          : { backgroundColor: 'var(--arcane-purple)' }
                         : !isPhaseComplete ? { backgroundColor: 'var(--obsidian-border)' } : {}),
                     }}
                   />

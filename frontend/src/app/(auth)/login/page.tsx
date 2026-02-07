@@ -4,9 +4,19 @@ import { useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import { getModeConfig } from '@/lib/mode-config'
+import type { LearningMode } from '@/lib/api'
 
 // Debug mode controlled by environment variable
 const DEBUG_MODE = process.env.NEXT_PUBLIC_DEBUG_MODE === 'true'
+
+function getStoredMode(): LearningMode {
+  if (typeof window !== 'undefined') {
+    const stored = localStorage.getItem('learning-mode')
+    if (stored === 'simple' || stored === 'detailed' || stored === 'mtg') return stored
+  }
+  return 'mtg'
+}
 
 export default function LoginPage() {
   return (
@@ -45,6 +55,7 @@ function LoginForm() {
   const [debugInfo, setDebugInfo] = useState<DebugInfo | null>(null)
   const [showDebug, setShowDebug] = useState(false)
   const searchParams = useSearchParams()
+  const config = getModeConfig(getStoredMode())
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -93,10 +104,10 @@ function LoginForm() {
   return (
     <>
       <h1 className="text-2xl font-bold text-center mb-2">
-        Welcome Back
+        {config.auth.loginHeading}
       </h1>
       <p className="text-center mb-6" style={{ color: 'var(--silver-muted)' }}>
-        Sign in to continue your journey
+        {config.auth.loginSubtext}
       </p>
 
       <form onSubmit={handleLogin} className="space-y-4">
