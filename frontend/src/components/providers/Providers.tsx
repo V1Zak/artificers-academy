@@ -1,6 +1,7 @@
 'use client'
 
 import { UserProvider, ProgressProvider } from '@/contexts'
+import { ToastProvider } from '@/contexts/ToastContext'
 import type { User } from '@supabase/supabase-js'
 
 interface ProvidersProps {
@@ -16,7 +17,9 @@ export function Providers({ children, user }: ProvidersProps) {
   return (
     <UserProvider initialUser={user}>
       <ProgressProvider>
-        {children}
+        <ToastProvider>
+          {children}
+        </ToastProvider>
       </ProgressProvider>
     </UserProvider>
   )
