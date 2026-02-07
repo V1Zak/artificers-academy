@@ -78,8 +78,9 @@ export default function InspectorPage() {
           <button
             onClick={handleValidate}
             disabled={loading || !code.trim()}
-            className="btn-arcane disabled:opacity-50"
+            className="btn-arcane disabled:opacity-50 flex items-center gap-2"
           >
+            {loading && <LoadingSpinner />}
             {loading ? 'Inspecting...' : 'Submit for Inspection'}
           </button>
         </div>
@@ -151,10 +152,19 @@ function ReferenceCard({
   description: string
 }) {
   return (
-    <div className="scroll-container p-4">
-      <h3 className="font-semibold mb-1">{title}</h3>
-      <code className="text-sm text-arcane-purple">{decorator}</code>
+    <div className="glass-card p-4">
+      <h3 className="font-semibold mb-1 text-silver">{title}</h3>
+      <code className="text-sm text-arcane-purple font-mono">{decorator}</code>
       <p className="text-sm text-silver/60 mt-2">{description}</p>
     </div>
+  )
+}
+
+function LoadingSpinner() {
+  return (
+    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+    </svg>
   )
 }
