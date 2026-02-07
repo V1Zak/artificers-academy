@@ -92,6 +92,23 @@ interface ModeConfig {
   }
   // Mana icons for levels (overrides for non-MTG modes)
   levelIcons: Record<string, string>
+  // App branding
+  appTitle: string
+  // Dashboard progress section heading
+  dashboardProgressHeading: string
+  // Progress bar style per mode
+  progressBar: {
+    style: 'flat' | 'subtle' | 'glow'
+  }
+  // Level card colors per mode (maps mana colors to Tailwind classes)
+  levelColors: Record<string, { gradient: string }>
+  // Auth page headings
+  auth: {
+    loginHeading: string
+    loginSubtext: string
+    signupHeading: string
+    signupSubtext: string
+  }
 }
 
 export const MODE_CONFIG: Record<LearningMode, ModeConfig> = {
@@ -191,6 +208,23 @@ export const MODE_CONFIG: Record<LearningMode, ModeConfig> = {
       green: '🌐',
       gold: '🚀',
     },
+    appTitle: 'MCP Learn',
+    dashboardProgressHeading: 'Your Progress',
+    progressBar: { style: 'flat' },
+    levelColors: {
+      blue: { gradient: 'from-blue-500/10 to-blue-500/5 border-blue-500/20' },
+      black: { gradient: 'from-gray-500/10 to-gray-500/5 border-gray-500/20' },
+      green: { gradient: 'from-green-500/10 to-green-500/5 border-green-500/20' },
+      gold: { gradient: 'from-amber-500/10 to-amber-500/5 border-amber-500/20' },
+      red: { gradient: 'from-red-500/10 to-red-500/5 border-red-500/20' },
+      white: { gradient: 'from-gray-300/10 to-gray-300/5 border-gray-300/20' },
+    },
+    auth: {
+      loginHeading: 'Welcome Back',
+      loginSubtext: 'Sign in to continue learning',
+      signupHeading: 'Create Account',
+      signupSubtext: 'Start learning MCP development',
+    },
   },
 
   detailed: {
@@ -289,6 +323,23 @@ export const MODE_CONFIG: Record<LearningMode, ModeConfig> = {
       green: '🔗',
       gold: '☁️',
     },
+    appTitle: 'MCP Academy',
+    dashboardProgressHeading: 'Progress Overview',
+    progressBar: { style: 'subtle' },
+    levelColors: {
+      blue: { gradient: 'from-blue-700/10 to-blue-700/5 border-blue-700/20' },
+      black: { gradient: 'from-gray-600/10 to-gray-600/5 border-gray-600/20' },
+      green: { gradient: 'from-emerald-700/10 to-emerald-700/5 border-emerald-700/20' },
+      gold: { gradient: 'from-yellow-600/10 to-yellow-600/5 border-yellow-600/20' },
+      red: { gradient: 'from-red-700/10 to-red-700/5 border-red-700/20' },
+      white: { gradient: 'from-gray-400/10 to-gray-400/5 border-gray-400/20' },
+    },
+    auth: {
+      loginHeading: 'Sign In',
+      loginSubtext: 'Access your MCP development environment',
+      signupHeading: 'Create Account',
+      signupSubtext: 'Begin the MCP curriculum',
+    },
   },
 
   mtg: {
@@ -386,6 +437,23 @@ export const MODE_CONFIG: Record<LearningMode, ModeConfig> = {
       black: '💀',
       green: '🌿',
       gold: '✨',
+    },
+    appTitle: 'The Academy',
+    dashboardProgressHeading: 'Your Journey',
+    progressBar: { style: 'glow' },
+    levelColors: {
+      blue: { gradient: 'from-mana-blue/20 to-mana-blue/5 border-mana-blue/30' },
+      black: { gradient: 'from-mana-black/20 to-mana-black/5 border-mana-black/30' },
+      green: { gradient: 'from-mana-green/20 to-mana-green/5 border-mana-green/30' },
+      gold: { gradient: 'from-yellow-500/20 to-yellow-500/5 border-yellow-500/30' },
+      red: { gradient: 'from-mana-red/20 to-mana-red/5 border-mana-red/30' },
+      white: { gradient: 'from-mana-white/20 to-mana-white/5 border-mana-white/30' },
+    },
+    auth: {
+      loginHeading: 'Welcome Back, Artificer',
+      loginSubtext: 'Sign in to continue your journey',
+      signupHeading: 'Join the Academy',
+      signupSubtext: 'Begin your journey to becoming an Artificer',
     },
   },
 }
