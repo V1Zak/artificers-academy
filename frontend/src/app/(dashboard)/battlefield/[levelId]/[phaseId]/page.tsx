@@ -313,17 +313,17 @@ export default function PhasePage() {
             onValidate={handleValidateDebounced}
           />
 
-          <div className="mt-4 flex items-center gap-4">
+          <div className="mt-4 flex flex-wrap items-center gap-3">
             <button
               onClick={handleValidate}
               disabled={validating || !code.trim()}
-              className="btn-arcane disabled:opacity-50"
+              className="btn-arcane disabled:opacity-50 min-h-[44px]"
             >
               {validating ? 'Validating...' : 'Validate Code'}
             </button>
             <button
               onClick={() => setShowHints(!showHints)}
-              className="px-4 py-2 text-sm border border-arcane-gold/50 text-arcane-gold rounded-lg hover:bg-arcane-gold/10 transition-colors"
+              className="px-4 py-2 text-sm border border-arcane-gold/50 text-arcane-gold rounded-lg hover:bg-arcane-gold/10 transition-colors min-h-[44px]"
             >
               {showHints ? 'Hide Hints' : 'Show Hints'}
             </button>
@@ -365,14 +365,14 @@ export default function PhasePage() {
       )}
 
       {/* Navigation Footer */}
-      <div className="flex items-center justify-between pt-6 border-t border-white/[0.06]">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-6 border-t border-white/[0.06]">
         {prevPhase ? (
           <Link
             href={`/battlefield/${levelId}/${prevPhase.id}`}
-            className="inline-flex items-center gap-2 text-silver/60 hover:text-silver"
+            className="inline-flex items-center gap-2 text-silver/60 hover:text-silver min-h-[44px]"
           >
             <ChevronLeftIcon />
-            Previous: {prevPhase.title}
+            <span className="hidden sm:inline">Previous: </span>{prevPhase.title}
           </Link>
         ) : (
           <div />
@@ -381,11 +381,11 @@ export default function PhasePage() {
         <button
           onClick={handleCompletePhase}
           disabled={currentPhase?.validation_required && !validationResult?.valid}
-          className="btn-arcane disabled:opacity-50"
+          className="btn-arcane disabled:opacity-50 min-h-[44px]"
         >
           {nextPhase ? (
             <>
-              Next: {nextPhase.title}
+              <span className="hidden sm:inline">Next: </span>{nextPhase.title}
               <ChevronRightIcon className="ml-2" />
             </>
           ) : (

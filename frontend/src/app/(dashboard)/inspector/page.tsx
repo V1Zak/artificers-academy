@@ -80,7 +80,7 @@ export default function InspectorPage() {
           <MonacoEditor
             value={code}
             onChange={setCode}
-            height="400px"
+            height="300px"
             className="mb-4"
           />
           <button
@@ -128,7 +128,7 @@ export default function InspectorPage() {
       {/* Quick Reference */}
       <div className="mt-12">
         <h2 className="text-xl font-semibold mb-4">Quick Reference</h2>
-        <div className="grid md:grid-cols-3 gap-4">
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
           <ReferenceCard
             title="Sorceries"
             decorator="@mcp.tool()"

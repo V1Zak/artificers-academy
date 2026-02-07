@@ -171,27 +171,27 @@ function LevelCard({
     <div
       className={`scroll-container overflow-hidden ${isLocked ? 'opacity-60' : ''}`}
     >
-      <div className={`bg-gradient-to-r ${manaConfig.gradient} p-6`}>
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-4">
-            <span className="text-4xl" role="img" aria-label={`${manaColor} mana`}>
+      <div className={`bg-gradient-to-r ${manaConfig.gradient} p-4 sm:p-6`}>
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <span className="text-3xl sm:text-4xl" role="img" aria-label={`${manaColor} mana`}>
               {manaConfig.icon}
             </span>
             <div>
               <div className="text-sm text-silver/50 mb-1">
                 Level {levelNumber}
               </div>
-              <h2 className="text-2xl font-bold">{level.title}</h2>
-              <p className="text-arcane-purple font-medium">{level.subtitle}</p>
+              <h2 className="text-xl sm:text-2xl font-bold">{level.title}</h2>
+              <p className="text-arcane-purple font-medium text-sm sm:text-base">{level.subtitle}</p>
             </div>
           </div>
           {isLocked && (
-            <span className="px-3 py-1 bg-white/5 rounded text-sm">
+            <span className="px-2 sm:px-3 py-1 bg-white/5 rounded text-xs sm:text-sm flex-shrink-0">
               🔒 Locked
             </span>
           )}
           {isComplete && !isLocked && (
-            <span className="px-3 py-1 bg-mana-green/20 text-mana-green rounded text-sm font-medium">
+            <span className="px-2 sm:px-3 py-1 bg-mana-green/20 text-mana-green rounded text-xs sm:text-sm font-medium flex-shrink-0">
               ✓ Complete
             </span>
           )}
@@ -246,7 +246,7 @@ function LevelCard({
             {level.phases.map((phase, index) => (
               <span
                 key={phase.id}
-                className="px-2 py-1 text-xs bg-white/[0.03] rounded border border-white/[0.06]/50"
+                className="px-2 py-1 text-xs bg-white/[0.03] rounded border border-white/[0.06]"
               >
                 {index + 1}. {phase.title}
               </span>
