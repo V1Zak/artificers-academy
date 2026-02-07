@@ -14,6 +14,7 @@ import {
 } from '@/lib/api'
 import { CounterspellAlert, ResolveAlert, MarkdownRenderer } from '@/components/theme'
 import { useProgress } from '@/contexts'
+import { SkeletonText } from '@/components/ui/Skeleton'
 
 // Dynamic import for Monaco to avoid SSR issues
 const MonacoEditor = dynamic(
@@ -253,10 +254,17 @@ export default function PhasePage() {
 
   if (loading || progressLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <div className="animate-pulse text-4xl mb-4">📜</div>
-          <p className="text-silver/60">Loading phase content...</p>
+      <div className="max-w-4xl mx-auto">
+        <div className="flex items-center justify-between mb-6">
+          <div className="h-4 w-32 bg-white/[0.06] rounded animate-pulse" />
+          <div className="h-4 w-20 bg-white/[0.06] rounded animate-pulse" />
+        </div>
+        <div className="mb-8 space-y-2">
+          <div className="h-4 w-20 bg-white/[0.06] rounded animate-pulse" />
+          <div className="h-8 w-80 bg-white/[0.06] rounded animate-pulse" />
+        </div>
+        <div className="glass-card p-8 mb-8">
+          <SkeletonText lines={8} />
         </div>
       </div>
     )

@@ -6,6 +6,7 @@ import { getCurriculum, type Level } from '@/lib/api'
 import { useProgress } from '@/contexts'
 import { ManaProgress } from '@/components/theme'
 import { AnimatedCard, PageTransition } from '@/components/motion'
+import { SkeletonCard } from '@/components/ui/Skeleton'
 
 // Unified mana configuration
 type ManaColor = 'blue' | 'black' | 'green' | 'gold' | 'red' | 'white'
@@ -96,10 +97,14 @@ export default function BattlefieldPage() {
 
   if (loading || progressLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <div className="animate-pulse text-4xl mb-4">🔮</div>
-          <p className="text-silver/60">Consulting the Oracle...</p>
+      <div>
+        <div className="h-8 w-40 bg-white/[0.06] rounded animate-pulse mb-2" />
+        <div className="h-5 w-80 bg-white/[0.06] rounded animate-pulse mb-8" />
+        <div className="grid gap-6">
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
         </div>
       </div>
     )
