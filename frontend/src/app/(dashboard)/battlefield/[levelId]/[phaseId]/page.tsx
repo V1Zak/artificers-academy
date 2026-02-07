@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
@@ -12,7 +12,7 @@ import {
   type PhaseContentResponse,
   type ValidationResponse,
 } from '@/lib/api'
-import { CounterspellAlert, ResolveAlert } from '@/components/theme'
+import { CounterspellAlert, ResolveAlert, MarkdownRenderer } from '@/components/theme'
 import { useProgress } from '@/contexts'
 
 // Dynamic import for Monaco to avoid SSR issues
@@ -299,7 +299,7 @@ export default function PhasePage() {
 
       {/* Content */}
       <div className="scroll-container p-8 mb-8">
-        <MarkdownContent content={content.content} />
+        <MarkdownRenderer content={content.content} />
       </div>
 
       {/* Code Editor (for tutorial phases with validation) */}
@@ -435,149 +435,6 @@ function ChevronRightIcon({ className = '' }: { className?: string }) {
       />
     </svg>
   )
-}
-
-// ==========================================
-// MARKDOWN RENDERER
-// ==========================================
-
-/**
- * Simple markdown renderer for tutorial content.
- *
- * Note: This is a basic regex-based parser for MVP. For production,
- * consider using react-markdown or similar library for:
- * - Nested structures (lists within lists)
- * - GFM features (task lists, strikethrough)
- * - Syntax highlighting in code blocks
- *
- * Content is trusted (from our own markdown files), so dangerouslySetInnerHTML
- * is acceptable here. User-generated content should use a sanitizing library.
- */
-function MarkdownContent({ content }: { content: string }) {
-  const html = useMemo(() => parseMarkdown(content), [content])
-
-  return (
-    <div
-      className="prose-dark max-w-none"
-      dangerouslySetInnerHTML={{ __html: html }}
-    />
-  )
-}
-
-function parseMarkdown(content: string): string {
-  let html = content
-
-  // Code blocks (must be first to protect code content)
-  html = html.replace(/```(\w+)?\n([\s\S]*?)```/g, (_, lang, code) => {
-    return `<pre class="bg-black/30 border border-white/[0.06] rounded-lg p-4 my-4 overflow-x-auto"><code class="text-sm font-mono">${escapeHtml(code.trim())}</code></pre>`
-  })
-
-  // Inline code (protect before other transformations)
-  const inlineCodePlaceholders: string[] = []
-  html = html.replace(/`([^`]+)`/g, (_, code) => {
-    const placeholder = `__INLINE_CODE_${inlineCodePlaceholders.length}__`
-    inlineCodePlaceholders.push(
-      `<code class="bg-black/30 px-1.5 py-0.5 rounded text-sm font-mono text-arcane-purple">${escapeHtml(code)}</code>`
-    )
-    return placeholder
-  })
-
-  // Headers
-  html = html.replace(/^### (.*$)/gm, '<h3 class="text-lg font-semibold mt-6 mb-2">$1</h3>')
-  html = html.replace(/^## (.*$)/gm, '<h2 class="text-xl font-semibold mt-8 mb-3">$1</h2>')
-  html = html.replace(/^# (.*$)/gm, '<h2 class="text-2xl font-bold mt-8 mb-4">$1</h2>')
-
-  // Bold and italic
-  html = html.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>')
-  html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-  html = html.replace(/(?<![*])\*([^*]+)\*(?![*])/g, '<em>$1</em>')
-
-  // Links
-  html = html.replace(
-    /\[([^\]]+)\]\(([^)]+)\)/g,
-    '<a href="$2" class="text-mana-blue hover:underline" target="_blank" rel="noopener noreferrer">$1</a>'
-  )
-
-  // Unordered lists - wrap in <ul>
-  html = html.replace(/((?:^\- .+$\n?)+)/gm, (match) => {
-    const items = match
-      .split('\n')
-      .filter(Boolean)
-      .map((line) => line.replace(/^\- (.*)$/, '<li>$1</li>'))
-      .join('')
-    return `<ul class="list-disc ml-6 my-4">${items}</ul>`
-  })
-
-  // Ordered lists - wrap in <ol>
-  html = html.replace(/((?:^\d+\. .+$\n?)+)/gm, (match) => {
-    const items = match
-      .split('\n')
-      .filter(Boolean)
-      .map((line) => line.replace(/^\d+\. (.*)$/, '<li>$1</li>'))
-      .join('')
-    return `<ol class="list-decimal ml-6 my-4">${items}</ol>`
-  })
-
-  // Tables - wrap properly
-  html = html.replace(/((?:\|.+\|\n?)+)/g, (match) => {
-    const rows = match.trim().split('\n')
-    let tableHtml = '<table class="w-full my-4 border-collapse">'
-    let isHeader = true
-
-    for (const row of rows) {
-      const cells = row.split('|').filter(Boolean).map((c) => c.trim())
-
-      // Skip separator row
-      if (cells.every((c) => /^-+$/.test(c))) {
-        isHeader = false
-        continue
-      }
-
-      const tag = isHeader ? 'th' : 'td'
-      const cellClass = isHeader
-        ? 'border border-white/[0.06] px-4 py-2 bg-white/5 font-semibold text-left'
-        : 'border border-white/[0.06] px-4 py-2'
-
-      const cellsHtml = cells
-        .map((c) => `<${tag} class="${cellClass}">${c}</${tag}>`)
-        .join('')
-      tableHtml += `<tr>${cellsHtml}</tr>`
-
-      if (isHeader) isHeader = false
-    }
-
-    tableHtml += '</table>'
-    return tableHtml
-  })
-
-  // Horizontal rules
-  html = html.replace(/^---$/gm, '<hr class="my-8 border-white/[0.06]" />')
-
-  // Paragraphs - wrap standalone text lines
-  html = html.replace(
-    /^(?!<[a-z]|__|$)(.+)$/gm,
-    '<p class="my-4 leading-relaxed">$1</p>'
-  )
-
-  // Restore inline code
-  inlineCodePlaceholders.forEach((code, i) => {
-    html = html.replace(`__INLINE_CODE_${i}__`, code)
-  })
-
-  // Clean up empty paragraphs and extra whitespace
-  html = html.replace(/<p class="my-4 leading-relaxed"><\/p>/g, '')
-  html = html.replace(/\n{3,}/g, '\n\n')
-
-  return html
-}
-
-function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;')
 }
 
 // ==========================================
