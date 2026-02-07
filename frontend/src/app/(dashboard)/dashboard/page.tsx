@@ -163,6 +163,14 @@ export default function DashboardPage() {
   )
 }
 
+// Mana color borders for each level
+const LEVEL_BORDERS: Record<number, string> = {
+  1: 'border-l-mana-blue',
+  2: 'border-l-mana-black',
+  3: 'border-l-mana-green',
+  4: 'border-l-arcane-gold',
+}
+
 interface LevelCardProps {
   level: number
   title: string
@@ -186,11 +194,21 @@ function LevelCard({
 }: LevelCardProps) {
   const isLocked = status === 'locked'
   const isCompleted = status === 'completed'
+  const borderColor = LEVEL_BORDERS[level] || 'border-l-arcane-purple'
 
   return (
     <div
-      className={`scroll-container p-6 ${isLocked ? 'opacity-60' : ''}`}
+      className={`scroll-container p-6 border-l-4 ${borderColor} relative overflow-hidden ${isLocked ? '' : ''}`}
     >
+      {/* Fog overlay for locked levels */}
+      {isLocked && (
+        <div className="absolute inset-0 bg-void/60 backdrop-blur-[1px] z-10 flex items-center justify-center">
+          <span className="text-silver/40 text-sm font-medium">
+            🔒 Complete previous levels to unlock
+          </span>
+        </div>
+      )}
+
       <div className="flex items-start justify-between mb-3">
         <div>
           <span className="text-sm text-arcane-purple font-semibold">
@@ -212,7 +230,7 @@ function LevelCard({
           </div>
           <div className="h-2 bg-white/[0.06] rounded-full overflow-hidden">
             <div
-              className={`h-full transition-all ${isCompleted ? 'bg-mana-green' : 'bg-arcane-purple'}`}
+              className={`h-full transition-all duration-500 ${isCompleted ? 'bg-mana-green' : 'bg-arcane-purple'}`}
               style={{ width: `${totalPhases > 0 ? (completedPhases / totalPhases) * 100 : 0}%` }}
             />
           </div>
@@ -227,11 +245,6 @@ function LevelCard({
           {isCompleted ? 'Review' : completedPhases > 0 ? 'Continue' : 'Begin'}
         </Link>
       )}
-      {isLocked && (
-        <span className="text-sm text-silver/40">
-          Complete previous levels to unlock
-        </span>
-      )}
     </div>
   )
 }
@@ -239,14 +252,14 @@ function LevelCard({
 function StatusBadge({ status }: { status: 'completed' | 'available' | 'locked' }) {
   if (status === 'completed') {
     return (
-      <span className="px-2 py-1 bg-mana-green/20 text-mana-green text-xs rounded-full">
-        Completed
+      <span className="px-2 py-1 bg-mana-green/20 text-mana-green text-xs rounded-full shadow-[0_0_8px_rgba(34,197,94,0.3)]">
+        ✓ Completed
       </span>
     )
   }
   if (status === 'available') {
     return (
-      <span className="px-2 py-1 bg-arcane-gold/20 text-arcane-gold text-xs rounded-full">
+      <span className="px-2 py-1 bg-arcane-gold/20 text-arcane-gold text-xs rounded-full shadow-[0_0_8px_rgba(212,168,67,0.3)]">
         Available
       </span>
     )
