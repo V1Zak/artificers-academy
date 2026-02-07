@@ -80,12 +80,13 @@ export default function InspectorPage() {
         {/* Code Input */}
         <div>
           <h2 className="text-xl font-semibold mb-4">
-            {mode === 'mtg' ? 'Your Decklist' : 'Your Code'}
+            {config.editor.title}
           </h2>
           <MonacoEditor
             value={code}
             onChange={setCode}
             height="300px"
+            title={config.editor.title}
             className="mb-4"
           />
           <button
@@ -101,7 +102,7 @@ export default function InspectorPage() {
         {/* Results */}
         <div>
           <h2 className="text-xl font-semibold mb-4">
-            {mode === 'mtg' ? "Inspector's Verdict" : 'Results'}
+            {config.inspector.resultsHeading}
           </h2>
 
           {error && (

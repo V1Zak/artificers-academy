@@ -2,6 +2,8 @@
 
 import { cn } from '@/lib/utils'
 import type { ValidationError } from '@/lib/api'
+import { useMode } from '@/contexts'
+import { getModeConfig } from '@/lib/mode-config'
 
 interface CounterspellAlertProps {
   errors: ValidationError[]
@@ -9,20 +11,20 @@ interface CounterspellAlertProps {
 }
 
 /**
- * CounterspellAlert - Display validation errors as "counterspells"
- *
- * In the language of the Grand Artificer, errors are spells
- * that have been countered - failed incantations that need correction.
+ * CounterspellAlert - Display validation errors with mode-aware text
  */
 export function CounterspellAlert({ errors, className }: CounterspellAlertProps) {
+  const { mode } = useMode()
+  const config = getModeConfig(mode)
+
   if (errors.length === 0) return null
 
   return (
     <div className={cn('space-y-3', className)}>
       <div className="flex items-center gap-2 text-mana-red">
-        <CounterspellIcon />
+        <AlertIcon />
         <span className="font-semibold">
-          {errors.length} Counterspell{errors.length > 1 ? 's' : ''} Detected
+          {config.validation.errorCountHeader(errors.length)}
         </span>
       </div>
       {errors.map((error, index) => (
@@ -33,7 +35,7 @@ export function CounterspellAlert({ errors, className }: CounterspellAlertProps)
             </span>
             <div>
               <p className="text-sm font-medium text-mana-red/90">
-                {getErrorTitle(error.type)}
+                {config.validation.errorTitles[error.type] || config.validation.defaultErrorTitle}
               </p>
               <p className="text-sm text-silver/70 mt-1">
                 {error.message}
@@ -46,21 +48,7 @@ export function CounterspellAlert({ errors, className }: CounterspellAlertProps)
   )
 }
 
-function getErrorTitle(type: string): string {
-  const titles: Record<string, string> = {
-    syntax_error: 'Forbidden Runes',
-    missing_import: 'Missing Mana Source',
-    missing_instance: 'Unbound Library',
-    empty_deck: 'Empty Decklist',
-    missing_docstring: 'Missing Oracle Text',
-    short_docstring: 'Insufficient Oracle Text',
-    invalid_resource_uri: 'Invalid Permanent Binding',
-    missing_resource_uri: 'Unbound Permanent',
-  }
-  return titles[type] || 'Spell Fizzled'
-}
-
-function CounterspellIcon() {
+function AlertIcon() {
   return (
     <svg
       className="w-5 h-5"
@@ -86,7 +74,7 @@ interface ResolveAlertProps {
 }
 
 /**
- * ResolveAlert - Display successful validation results
+ * ResolveAlert - Display successful validation results with mode-aware text
  */
 export function ResolveAlert({
   toolsFound,
@@ -94,6 +82,9 @@ export function ResolveAlert({
   promptsFound,
   className,
 }: ResolveAlertProps) {
+  const { mode } = useMode()
+  const config = getModeConfig(mode)
+
   const totalFound = toolsFound.length + resourcesFound.length + promptsFound.length
 
   if (totalFound === 0) return null
@@ -101,14 +92,14 @@ export function ResolveAlert({
   return (
     <div className={cn('resolve-alert', className)}>
       <div className="flex items-center gap-2 text-mana-green mb-3">
-        <ResolveIcon />
-        <span className="font-semibold">Spell Resolves Successfully!</span>
+        <SuccessIcon />
+        <span className="font-semibold">{config.validation.successHeader}</span>
       </div>
 
       {toolsFound.length > 0 && (
         <div className="mb-2">
           <p className="text-sm font-medium text-silver">
-            Sorceries Discovered ({toolsFound.length}):
+            {config.validation.toolsLabel} ({toolsFound.length}):
           </p>
           <div className="flex flex-wrap gap-2 mt-1">
             {toolsFound.map((tool) => (
@@ -126,7 +117,7 @@ export function ResolveAlert({
       {resourcesFound.length > 0 && (
         <div className="mb-2">
           <p className="text-sm font-medium text-silver">
-            Permanents Discovered ({resourcesFound.length}):
+            {config.validation.resourcesLabel} ({resourcesFound.length}):
           </p>
           <div className="flex flex-wrap gap-2 mt-1">
             {resourcesFound.map((resource) => (
@@ -144,7 +135,7 @@ export function ResolveAlert({
       {promptsFound.length > 0 && (
         <div>
           <p className="text-sm font-medium text-silver">
-            Tutors Discovered ({promptsFound.length}):
+            {config.validation.promptsLabel} ({promptsFound.length}):
           </p>
           <div className="flex flex-wrap gap-2 mt-1">
             {promptsFound.map((prompt) => (
@@ -162,7 +153,7 @@ export function ResolveAlert({
   )
 }
 
-function ResolveIcon() {
+function SuccessIcon() {
   return (
     <svg
       className="w-5 h-5"

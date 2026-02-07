@@ -20,7 +20,7 @@ const themeScript = `
 
 export const metadata: Metadata = {
   title: "The Artificer's Academy",
-  description: 'Learn to build MCP servers through the art of the Grand Artificer',
+  description: 'Learn to build MCP servers with interactive lessons and hands-on coding',
 }
 
 export default function RootLayout({

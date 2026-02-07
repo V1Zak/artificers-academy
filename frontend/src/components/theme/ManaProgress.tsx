@@ -1,6 +1,8 @@
 'use client'
 
 import { cn } from '@/lib/utils'
+import { useMode } from '@/contexts'
+import { getModeConfig } from '@/lib/mode-config'
 
 interface ManaProgressProps {
   current: number
@@ -25,6 +27,9 @@ export function ManaProgress({
   className,
   manaType = 'blue',
 }: ManaProgressProps) {
+  const { mode } = useMode()
+  const config = getModeConfig(mode)
+
   const percentage = total > 0 ? Math.min((current / total) * 100, 100) : 0
   const isFull = percentage >= 100
 
@@ -92,7 +97,7 @@ export function ManaProgress({
       </div>
       {isFull && (
         <p className="text-xs text-arcane-gold mt-1 text-center animate-pulse">
-          Mana pool full!
+          {config.progress.completionText}
         </p>
       )}
     </div>

@@ -19,7 +19,7 @@ export default function CodexPage() {
       {/* Terminology - Lore Card Grid */}
       <section className="mb-12">
         <h2 className="text-2xl font-semibold mb-4">
-          {mode === 'mtg' ? "The Grand Artificer's Dictionary" : mode === 'detailed' ? 'Terminology Reference' : 'Key Terms'}
+          {config.codex.dictionaryHeading}
         </h2>
         <p className="text-sm mb-6" style={{ color: 'var(--silver-faint)' }}>Hover or tap a card to reveal its meaning</p>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -33,7 +33,7 @@ export default function CodexPage() {
 
       {/* Quick Start */}
       <section className="mb-12">
-        <h2 className="text-2xl font-semibold mb-4">{mode === 'mtg' ? 'Quick Start Incantation' : 'Quick Start Guide'}</h2>
+        <h2 className="text-2xl font-semibold mb-4">{config.codex.quickStartHeading}</h2>
         <div className="space-y-4">
           <CodeScroll
             title={config.quickStart.step1Title}
@@ -82,7 +82,7 @@ npx @modelcontextprotocol/inspector uv run server.py`}
 
       {/* Key Concepts */}
       <section>
-        <h2 className="text-2xl font-semibold mb-4">Core Concepts</h2>
+        <h2 className="text-2xl font-semibold mb-4">{config.codex.conceptsHeading}</h2>
         <div className="grid md:grid-cols-2 gap-6">
           {getConcepts(mode).map((card, index) => (
             <AnimatedCard key={card.title} index={index}>
