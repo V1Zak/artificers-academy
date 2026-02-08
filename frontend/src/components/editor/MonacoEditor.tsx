@@ -4,8 +4,10 @@ import { useCallback, useEffect, useRef } from 'react'
 import Editor, { OnMount, OnChange, loader } from '@monaco-editor/react'
 import type { editor } from 'monaco-editor'
 import { cn } from '@/lib/utils'
+import { useMode } from '@/contexts'
+import type { LearningMode } from '@/lib/api'
 
-// Define custom magitech-dark theme
+// MTG theme: dark fantasy with purple/gold accents
 const MAGITECH_THEME: editor.IStandaloneThemeData = {
   base: 'vs-dark',
   inherit: true,
@@ -27,7 +29,6 @@ const MAGITECH_THEME: editor.IStandaloneThemeData = {
     { token: 'attribute.value', foreground: '4EC9B0' },
     { token: 'delimiter', foreground: 'E8E6E3' },
     { token: 'delimiter.bracket', foreground: 'E8E6E3' },
-    // Python specific
     { token: 'keyword.python', foreground: '5B9FE8' },
     { token: 'metatag.python', foreground: '8B5CF6' },
     { token: 'tag.decorator', foreground: '8B5CF6' },
@@ -53,12 +54,112 @@ const MAGITECH_THEME: editor.IStandaloneThemeData = {
   },
 }
 
-// Register theme once
+// Detailed mode: VS Code-inspired dark theme
+const VSCODE_DARK_THEME: editor.IStandaloneThemeData = {
+  base: 'vs-dark',
+  inherit: true,
+  rules: [
+    { token: '', foreground: 'D4D4D4' },
+    { token: 'comment', foreground: '6A9955', fontStyle: 'italic' },
+    { token: 'keyword', foreground: '569CD6' },
+    { token: 'keyword.control', foreground: 'C586C0' },
+    { token: 'string', foreground: 'CE9178' },
+    { token: 'string.escape', foreground: 'D7BA7D' },
+    { token: 'number', foreground: 'B5CEA8' },
+    { token: 'type', foreground: '4EC9B0' },
+    { token: 'class', foreground: '4EC9B0' },
+    { token: 'function', foreground: 'DCDCAA' },
+    { token: 'variable', foreground: '9CDCFE' },
+    { token: 'constant', foreground: '4FC1FF' },
+    { token: 'tag', foreground: '569CD6' },
+    { token: 'attribute.name', foreground: '9CDCFE' },
+    { token: 'attribute.value', foreground: 'CE9178' },
+    { token: 'delimiter', foreground: 'D4D4D4' },
+    { token: 'delimiter.bracket', foreground: 'FFD700' },
+    { token: 'keyword.python', foreground: '569CD6' },
+    { token: 'metatag.python', foreground: '4EC9B0' },
+    { token: 'tag.decorator', foreground: 'DCDCAA' },
+  ],
+  colors: {
+    'editor.background': '#1E1E1E',
+    'editor.foreground': '#D4D4D4',
+    'editor.lineHighlightBackground': '#2A2D2E',
+    'editor.selectionBackground': '#264F78',
+    'editor.inactiveSelectionBackground': '#3A3D41',
+    'editorLineNumber.foreground': '#858585',
+    'editorLineNumber.activeForeground': '#C6C6C6',
+    'editorCursor.foreground': '#AEAFAD',
+    'editorWhitespace.foreground': '#3B3B3B',
+    'editorIndentGuide.background': '#404040',
+    'editorIndentGuide.activeBackground': '#707070',
+    'editor.selectionHighlightBackground': '#ADD6FF26',
+    'editorBracketMatch.background': '#0064001A',
+    'editorBracketMatch.border': '#888888',
+    'scrollbarSlider.background': '#79797966',
+    'scrollbarSlider.hoverBackground': '#646464B3',
+    'scrollbarSlider.activeBackground': '#BFBFBF66',
+  },
+}
+
+// Simple mode: clean light theme
+const SIMPLE_LIGHT_THEME: editor.IStandaloneThemeData = {
+  base: 'vs',
+  inherit: true,
+  rules: [
+    { token: '', foreground: '1E1E1E' },
+    { token: 'comment', foreground: '6A9955', fontStyle: 'italic' },
+    { token: 'keyword', foreground: '0000FF' },
+    { token: 'keyword.control', foreground: 'AF00DB' },
+    { token: 'string', foreground: 'A31515' },
+    { token: 'number', foreground: '098658' },
+    { token: 'type', foreground: '267F99' },
+    { token: 'class', foreground: '267F99' },
+    { token: 'function', foreground: '795E26' },
+    { token: 'variable', foreground: '001080' },
+    { token: 'constant', foreground: '0070C1' },
+    { token: 'tag', foreground: '800000' },
+    { token: 'attribute.name', foreground: 'FF0000' },
+    { token: 'attribute.value', foreground: '0451A5' },
+    { token: 'delimiter', foreground: '1E1E1E' },
+    { token: 'keyword.python', foreground: '0000FF' },
+    { token: 'metatag.python', foreground: '267F99' },
+    { token: 'tag.decorator', foreground: '795E26' },
+  ],
+  colors: {
+    'editor.background': '#1A1B2E',
+    'editor.foreground': '#D4D4D4',
+    'editor.lineHighlightBackground': '#FFFFFF08',
+    'editor.selectionBackground': '#3B82F630',
+    'editor.inactiveSelectionBackground': '#3B82F615',
+    'editorLineNumber.foreground': '#FFFFFF30',
+    'editorLineNumber.activeForeground': '#FFFFFF60',
+    'editorCursor.foreground': '#3B82F6',
+    'editorWhitespace.foreground': '#FFFFFF10',
+    'editorIndentGuide.background': '#FFFFFF08',
+    'editorIndentGuide.activeBackground': '#FFFFFF15',
+    'editor.selectionHighlightBackground': '#3B82F620',
+    'editorBracketMatch.background': '#3B82F630',
+    'editorBracketMatch.border': '#3B82F650',
+    'scrollbarSlider.background': '#FFFFFF10',
+    'scrollbarSlider.hoverBackground': '#FFFFFF20',
+    'scrollbarSlider.activeBackground': '#FFFFFF30',
+  },
+}
+
+const THEME_MAP: Record<LearningMode, string> = {
+  mtg: 'magitech-dark',
+  detailed: 'vscode-dark',
+  simple: 'simple-clean',
+}
+
+// Register all themes once
 loader.init().then((monaco) => {
   monaco.editor.defineTheme('magitech-dark', MAGITECH_THEME)
+  monaco.editor.defineTheme('vscode-dark', VSCODE_DARK_THEME)
+  monaco.editor.defineTheme('simple-clean', SIMPLE_LIGHT_THEME)
 })
 
-// Shared editor options to avoid duplication
+// Shared editor options
 const BASE_EDITOR_OPTIONS: editor.IStandaloneEditorConstructionOptions = {
   minimap: { enabled: false },
   fontFamily: "'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
@@ -94,6 +195,8 @@ export function MonacoEditor({
   onValidate,
 }: MonacoEditorProps) {
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null)
+  const { mode } = useMode()
+  const theme = THEME_MAP[mode]
 
   useEffect(() => {
     return () => {
@@ -144,7 +247,7 @@ export function MonacoEditor({
         value={value}
         onChange={handleChange}
         onMount={handleMount}
-        theme="magitech-dark"
+        theme={theme}
         options={{
           ...BASE_EDITOR_OPTIONS,
           readOnly,
@@ -181,6 +284,8 @@ export function MonacoEditorReadOnly({
   className,
 }: MonacoEditorReadOnlyProps) {
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null)
+  const { mode } = useMode()
+  const theme = THEME_MAP[mode]
 
   useEffect(() => {
     return () => {
@@ -202,7 +307,7 @@ export function MonacoEditorReadOnly({
         language={language}
         value={value}
         onMount={handleMount}
-        theme="magitech-dark"
+        theme={theme}
         options={{
           ...BASE_EDITOR_OPTIONS,
           readOnly: true,
