@@ -62,7 +62,9 @@ export function ModeProvider({ children }: ModeProviderProps) {
     document.documentElement.setAttribute('data-theme', THEME_MAP[mode])
   }, [mode])
 
-  // Fetch preference from server when user is available
+  // Sync mode preference with server when user is available
+  // localStorage is the source of truth (set by landing page selection)
+  // Server preference is only used as fallback when localStorage is empty
   useEffect(() => {
     if (!user?.id) {
       setLoading(false)
@@ -70,18 +72,26 @@ export function ModeProvider({ children }: ModeProviderProps) {
     }
 
     const controller = new AbortController()
+    const storedMode = localStorage.getItem(STORAGE_KEY)
+    const hasLocalChoice = storedMode === 'simple' || storedMode === 'detailed' || storedMode === 'mtg'
 
-    async function fetchPreference() {
+    async function syncPreference() {
       try {
-        const pref = await getUserPreference(user!.id, { signal: controller.signal })
-        if (controller.signal.aborted) return
-        const serverMode = pref.active_mode
-        if (serverMode === 'simple' || serverMode === 'detailed' || serverMode === 'mtg') {
-          setModeState(serverMode)
-          localStorage.setItem(STORAGE_KEY, serverMode)
+        if (hasLocalChoice) {
+          // localStorage has a value — push it to server (fire-and-forget sync)
+          apiSetPreference(user!.id, storedMode as LearningMode).catch(() => {})
+        } else {
+          // No local choice — pull from server as fallback
+          const pref = await getUserPreference(user!.id, { signal: controller.signal })
+          if (controller.signal.aborted) return
+          const serverMode = pref.active_mode
+          if (serverMode === 'simple' || serverMode === 'detailed' || serverMode === 'mtg') {
+            setModeState(serverMode)
+            localStorage.setItem(STORAGE_KEY, serverMode)
+          }
         }
       } catch {
-        // Keep localStorage value on error
+        // Keep current value on error
       } finally {
         if (!controller.signal.aborted) {
           setLoading(false)
@@ -89,7 +99,7 @@ export function ModeProvider({ children }: ModeProviderProps) {
       }
     }
 
-    fetchPreference()
+    syncPreference()
 
     return () => {
       controller.abort()
