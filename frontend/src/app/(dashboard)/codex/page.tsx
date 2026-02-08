@@ -21,7 +21,7 @@ export default function CodexPage() {
         <h2 className="text-2xl font-semibold mb-4">
           {config.codex.dictionaryHeading}
         </h2>
-        <p className="text-sm mb-6" style={{ color: 'var(--silver-faint)' }}>Hover or tap a card to reveal its meaning</p>
+        <p className="text-sm mb-6" style={{ color: 'var(--silver-faint)' }}>{config.codexInstruction}</p>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {config.dictionary.map((entry, index) => (
             <AnimatedCard key={entry.technical} index={index}>

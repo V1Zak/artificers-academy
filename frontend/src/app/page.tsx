@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import type { LearningMode } from '@/lib/api'
+import { getModeConfig } from '@/lib/mode-config'
 
 const MODE_CARDS: Array<{
   mode: LearningMode
@@ -109,9 +110,7 @@ export default function Home() {
               <div className={`mt-4 p-3 rounded-lg ${card.previewBg} ${card.previewText} border ${card.previewBorder} text-xs`}>
                 <div className="font-semibold mb-1">Preview</div>
                 <div className="opacity-70">
-                  {card.mode === 'simple' && 'Module 1: Getting Started'}
-                  {card.mode === 'detailed' && 'Module 1: Fundamentals'}
-                  {card.mode === 'mtg' && 'Level 1: The Sanctum'}
+                  {getModeConfig(card.mode).landingPreview}
                 </div>
               </div>
             </div>
