@@ -21,6 +21,7 @@ export function MobileSidebar({ email }: MobileSidebarProps) {
     { href: '/battlefield', label: config.nav.battlefield },
     { href: '/codex', label: config.nav.codex },
     { href: '/inspector', label: config.nav.inspector },
+    { href: '/prompting-tips', label: config.nav.promptingTips },
   ]
 
   return (
