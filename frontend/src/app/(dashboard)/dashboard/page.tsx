@@ -6,7 +6,7 @@ import { getCurriculum, type Level } from '@/lib/api'
 import { useProgress, useMode } from '@/contexts'
 import { getModeConfig } from '@/lib/mode-config'
 import { ManaProgress } from '@/components/theme'
-import { AnimatedCard, PageTransition } from '@/components/motion'
+import { AnimatedCard, PageTransition, TiltCard } from '@/components/motion'
 import { SkeletonCard, SkeletonProgress } from '@/components/ui/Skeleton'
 
 export default function DashboardPage() {
@@ -145,19 +145,21 @@ export default function DashboardPage() {
       <div className="grid md:grid-cols-2 gap-6">
         {levels.map((level, index) => (
           <AnimatedCard key={level.id} index={index + 1}>
-            <LevelCard
-              level={index + 1}
-              title={level.title}
-              subtitle={level.subtitle}
-              description={level.description}
-              status={getLevelStatus(level, index)}
-              href={`/battlefield/${level.id}`}
-              completedPhases={getCompletedCount(level.id)}
-              totalPhases={level.phases.length}
-              levelLabel={config.terms.level}
-              phaseLabel={config.terms.phase}
-              statusLabels={config.status}
-            />
+            <TiltCard>
+              <LevelCard
+                level={index + 1}
+                title={level.title}
+                subtitle={level.subtitle}
+                description={level.description}
+                status={getLevelStatus(level, index)}
+                href={`/battlefield/${level.id}`}
+                completedPhases={getCompletedCount(level.id)}
+                totalPhases={level.phases.length}
+                levelLabel={config.terms.level}
+                phaseLabel={config.terms.phase}
+                statusLabels={config.status}
+              />
+            </TiltCard>
           </AnimatedCard>
         ))}
       </div>

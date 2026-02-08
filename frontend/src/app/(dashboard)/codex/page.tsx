@@ -1,7 +1,7 @@
 'use client'
 
 import { CodeScroll } from '@/components/theme'
-import { AnimatedCard, PageTransition } from '@/components/motion'
+import { AnimatedCard, PageTransition, TiltCard } from '@/components/motion'
 import { useMode } from '@/contexts'
 import { getModeConfig } from '@/lib/mode-config'
 
@@ -86,7 +86,9 @@ npx @modelcontextprotocol/inspector uv run server.py`}
         <div className="grid md:grid-cols-2 gap-6">
           {getConcepts(mode).map((card, index) => (
             <AnimatedCard key={card.title} index={index}>
-              <ConceptCard title={card.title} description={card.description} />
+              <TiltCard>
+                <ConceptCard title={card.title} description={card.description} />
+              </TiltCard>
             </AnimatedCard>
           ))}
         </div>
