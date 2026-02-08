@@ -7,6 +7,7 @@ interface ModeConfig {
     battlefield: string
     codex: string
     inspector: string
+    promptingTips: string
   }
   // Page headings
   headings: {
@@ -18,6 +19,8 @@ interface ModeConfig {
     codexSubtitle: string
     inspectorTitle: string
     inspectorSubtitle: string
+    promptingTipsTitle: string
+    promptingTipsSubtitle: string
   }
   // Terminology
   terms: {
@@ -117,6 +120,19 @@ interface ModeConfig {
   codexInstruction: string
   // Landing page preview labels
   landingPreview: string
+  // Prompting tips section
+  promptingTips: {
+    categories: Array<{
+      title: string
+      icon: string
+      tips: Array<{
+        title: string
+        description: string
+        why: string
+        example?: { good: string; bad: string }
+      }>
+    }>
+  }
 }
 
 export const MODE_CONFIG: Record<LearningMode, ModeConfig> = {
@@ -126,6 +142,7 @@ export const MODE_CONFIG: Record<LearningMode, ModeConfig> = {
       battlefield: 'Lessons',
       codex: 'Reference',
       inspector: 'Code Checker',
+      promptingTips: 'Prompting Tips',
     },
     headings: {
       dashboardTitle: 'Welcome back',
@@ -136,6 +153,8 @@ export const MODE_CONFIG: Record<LearningMode, ModeConfig> = {
       codexSubtitle: 'A handy guide to key terms and concepts',
       inspectorTitle: 'Code Checker',
       inspectorSubtitle: 'Paste your code here to check if it looks right.',
+      promptingTipsTitle: 'Prompting Tips',
+      promptingTipsSubtitle: 'Simple tips to get better results from Claude',
     },
     terms: {
       level: 'Module',
@@ -238,6 +257,102 @@ export const MODE_CONFIG: Record<LearningMode, ModeConfig> = {
     },
     codexInstruction: 'Hover or tap a card to see its definition',
     landingPreview: 'Module 1: Getting Started',
+    promptingTips: {
+      categories: [
+        {
+          title: 'The Basics',
+          icon: '📝',
+          tips: [
+            {
+              title: 'Be Clear & Direct',
+              description: 'Tell Claude exactly what you want. Say "change this function to use async/await" instead of "can you maybe suggest some changes?"',
+              why: 'Claude takes your instructions literally. Vague requests get vague answers. Direct instructions get precise results.',
+              example: {
+                good: 'Rewrite this function to handle errors with try/catch and return null on failure.',
+                bad: 'Can you suggest some improvements to this function?',
+              },
+            },
+            {
+              title: 'Explain Why',
+              description: 'Tell Claude the reason behind your rules. Instead of just "no ellipses", say "no ellipses because this text will be read aloud by text-to-speech."',
+              why: 'When Claude understands the motivation, it can apply the rule correctly to edge cases you didn\'t think of.',
+            },
+            {
+              title: 'Use Numbered Steps',
+              description: 'Break complex instructions into numbered steps: "1. Read the file. 2. Find all TODO comments. 3. Create a summary."',
+              why: 'Numbered steps reduce ambiguity and ensure nothing gets skipped. Claude follows them in order.',
+            },
+          ],
+        },
+        {
+          title: 'Formatting Your Prompts',
+          icon: '🏗️',
+          tips: [
+            {
+              title: 'Use XML Tags',
+              description: 'Wrap different parts of your prompt in tags like <instructions>, <data>, and <example> to keep things organized.',
+              why: 'Claude was specially trained to understand XML tags. They help it tell the difference between your instructions and the data you\'re working with.',
+              example: {
+                good: '<instructions>Summarize this article in 3 bullet points.</instructions>\n<article>...</article>',
+                bad: 'Summarize this article in 3 bullet points. The article is: ...',
+              },
+            },
+            {
+              title: 'Show Examples',
+              description: 'Give Claude 3-5 examples of the output format you want. This is the easiest way to get exactly the format you need.',
+              why: 'Examples are worth more than descriptions. Claude pattern-matches from examples more reliably than from written rules.',
+            },
+            {
+              title: 'Put Questions Last',
+              description: 'When giving Claude a long document to analyze, put the document first and your questions at the end.',
+              why: 'Claude pays the most attention to what comes last. Putting your question at the end after the context can improve accuracy by up to 30%.',
+            },
+          ],
+        },
+        {
+          title: 'Getting Accurate Answers',
+          icon: '🎯',
+          tips: [
+            {
+              title: 'Ask for Step-by-Step Thinking',
+              description: 'Add "think step-by-step" to get Claude to show its reasoning before giving a final answer.',
+              why: 'When Claude writes out its thinking, it catches its own mistakes. If the thinking isn\'t written out, it doesn\'t happen.',
+            },
+            {
+              title: 'Use Extended Thinking',
+              description: 'For hard math, logic, or coding problems, use Claude\'s built-in thinking mode. Give general goals rather than rigid step-by-step instructions.',
+              why: 'Extended thinking gives Claude extra space to reason through complex problems before responding. Overly prescriptive instructions can actually limit its reasoning.',
+            },
+            {
+              title: 'Let Claude Say "I Don\'t Know"',
+              description: 'Tell Claude it\'s okay to say "I\'m not sure" instead of guessing. Ask it to quote directly from sources when possible.',
+              why: 'By default, Claude tries to be helpful and may guess. Giving it permission to be uncertain dramatically reduces made-up answers.',
+            },
+          ],
+        },
+        {
+          title: 'Power Techniques',
+          icon: '🚀',
+          tips: [
+            {
+              title: 'Give Claude a Role',
+              description: 'Start with something like "You are an experienced Python developer who specializes in FastAPI." This sets the tone for the whole conversation.',
+              why: 'A specific role helps Claude draw on the right knowledge and give responses at the right level of detail.',
+            },
+            {
+              title: 'Chain Your Prompts',
+              description: 'Instead of one massive prompt, break big tasks into smaller steps. Use the output of one step as input to the next.',
+              why: 'Each smaller task gets Claude\'s full attention. You can check results at each step instead of debugging a huge output.',
+            },
+            {
+              title: 'Write Good Tool Descriptions',
+              description: 'When building MCP tools, write detailed descriptions (3-4 sentences) explaining what the tool does, when to use it, and any important details about parameters.',
+              why: 'Tool descriptions are the single most important factor in whether Claude uses your tools correctly. Short or vague descriptions lead to misuse.',
+            },
+          ],
+        },
+      ],
+    },
   },
 
   detailed: {
@@ -246,6 +361,7 @@ export const MODE_CONFIG: Record<LearningMode, ModeConfig> = {
       battlefield: 'Curriculum',
       codex: 'Technical Docs',
       inspector: 'MCP Validator',
+      promptingTips: 'Prompt Engineering',
     },
     headings: {
       dashboardTitle: 'Dashboard',
@@ -256,6 +372,8 @@ export const MODE_CONFIG: Record<LearningMode, ModeConfig> = {
       codexSubtitle: 'Reference documentation for MCP concepts and APIs',
       inspectorTitle: 'MCP Validator',
       inspectorSubtitle: 'Static analysis and validation for MCP server implementations.',
+      promptingTipsTitle: 'Prompt Engineering',
+      promptingTipsSubtitle: 'Best practices for effective Claude interactions, sourced from Anthropic documentation',
     },
     terms: {
       level: 'Module',
@@ -358,6 +476,102 @@ export const MODE_CONFIG: Record<LearningMode, ModeConfig> = {
     },
     codexInstruction: 'Hover or tap a card to view its technical definition',
     landingPreview: 'Module 1: Fundamentals',
+    promptingTips: {
+      categories: [
+        {
+          title: 'Foundations',
+          icon: '🔬',
+          tips: [
+            {
+              title: 'Be Clear & Direct',
+              description: 'Claude 4 models interpret instructions literally. Use imperative statements ("refactor this function") rather than hedged requests ("could you perhaps look at improving this?").',
+              why: 'Ambiguous prompts force the model to infer intent, introducing variance. Direct instructions map to deterministic behavior, reducing output entropy.',
+              example: {
+                good: 'Refactor `processData()` to use async iterators. Preserve the existing error handling. Return `AsyncGenerator<DataChunk>`.',
+                bad: 'Can you take a look at processData and maybe suggest some improvements to make it more modern?',
+              },
+            },
+            {
+              title: 'Provide Context & Motivation',
+              description: 'Explain the reasoning behind constraints. Instead of "no abbreviations", specify "no abbreviations because this text feeds into a TTS pipeline that reads abbreviations literally."',
+              why: 'Motivated instructions enable generalization. The model applies the underlying principle to edge cases not explicitly covered, rather than pattern-matching on surface rules.',
+            },
+            {
+              title: 'Use Sequential Steps',
+              description: 'Structure multi-step tasks as numbered instructions. Each step should have a clear input, operation, and expected output state.',
+              why: 'Sequential enumeration creates an implicit execution plan. The model processes steps serially, reducing the probability of skipping operations or reordering dependencies.',
+            },
+          ],
+        },
+        {
+          title: 'Structure & Format',
+          icon: '🏗️',
+          tips: [
+            {
+              title: 'XML Tags for Prompt Structure',
+              description: 'Use XML tags (<instructions>, <context>, <data>, <example>) to delineate prompt sections. Claude\'s training includes extensive XML-structured data.',
+              why: 'XML tags create unambiguous boundaries between meta-instructions and content. This eliminates prompt injection vectors where data could be misinterpreted as instructions.',
+              example: {
+                good: '<system>You are a code reviewer.</system>\n<context>Python 3.12, FastAPI application</context>\n<code>...</code>\n<instructions>Review for security vulnerabilities. Output as JSON.</instructions>',
+                bad: 'You are a code reviewer. Here is some Python 3.12 FastAPI code: ... Review it for security vulnerabilities and output as JSON.',
+              },
+            },
+            {
+              title: 'Few-Shot Examples',
+              description: 'Provide 3-5 diverse input/output examples wrapped in <example> tags. Cover edge cases and boundary conditions, not just the happy path.',
+              why: 'Few-shot examples define the output distribution more precisely than natural language descriptions. The model extrapolates the transformation pattern from examples, achieving higher format compliance.',
+            },
+            {
+              title: 'Long Context: Document-Query Ordering',
+              description: 'In retrieval-augmented prompts, place source documents at the beginning and the query/instructions at the end. This applies to any prompt with substantial reference material.',
+              why: 'Recency bias in attention mechanisms means content near the end of the context window receives higher attention weights. Placing the query last yields up to 30% accuracy improvement on document QA tasks.',
+            },
+          ],
+        },
+        {
+          title: 'Reasoning & Accuracy',
+          icon: '🧠',
+          tips: [
+            {
+              title: 'Chain of Thought Prompting',
+              description: 'Request explicit reasoning with "think step-by-step" or structured <thinking> tags before the final answer. For classification tasks, require justification before the label.',
+              why: 'Chain-of-thought creates intermediate computation tokens that serve as working memory. Critical insight: reasoning that isn\'t output to tokens doesn\'t influence the model\'s computation.',
+            },
+            {
+              title: 'Extended Thinking Mode',
+              description: 'For complex STEM, multi-step reasoning, or code architecture tasks, enable Claude\'s built-in extended thinking. Provide high-level objectives rather than prescriptive step-by-step procedures.',
+              why: 'Extended thinking allocates dedicated computation before response generation. Overly prescriptive instructions constrain the model\'s reasoning search space, potentially excluding optimal solution paths.',
+            },
+            {
+              title: 'Hallucination Mitigation',
+              description: 'Instruct Claude to: (1) say "I don\'t know" when uncertain, (2) provide direct quotes from source material, (3) verify its own claims against provided context before responding.',
+              why: 'Without explicit uncertainty permission, the model optimizes for helpfulness over accuracy. Verification instructions create a self-consistency check that catches confabulated details.',
+            },
+          ],
+        },
+        {
+          title: 'Advanced Techniques',
+          icon: '⚡',
+          tips: [
+            {
+              title: 'Role Prompting via System Messages',
+              description: 'Define domain expertise in system prompts: "You are a senior platform engineer specializing in Kubernetes orchestration with 10 years of production experience." Include specific technical constraints.',
+              why: 'Role prompts activate domain-specific knowledge clusters in the model\'s weights. System-level role definitions persist across the conversation, maintaining consistent expertise without repetition.',
+            },
+            {
+              title: 'Prompt Chaining Pipelines',
+              description: 'Decompose complex tasks into sequential subtask prompts. Each subtask receives focused context and produces validated intermediate output. Independent subtasks can execute in parallel.',
+              why: 'Chaining trades single-prompt complexity for pipeline reliability. Each step operates within a narrower problem space, reducing compound error rates. Intermediate outputs serve as checkpoints for quality validation.',
+            },
+            {
+              title: 'Tool Description Engineering',
+              description: 'Write tool descriptions with 3-4 sentences covering: (1) what the tool does, (2) when to use it vs. alternatives, (3) parameter constraints and formats, (4) known limitations or caveats.',
+              why: 'Tool descriptions are the primary signal for tool selection and parameter construction. Empirically, description quality is the single highest-leverage factor in tool use accuracy, outweighing parameter schemas.',
+            },
+          ],
+        },
+      ],
+    },
   },
 
   mtg: {
@@ -366,6 +580,7 @@ export const MODE_CONFIG: Record<LearningMode, ModeConfig> = {
       battlefield: 'The Battlefield',
       codex: 'The Codex',
       inspector: 'The Inspector',
+      promptingTips: 'Arcane Inscriptions',
     },
     headings: {
       dashboardTitle: 'Welcome, Artificer',
@@ -376,6 +591,8 @@ export const MODE_CONFIG: Record<LearningMode, ModeConfig> = {
       codexSubtitle: "The Grand Artificer's compendium of knowledge",
       inspectorTitle: 'The Inspector',
       inspectorSubtitle: 'Submit your Decklist for validation. The Inspector will analyze your spells and identify any issues.',
+      promptingTipsTitle: 'Arcane Inscriptions',
+      promptingTipsSubtitle: 'Master the art of commanding your Planeswalker with precision and power',
     },
     terms: {
       level: 'Level',
@@ -478,6 +695,102 @@ export const MODE_CONFIG: Record<LearningMode, ModeConfig> = {
     },
     codexInstruction: 'Hover or tap a card to reveal its meaning',
     landingPreview: 'Level 1: The Sanctum',
+    promptingTips: {
+      categories: [
+        {
+          title: 'Foundations of Inscription',
+          icon: '🔮',
+          tips: [
+            {
+              title: 'Inscribe with Clarity',
+              description: 'A Planeswalker reads your incantation exactly as written. Command "transmute this Sorcery to async" rather than whispering "might you consider alterations to this spell?"',
+              why: 'The Planeswalker interprets your Oracle Text literally. Vague incantations scatter the mana, producing unfocused results. Precise wording channels power directly.',
+              example: {
+                good: 'Transmute `processData()` into an async incantation. Preserve the existing ward (error handling). Return `AsyncGenerator<DataChunk>`.',
+                bad: 'Could you maybe look at processData and suggest some improvements?',
+              },
+            },
+            {
+              title: 'Reveal the Purpose',
+              description: 'Tell the Planeswalker why a rule exists. Not just "no ellipses" but "no ellipses, for this text shall be spoken aloud by a Voice Golem that reads each glyph literally."',
+              why: 'When the Planeswalker understands the intent behind your ward, it can extend the protection to edge cases your inscription didn\'t foresee. Motivation unlocks generalization.',
+            },
+            {
+              title: 'Number Your Incantations',
+              description: 'Break complex rituals into numbered steps: "1. Scry the file. 2. Locate all TODO runes. 3. Forge a summary scroll."',
+              why: 'Numbered steps create a ritual sequence. The Planeswalker resolves each step in order, preventing skipped phases or tangled dependencies in your spell chain.',
+            },
+          ],
+        },
+        {
+          title: 'Structuring Your Scrolls',
+          icon: '📜',
+          tips: [
+            {
+              title: 'Bind with XML Wards',
+              description: 'Enclose different parts of your scroll in binding tags like <instructions>, <data>, and <example>. These wards separate your commands from the materials they act upon.',
+              why: 'The Planeswalker was trained to recognize XML bindings as arcane boundaries. They prevent your data from being mistaken for instructions — a dangerous form of spell corruption.',
+              example: {
+                good: '<instructions>Distill this tome into 3 key insights.</instructions>\n<tome>...</tome>',
+                bad: 'Distill this tome into 3 key insights. The tome is: ...',
+              },
+            },
+            {
+              title: 'Provide Specimen Scrolls',
+              description: 'Show the Planeswalker 3-5 examples of the output pattern you desire. This is the most potent technique for achieving exact format compliance.',
+              why: 'Specimen scrolls define the transformation pattern more precisely than any written description. The Planeswalker extrapolates the enchantment from your examples with high fidelity.',
+            },
+            {
+              title: 'Query at the Bottom of the Stack',
+              description: 'When presenting long tomes for analysis, place the source material first and your question at the bottom — last on the stack, first to resolve.',
+              why: 'Like spells on the Stack, the last item resolves first and receives the most attention. Placing your query at the bottom can improve accuracy by up to 30%.',
+            },
+          ],
+        },
+        {
+          title: 'Sharpening the Mind\'s Eye',
+          icon: '👁️',
+          tips: [
+            {
+              title: 'Invoke Chain of Thought',
+              description: 'Command the Planeswalker to "think step-by-step" or use <thinking> wards to force visible reasoning before the final verdict.',
+              why: 'Chain of Thought creates visible mana threads — intermediate reasoning tokens that serve as working memory. Critical law: reasoning that isn\'t manifest in tokens doesn\'t influence the spell.',
+            },
+            {
+              title: 'Unleash Extended Contemplation',
+              description: 'For complex puzzles, STEM riddles, or architecture decisions, invoke the Planeswalker\'s deep thinking mode. Provide broad objectives, not rigid step-by-step rituals.',
+              why: 'Extended Contemplation grants the Planeswalker dedicated reasoning space before responding. Overly prescriptive rituals constrain its search through the solution space, potentially warding off the optimal path.',
+            },
+            {
+              title: 'Ward Against Fabrication',
+              description: 'Grant the Planeswalker permission to declare "The answer is beyond my sight." Ask it to quote directly from source scrolls and verify claims against provided lore.',
+              why: 'Without explicit permission to express uncertainty, the Planeswalker optimizes for helpfulness and may conjure plausible fictions. Verification wards create a self-consistency check.',
+            },
+          ],
+        },
+        {
+          title: 'Grandmaster Techniques',
+          icon: '⚡',
+          tips: [
+            {
+              title: 'Bestow a Title',
+              description: 'Begin your system prompt with a role: "You are the Grand Enchanter of API Architecture, versed in the ancient arts of distributed systems." Specificity amplifies power.',
+              why: 'A Title activates domain-specific knowledge within the Planeswalker\'s vast memory. System-level Titles persist across the entire conversation, maintaining consistent expertise.',
+            },
+            {
+              title: 'Chain Your Spells',
+              description: 'Rather than casting one massive ritual, decompose your task into a spell chain. Each link feeds its output to the next. Independent links can resolve in parallel.',
+              why: 'Spell chaining trades single-cast complexity for pipeline reliability. Each link operates in a narrower problem space, and intermediate results serve as checkpoints for quality.',
+            },
+            {
+              title: 'Forge Worthy Oracle Text',
+              description: 'When crafting MCP Sorceries, write Oracle Text of at least 3-4 sentences: what the Sorcery does, when to invoke it, parameter constraints, and known limitations.',
+              why: 'Oracle Text is the single most powerful factor in whether the Planeswalker wields your Sorceries correctly. Sparse or vague Oracle Text leads to misfired spells and wasted mana.',
+            },
+          ],
+        },
+      ],
+    },
   },
 }
 
