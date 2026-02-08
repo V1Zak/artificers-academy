@@ -202,8 +202,8 @@ function PhaseCard({
                 {phaseTypeLabel}
               </span>
               {phase.validation_required && (
-                <span className="px-2 py-0.5 text-xs bg-mana-blue/10 text-mana-blue rounded">
-                  Validation Required
+                <span className="px-2 py-0.5 text-xs rounded" style={{ backgroundColor: 'rgba(14,104,171,0.1)', color: 'var(--luminescent)' }}>
+                  {config.phaseLabels.validationRequired}
                 </span>
               )}
             </div>

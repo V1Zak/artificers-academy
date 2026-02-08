@@ -109,6 +109,14 @@ interface ModeConfig {
     signupHeading: string
     signupSubtext: string
   }
+  // Phase card labels
+  phaseLabels: {
+    validationRequired: string
+  }
+  // Codex instructional text
+  codexInstruction: string
+  // Landing page preview labels
+  landingPreview: string
 }
 
 export const MODE_CONFIG: Record<LearningMode, ModeConfig> = {
@@ -225,6 +233,11 @@ export const MODE_CONFIG: Record<LearningMode, ModeConfig> = {
       signupHeading: 'Create Account',
       signupSubtext: 'Start learning MCP development',
     },
+    phaseLabels: {
+      validationRequired: 'Code Check Required',
+    },
+    codexInstruction: 'Hover or tap a card to see its definition',
+    landingPreview: 'Module 1: Getting Started',
   },
 
   detailed: {
@@ -340,6 +353,11 @@ export const MODE_CONFIG: Record<LearningMode, ModeConfig> = {
       signupHeading: 'Create Account',
       signupSubtext: 'Begin the MCP curriculum',
     },
+    phaseLabels: {
+      validationRequired: 'Validation Required',
+    },
+    codexInstruction: 'Hover or tap a card to view its technical definition',
+    landingPreview: 'Module 1: Fundamentals',
   },
 
   mtg: {
@@ -455,6 +473,11 @@ export const MODE_CONFIG: Record<LearningMode, ModeConfig> = {
       signupHeading: 'Join the Academy',
       signupSubtext: 'Begin your journey to becoming an Artificer',
     },
+    phaseLabels: {
+      validationRequired: 'Inspection Required',
+    },
+    codexInstruction: 'Hover or tap a card to reveal its meaning',
+    landingPreview: 'Level 1: The Sanctum',
   },
 }
 

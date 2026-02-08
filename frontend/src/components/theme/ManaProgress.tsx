@@ -128,6 +128,9 @@ interface ManaOrbProps {
  * ManaOrb - Individual mana symbol orb
  */
 export function ManaOrb({ filled, manaType = 'blue', size = 'md' }: ManaOrbProps) {
+  const { mode } = useMode()
+  const config = getModeConfig(mode)
+
   const sizeClasses = {
     sm: 'w-4 h-4',
     md: 'w-6 h-6',
@@ -148,7 +151,7 @@ export function ManaOrb({ filled, manaType = 'blue', size = 'md' }: ManaOrbProps
         'rounded-full transition-all duration-300',
         sizeClasses[size],
         colorClasses[manaType],
-        filled && 'shadow-glow'
+        filled && config.progressBar.style === 'glow' && 'shadow-glow'
       )}
     />
   )
