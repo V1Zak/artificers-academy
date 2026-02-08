@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { getCurriculum, type Level } from '@/lib/api'
 import { useProgress, useMode } from '@/contexts'
 import { getModeConfig } from '@/lib/mode-config'
-import { ManaProgress } from '@/components/theme'
+import { ManaProgress, GemstoneTracker } from '@/components/theme'
 import { AnimatedCard, PageTransition, TiltCard } from '@/components/motion'
 import { SkeletonCard } from '@/components/ui/Skeleton'
 
@@ -233,23 +233,9 @@ function LevelCard({
               const isPhaseComplete = index < completedPhases
               return (
                 <div key={phase.id} className="flex items-center gap-2 group">
-                  <div
-                    className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                      isPhaseComplete
-                        ? mode === 'mtg'
-                          ? 'bg-mana-green shadow-[0_0_6px_rgba(34,197,94,0.5)]'
-                          : 'bg-green-500'
-                        : index === completedPhases
-                          ? 'animate-pulse'
-                          : ''
-                    }`}
-                    style={{
-                      ...(!isPhaseComplete && index === completedPhases
-                        ? mode === 'mtg'
-                          ? { backgroundColor: 'var(--arcane-purple)', boxShadow: '0 0 6px rgba(139,92,246,0.4)' }
-                          : { backgroundColor: 'var(--arcane-purple)' }
-                        : !isPhaseComplete ? { backgroundColor: 'var(--obsidian-border)' } : {}),
-                    }}
+                  <GemstoneTracker
+                    isComplete={isPhaseComplete}
+                    isCurrent={!isPhaseComplete && index === completedPhases}
                   />
                   <span className="text-xs" style={{
                     color: isPhaseComplete

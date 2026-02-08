@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { getLevel, type Level, type Phase } from '@/lib/api'
 import { useProgress, useMode } from '@/contexts'
 import { getModeConfig } from '@/lib/mode-config'
+import { GemstoneTracker } from '@/components/theme'
 import { SkeletonPhaseCard } from '@/components/ui/Skeleton'
 
 export default function LevelPage() {
@@ -174,26 +175,12 @@ function PhaseCard({
       <div className="p-4 sm:p-6">
         <div className="flex items-start gap-3 sm:gap-4">
           {/* Phase Number */}
-          <div
-            className={`
-              w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg flex-shrink-0
-              ${
-                isCompleted
-                  ? 'bg-mana-green/20 text-mana-green'
-                  : isUnlocked
-                    ? ''
-                    : ''
-              }
-            `}
-            style={{
-              ...(!isCompleted && isUnlocked
-                ? { backgroundColor: 'rgba(var(--arcane-purple-rgb, 139,92,246), 0.2)', color: 'var(--arcane-purple)' }
-                : !isCompleted ? { backgroundColor: 'var(--obsidian)', color: 'var(--silver-faint)' } : {}),
-            }}
-            aria-label={isCompleted ? config.status.completed : `${config.terms.phase} ${phaseNumber}`}
-          >
-            {isCompleted ? '✓' : phaseNumber}
-          </div>
+          <GemstoneTracker
+            isComplete={isCompleted}
+            isCurrent={!isCompleted && isUnlocked}
+            size="lg"
+            label={phaseNumber}
+          />
 
           {/* Phase Info */}
           <div className="flex-1 min-w-0">
