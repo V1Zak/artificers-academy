@@ -6,7 +6,7 @@ import { getCurriculum, type Level } from '@/lib/api'
 import { useProgress, useMode } from '@/contexts'
 import { getModeConfig } from '@/lib/mode-config'
 import { ManaProgress } from '@/components/theme'
-import { AnimatedCard, PageTransition } from '@/components/motion'
+import { AnimatedCard, PageTransition, TiltCard } from '@/components/motion'
 import { SkeletonCard } from '@/components/ui/Skeleton'
 
 type ManaColor = 'blue' | 'black' | 'green' | 'gold' | 'red' | 'white'
@@ -114,13 +114,15 @@ export default function BattlefieldPage() {
       <div className="grid gap-6">
         {levels.map((level, index) => (
           <AnimatedCard key={level.id} index={index}>
-            <LevelCard
-              level={level}
-              levelNumber={index + 1}
-              completedPhases={getCompletedCount(level.id)}
-              config={config}
-              mode={mode}
-            />
+            <TiltCard>
+              <LevelCard
+                level={level}
+                levelNumber={index + 1}
+                completedPhases={getCompletedCount(level.id)}
+                config={config}
+                mode={mode}
+              />
+            </TiltCard>
           </AnimatedCard>
         ))}
       </div>
