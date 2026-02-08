@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils'
 import type { ValidationError } from '@/lib/api'
 import { useMode } from '@/contexts'
 import { getModeConfig } from '@/lib/mode-config'
+import { TypewriterText } from './TypewriterText'
 
 interface CounterspellAlertProps {
   errors: ValidationError[]
@@ -24,7 +25,7 @@ export function CounterspellAlert({ errors, className }: CounterspellAlertProps)
       <div className="flex items-center gap-2 text-mana-red">
         <AlertIcon />
         <span className="font-semibold">
-          {config.validation.errorCountHeader(errors.length)}
+          <TypewriterText text={config.validation.errorCountHeader(errors.length)} />
         </span>
       </div>
       {errors.map((error, index) => (
@@ -93,7 +94,9 @@ export function ResolveAlert({
     <div className={cn('resolve-alert', className)}>
       <div className="flex items-center gap-2 text-mana-green mb-3">
         <SuccessIcon />
-        <span className="font-semibold">{config.validation.successHeader}</span>
+        <span className="font-semibold">
+          <TypewriterText text={config.validation.successHeader} />
+        </span>
       </div>
 
       {toolsFound.length > 0 && (
