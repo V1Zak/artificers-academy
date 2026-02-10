@@ -181,6 +181,53 @@
           "content_file": "detailed/level4/phase5_production.md"
         }
       ]
+    },
+    {
+      "id": "level5",
+      "title": "Module 5: Advanced Agents",
+      "subtitle": "AI Agent Orchestration",
+      "description": "Master Claude Code agent systems, programmatic agent control via SDK, and multi-agent orchestration for complex AI workflows.",
+      "mana_color": "colorless",
+      "phases": [
+        {
+          "id": "phase1",
+          "title": "Agent Architecture",
+          "description": "Understand agent capabilities, architectural patterns, and when to use agents vs traditional MCP tools for task delegation.",
+          "type": "lesson",
+          "content_file": "detailed/level5/phase1_architecture.md"
+        },
+        {
+          "id": "phase2",
+          "title": "Agent Invocation Tools",
+          "description": "Build MCP tools that invoke Claude Code agents programmatically for code review and analysis tasks.",
+          "type": "tutorial",
+          "content_file": "detailed/level5/phase2_invocation.md",
+          "validation_required": true
+        },
+        {
+          "id": "phase3",
+          "title": "Agent SDK Integration",
+          "description": "Use the Agent SDK for programmatic agent control, parallel execution, and custom agent configuration.",
+          "type": "tutorial",
+          "content_file": "detailed/level5/phase3_sdk.md",
+          "validation_required": true
+        },
+        {
+          "id": "phase4",
+          "title": "Multi-Agent Orchestration",
+          "description": "Design and implement multi-agent systems with specialized agents, state management, and pipeline orchestration.",
+          "type": "tutorial",
+          "content_file": "detailed/level5/phase4_orchestration.md",
+          "validation_required": true
+        },
+        {
+          "id": "phase5",
+          "title": "Production Agent Systems",
+          "description": "Build production-ready agent-aware MCP servers with observability, cost management, and safety controls.",
+          "type": "tutorial",
+          "content_file": "detailed/level5/phase5_production.md"
+        }
+      ]
     }
   ]
 }

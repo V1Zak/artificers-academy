@@ -181,6 +181,53 @@
           "content_file": "level4/phase5_ascension.md"
         }
       ]
+    },
+    {
+      "id": "level5",
+      "title": "The Nexus",
+      "subtitle": "Advanced Agent Systems",
+      "description": "Master Claude Code agents and multi-agent orchestration for sophisticated AI workflows.",
+      "mana_color": "colorless",
+      "phases": [
+        {
+          "id": "phase1",
+          "title": "The Awakening",
+          "description": "Understanding agent architecture and when to use agents vs traditional tools.",
+          "type": "lesson",
+          "content_file": "level5/phase1_awakening.md"
+        },
+        {
+          "id": "phase2",
+          "title": "Summoning the First Spawn",
+          "description": "Build an MCP server with agent-invocation capabilities for code review.",
+          "type": "tutorial",
+          "content_file": "level5/phase2_first_spawn.md",
+          "validation_required": true
+        },
+        {
+          "id": "phase3",
+          "title": "The Scrying Network",
+          "description": "Use the Agent SDK to programmatically control agents and process files in parallel.",
+          "type": "tutorial",
+          "content_file": "level5/phase3_scrying_network.md",
+          "validation_required": true
+        },
+        {
+          "id": "phase4",
+          "title": "The Hivemind",
+          "description": "Build multi-agent orchestration systems with specialized agent teams.",
+          "type": "tutorial",
+          "content_file": "level5/phase4_hivemind.md",
+          "validation_required": true
+        },
+        {
+          "id": "phase5",
+          "title": "The Omniscient Assembly",
+          "description": "Create production agent-aware MCP servers with observability and safety controls.",
+          "type": "tutorial",
+          "content_file": "level5/phase5_omniscient_assembly.md"
+        }
+      ]
     }
   ]
 }
