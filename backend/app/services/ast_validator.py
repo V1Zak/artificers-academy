@@ -283,6 +283,8 @@ class MCPValidator:
             self._check_level3_requirements(tree, code)
         elif self.level == "level4":
             self._check_level4_requirements(tree, code)
+        elif self.level == "level5":
+            self._check_level5_requirements(tree, code)
 
     def _check_level2_requirements(self, tree: ast.AST, code: str) -> None:
         """
@@ -447,6 +449,141 @@ class MCPValidator:
 
         # Also run Level 3 checks (Level 4 builds on Level 3)
         self._check_level3_requirements(tree, code)
+
+    def _check_level5_requirements(self, tree: ast.AST, code: str) -> None:
+        """
+        Level 5 specific checks:
+        Phase 2: Agent-invocation patterns in MCP tools
+        Phase 3: Agent SDK usage and configuration
+        Phase 4: Multi-agent orchestration (3+ specialized agents)
+        """
+        # Check for Agent SDK import
+        agent_sdk_patterns = [
+            "from claude_agent_sdk import",
+            "import claude_agent_sdk",
+            "from anthropic import",  # Alternative SDK
+        ]
+        has_agent_sdk = any(pattern in code for pattern in agent_sdk_patterns)
+
+        # Check for Agent or AgentConfig usage
+        agent_class_patterns = ["Agent(", "AgentConfig("]
+        has_agent_usage = any(pattern in code for pattern in agent_class_patterns)
+
+        # Count agent configurations (for multi-agent validation)
+        agent_config_count = code.count("AgentConfig(")
+
+        # Phase 3 validation: Agent SDK integration
+        if "phase3" in str(self.level).lower():
+            if not has_agent_sdk:
+                self.errors.append(ValidationError(
+                    type="missing_agent_sdk",
+                    line=1,
+                    message="Your Scrying Network lacks the Agent SDK! "
+                            "Add: from claude_agent_sdk import Agent, AgentConfig"
+                ))
+
+            if has_agent_sdk and not has_agent_usage:
+                self.errors.append(ValidationError(
+                    type="no_agent_instantiation",
+                    line=1,
+                    message="You imported the Agent SDK but didn't create any agents! "
+                            "Add: agent = Agent(config=AgentConfig(...))"
+                ))
+
+            # Check for async patterns (required for agent execution)
+            has_async_def = any(
+                isinstance(node, ast.AsyncFunctionDef)
+                for node in ast.walk(tree)
+            )
+            has_await = "await" in code
+
+            if has_agent_usage and not (has_async_def and has_await):
+                self.warnings.append(ValidationError(
+                    type="no_async_agent_execution",
+                    line=1,
+                    message="Agent execution should use async/await patterns! "
+                            "Use 'async def' and 'await agent.run(...)'"
+                ))
+
+        # Phase 4 validation: Multi-agent orchestration
+        if "phase4" in str(self.level).lower():
+            if agent_config_count < 3:
+                self.errors.append(ValidationError(
+                    type="insufficient_agents",
+                    line=1,
+                    message="Your Hivemind needs at least 3 specialized agents! "
+                            f"Found only {agent_config_count} AgentConfig instances. "
+                            "Create specialized agents with different configurations."
+                ))
+
+            # Check for state management patterns
+            state_patterns = [
+                "@dataclass",
+                "class.*State:",
+                "pipeline_state",
+                "state =",
+            ]
+            has_state_management = any(
+                re.search(pattern, code) for pattern in state_patterns
+            )
+
+            if not has_state_management:
+                self.warnings.append(ValidationError(
+                    type="no_state_management",
+                    line=1,
+                    message="Multi-agent systems need state management! "
+                            "Consider using a dataclass or dict to pass data between agents."
+                ))
+
+            # Check for sequential execution pattern
+            sequential_patterns = ["await.*step", "state = await"]
+            has_sequential = any(
+                re.search(pattern, code) for pattern in sequential_patterns
+            )
+
+            if agent_config_count >= 3 and not has_sequential:
+                self.warnings.append(ValidationError(
+                    type="no_orchestration_pattern",
+                    line=1,
+                    message="Multiple agents found but no orchestration pattern detected! "
+                            "Use sequential execution: state = await step1(state)"
+                ))
+
+        # Phase 2 validation: Agent-invocation in MCP tools
+        if "phase2" in str(self.level).lower():
+            # Check for error handling (important for agent invocation)
+            has_try_except = any(isinstance(node, ast.Try) for node in ast.walk(tree))
+
+            if not has_try_except and self.tools_found:
+                self.warnings.append(ValidationError(
+                    type="no_agent_error_handling",
+                    line=1,
+                    message="Agent-invocation tools need error handling! "
+                            "Wrap agent calls in try/except to handle timeouts and failures."
+                ))
+
+        # General Level 5 recommendations
+        if has_agent_usage:
+            # Check for timeout configuration
+            if "timeout=" not in code:
+                self.warnings.append(ValidationError(
+                    type="no_timeout_config",
+                    line=1,
+                    message="Agent configurations should include timeouts! "
+                            "Add: AgentConfig(timeout=90, ...)"
+                ))
+
+            # Check for model selection
+            model_patterns = ["model=", "claude-", "haiku", "sonnet", "opus"]
+            has_model_config = any(pattern in code for pattern in model_patterns)
+
+            if not has_model_config:
+                self.warnings.append(ValidationError(
+                    type="no_model_selection",
+                    line=1,
+                    message="Consider explicitly setting the agent model! "
+                            "Add: AgentConfig(model='claude-sonnet-4.5', ...)"
+                ))
 
     def _build_response(self) -> ValidationResponse:
         """Build the final validation response."""

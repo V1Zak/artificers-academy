@@ -181,6 +181,53 @@
           "content_file": "simple/level4/phase5_graduation.md"
         }
       ]
+    },
+    {
+      "id": "level5",
+      "title": "Working with AI Helpers",
+      "subtitle": "Advanced Agent Systems",
+      "description": "Learn how to build tools that use AI helpers (agents) to do complex tasks automatically.",
+      "mana_color": "colorless",
+      "phases": [
+        {
+          "id": "phase1",
+          "title": "Understanding AI Helpers",
+          "description": "Learn what agents are and when to use them instead of regular tools.",
+          "type": "lesson",
+          "content_file": "simple/level5/phase1_understanding_helpers.md"
+        },
+        {
+          "id": "phase2",
+          "title": "Your First Agent Tool",
+          "description": "Build a tool that calls an AI helper to review your code.",
+          "type": "tutorial",
+          "content_file": "simple/level5/phase2_first_agent.md",
+          "validation_required": true
+        },
+        {
+          "id": "phase3",
+          "title": "Controlling Agents with Code",
+          "description": "Use the Agent SDK to control AI helpers from your Python programs.",
+          "type": "tutorial",
+          "content_file": "simple/level5/phase3_sdk_control.md",
+          "validation_required": true
+        },
+        {
+          "id": "phase4",
+          "title": "Multiple Agents Working Together",
+          "description": "Build a system where different AI helpers work together on the same task.",
+          "type": "tutorial",
+          "content_file": "simple/level5/phase4_multiple_agents.md",
+          "validation_required": true
+        },
+        {
+          "id": "phase5",
+          "title": "Building Real Agent Systems",
+          "description": "Create production-ready tools that use agents safely and efficiently.",
+          "type": "tutorial",
+          "content_file": "simple/level5/phase5_production_agents.md"
+        }
+      ]
     }
   ]
 }
