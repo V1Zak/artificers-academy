@@ -226,6 +226,20 @@
           "description": "Create production-ready tools that use agents safely and efficiently.",
           "type": "tutorial",
           "content_file": "simple/level5/phase5_production_agents.md"
+        },
+        {
+          "id": "phase6",
+          "title": "AI Teams Working Together",
+          "description": "Learn how to coordinate multiple AI helpers working on the same project at the same time.",
+          "type": "tutorial",
+          "content_file": "simple/level5/phase6_ai_team_collaboration.md"
+        },
+        {
+          "id": "phase6",
+          "title": "AI Teams Working Together",
+          "description": "Learn how to coordinate multiple AI helpers working on the same project at the same time.",
+          "type": "tutorial",
+          "content_file": "simple/level5/phase6_ai_team_collaboration.md"
         }
       ]
     }
