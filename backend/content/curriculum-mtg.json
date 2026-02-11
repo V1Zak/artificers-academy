@@ -233,13 +233,6 @@
           "description": "Master Claude Code agent teams for parallel collaboration and real-time coordination.",
           "type": "tutorial",
           "content_file": "mtg/level5/phase6_swarm_ascendant.md"
-        },
-        {
-          "id": "phase6",
-          "title": "The Swarm Ascendant",
-          "description": "Master Claude Code agent teams for parallel collaboration and real-time coordination.",
-          "type": "tutorial",
-          "content_file": "mtg/level5/phase6_swarm_ascendant.md"
         }
       ]
     }

@@ -233,13 +233,6 @@
           "description": "Deploy Claude Code agent teams for parallel work with shared task lists and inter-agent messaging.",
           "type": "tutorial",
           "content_file": "detailed/level5/phase6_agent_teams.md"
-        },
-        {
-          "id": "phase6",
-          "title": "Agent Team Coordination",
-          "description": "Deploy Claude Code agent teams for parallel work with shared task lists and inter-agent messaging.",
-          "type": "tutorial",
-          "content_file": "detailed/level5/phase6_agent_teams.md"
         }
       ]
     }
